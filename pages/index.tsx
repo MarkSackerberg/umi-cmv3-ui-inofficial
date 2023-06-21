@@ -10,7 +10,8 @@ import {
   transactionBuilder,
   assertAccountExists,
   lamports,
-  amountToNumber
+  amountToNumber,
+  Some
 } from "@metaplex-foundation/umi";
 import { createNft, fetchAllDigitalAssetWithTokenByOwner, fetchDigitalAsset, TokenStandard } from "@metaplex-foundation/mpl-token-metadata";
 import { Inter } from "@next/font/google";
@@ -18,11 +19,12 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import dynamic from "next/dynamic";
 import Head from "next/head";
 import { FormEvent, useState } from "react";
-import { useUmi } from "./useUmi";
-import { fetchCandyMachine, mintV2, safeFetchCandyGuard, DefaultGuardSetMintArgs, findMintCounterPda } from "@metaplex-foundation/mpl-candy-machine"
+import { useUmi } from "../utils/useUmi";
+import { fetchCandyMachine, mintV2, safeFetchCandyGuard, DefaultGuardSetMintArgs, findMintCounterPda, AddressGate, BotTax } from "@metaplex-foundation/mpl-candy-machine"
 import { fetchTokensByOwner, setComputeUnitLimit } from '@metaplex-foundation/mpl-essentials';
 import styles from "@/styles/Home.module.css";
 import { guardChecker } from "@/utils/checkAllowed";
+import { Card, CardHeader, CardBody, CardFooter, StackDivider, Heading, Stack, Box, Text, Button } from '@chakra-ui/react'
 const inter = Inter({ subsets: ["latin"] });
 
 const WalletMultiButtonDynamic = dynamic(
@@ -44,30 +46,17 @@ export default function Home() {
 
 
     try {
-      const candyMachine = await fetchCandyMachine(umi, publicKey("8jnnVbL9DCV5Sd1atyP84Du6Re22QjDCswwNd94n9XmG"))
+      const candyMachine = await fetchCandyMachine(umi, publicKey("375upFCTLSYcjzJdPBXufZkStPGeqSyFZtwoJ5xbywZL"))
       const candyGuard = await safeFetchCandyGuard(umi, candyMachine.mintAuthority)
 
-      if (!candyGuard){return}
-      if (!guardChecker(umi, candyGuard, candyMachine)){
+      console.log(candyGuard)
+      console.log((candyGuard?.guards.botTax as Some<BotTax>).value.lamports)
+      console.log(publicKey((candyGuard?.groups[0].guards.addressGate as Some<AddressGate>).value.address))
+      if (!candyGuard) { return }
+      if (!guardChecker(umi, candyGuard, candyMachine)) {
 
       }
-      const account = await umi.rpc.getAccount(umi.identity.publicKey);
-      assertAccountExists(account)
-      console.log(amountToNumber(account.lamports))
-      const tokens = await fetchTokensByOwner(umi, umi.identity.publicKey);
-      console.log(tokens)
-      const mintLimitCounter = findMintCounterPda(umi, {
-        id: 1,
-        user: umi.identity.publicKey,
-        candyMachine: publicKey("8jnnVbL9DCV5Sd1atyP84Du6Re22QjDCswwNd94n9XmG"),
-        candyGuard: publicKey("8jnnVbL9DCV5Sd1atyP84Du6Re22QjDCswwNd94n9XmG")
-      })
-      
 
-      const digitalAssets = await fetchAllDigitalAssetWithTokenByOwner(umi,umi.identity.publicKey)
-      console.log(digitalAssets)
-
-      
 
       const nftSigner = generateSigner(umi);
       const mintArgs: Partial<DefaultGuardSetMintArgs> = {
@@ -84,6 +73,7 @@ export default function Home() {
           mintArgs: mintArgs,
           tokenStandard: TokenStandard.ProgrammableNonFungible
         }))
+      umi.transactions.serialize(tx.build(umi))
       const txArray = [tx]
 
       const { signature } = await tx.sendAndConfirm(umi, {
@@ -182,14 +172,42 @@ export default function Home() {
 
     return (
       <form method="post" onSubmit={onSubmit} className={styles.form}>
-        <label className={styles.field}>
-          <span>Name</span>
-          <input name="name" defaultValue="My NFT" />
-        </label>
-        <label className={styles.field}>
-          <span>Image</span>
-          <input name="image" type="file" />
-        </label>
+        <Card>
+          <CardHeader>
+            <Heading size='md'>Client Report</Heading>
+          </CardHeader>
+
+          <CardBody>
+            <Stack divider={<StackDivider />} spacing='4'>
+              <Box>
+                <Heading size='xs' textTransform='uppercase'>
+                  Summary
+                </Heading>
+                <Text pt='2' fontSize='sm'>
+                  View a summary of all your clients over the last month.
+                </Text>
+              </Box>
+              <Box>
+                <Heading size='xs' textTransform='uppercase'>
+                  Overview
+                </Heading>
+                <Text pt='2' fontSize='sm'>
+                  Check out the overview of your clients.
+                </Text>
+              </Box>
+              <Box>
+                <Heading size='xs' textTransform='uppercase'>
+                  Analysis
+                </Heading>
+                <Text pt='2' fontSize='sm'>
+                  See a detailed analysis of all your business clients.
+                </Text>
+                <Button colorScheme='teal200' isLoading type="submit">Button</Button>
+              </Box>
+            </Stack>
+          </CardBody>
+        </Card>
+
         <button type="submit">
           <span>Create NFT</span>
           <svg

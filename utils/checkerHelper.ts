@@ -1,15 +1,20 @@
-import { UmiContext } from "@/pages/useUmi";
 import {
-  fetchAllMintCounter,
-  findMintCounterPda,
-  getAccountVersionSerializer,
+  CandyMachine,
+  GuardSet,
+  MintLimit,
+  safeFetchMintCounterFromSeeds,
 } from "@metaplex-foundation/mpl-candy-machine";
 import {
-  fetchAllToken,
   fetchToken,
   findAssociatedTokenPda,
 } from "@metaplex-foundation/mpl-essentials";
-import { PublicKey, SolAmount, Umi, publicKey } from "@metaplex-foundation/umi";
+import {
+  PublicKey,
+  SolAmount,
+  Umi,
+  base58PublicKey,
+} from "@metaplex-foundation/umi";
+import { DigitalAssetWithToken } from "@metaplex-foundation/mpl-token-metadata";
 
 export const addressGateChecker = (wallet: PublicKey, address: PublicKey) => {
   if (wallet != address) {
@@ -19,9 +24,11 @@ export const addressGateChecker = (wallet: PublicKey, address: PublicKey) => {
   return true;
 };
 
-export const solBalanceChecker = (solBalance: number, solAmount: SolAmount) => {
-  const costInLamports = Number(solAmount.basisPoints.toString(10));
-  if (costInLamports > solBalance) {
+export const solBalanceChecker = (
+  solBalance: SolAmount,
+  solAmount: SolAmount
+) => {
+  if (solAmount > solBalance) {
     console.error("freezeSolPayment/solPayment: Not enough SOL!");
     return false;
   }
@@ -49,30 +56,19 @@ export const tokenBalanceChecker = async (
 export const mintLimitChecker = async (
   umi: Umi,
   candyMachine: CandyMachine,
-  singleGuard: DefaultCandyGuardSettings
+  mintLimit: MintLimit
 ) => {
-  if (!singleGuard.mintLimit || !candyMachine.candyGuard) {
+  if (!mintLimit) {
     return;
   }
-
-  const mintLimitCounter = findMintCounterPda(umi, {
-    id: singleGuard.mintLimit.id,
+  const mintLimitCounter = await safeFetchMintCounterFromSeeds(umi, {
+    id: mintLimit.id,
     user: umi.identity.publicKey,
-    candyMachine: candyMachine.address,
-    candyGuard: candyMachine.candyGuard.address,
+    candyMachine: candyMachine.publicKey,
+    candyGuard: candyMachine.mintAuthority,
   });
 
-  const mintedAmountBuffer = await metaplex.connection.getAccountInfo(
-    mintLimitCounter,
-    "processed"
-  );
-
-  let mintedAmount: Number = 0;
-  if (mintedAmountBuffer != null) {
-    mintedAmount = mintedAmountBuffer.data.readUintLE(0, 1);
-  }
-
-  if (mintedAmount >= singleGuard.mintLimit.limit) {
+  if (!mintLimitCounter || mintLimitCounter.count >= mintLimit.limit) {
     console.error("mintLimit: mintLimit reached!");
     return false;
   }
@@ -80,16 +76,15 @@ export const mintLimitChecker = async (
 };
 
 export const ownedNftChecker = async (
-  ownedNfts: FindNftsByOwnerOutput,
+  ownedNfts: DigitalAssetWithToken[],
   requiredCollection: PublicKey
 ) => {
-  const nftsInCollection = ownedNfts.filter((obj) => {
-    return (
-      obj.collection?.address.toBase58() === requiredCollection.toBase58() &&
-      obj.collection?.verified === true
-    );
-  });
-  if (nftsInCollection.length < 1) {
+  const digitalAssetWithToken = ownedNfts.find(
+    (el) =>
+      el.metadata.collection.__option === "Some" &&
+      el.metadata.collection.value.key === requiredCollection
+  );
+  if (!digitalAssetWithToken) {
     console.error("nftBurn: The user has no NFT to pay with!");
     return false;
   } else {
@@ -99,7 +94,7 @@ export const ownedNftChecker = async (
 
 export const allowlistChecker = (
   allowLists: Map<string, string[]>,
-  metaplex: Metaplex,
+  umi: Umi,
   guardlabel: string
 ) => {
   if (!allowLists.has(guardlabel)) {
@@ -109,7 +104,7 @@ export const allowlistChecker = (
   if (
     !allowLists
       .get(guardlabel)
-      ?.includes(metaplex.identity().publicKey.toBase58())
+      ?.includes(base58PublicKey(umi.identity.publicKey))
   ) {
     console.error(`Guard ${guardlabel}; allowlist wallet not allowlisted`);
     return false;
@@ -127,7 +122,7 @@ export const getSolanaTime = async (umi: Umi) => {
 };
 
 export const checkDateRequired = (
-  guards: { label: string; guards: DefaultCandyGuardSettings }[]
+  guards: { label: string; guards: GuardSet }[]
 ) => {
   for (const guard of guards) {
     if (guard.guards.startDate || guard.guards.endDate) {
@@ -139,7 +134,7 @@ export const checkDateRequired = (
 };
 
 export const checkSolBalanceRequired = (
-  guards: { label: string; guards: DefaultCandyGuardSettings }[]
+  guards: { label: string; guards: GuardSet }[]
 ) => {
   let solBalanceRequired: boolean = false;
   guards.forEach((guard) => {
@@ -151,8 +146,8 @@ export const checkSolBalanceRequired = (
   return solBalanceRequired;
 };
 
-export const checkNftsRequired = (
-  guards: { label: string; guards: DefaultCandyGuardSettings }[]
+export const checkTokensRequired = (
+  guards: { label: string; guards: GuardSet }[]
 ) => {
   let nftBalanceRequired: boolean = false;
   guards.forEach((guard) => {
