@@ -14,29 +14,29 @@ dependencies:
     specifier: ^11.11.0
     version: 11.11.0(@emotion/react@11.11.1)(@types/react@18.0.27)(react@18.2.0)
   '@metaplex-foundation/mpl-candy-machine':
-    specifier: 6.0.0-alpha.11
-    version: 6.0.0-alpha.11(@metaplex-foundation/umi@0.7.10)
-  '@metaplex-foundation/mpl-essentials':
-    specifier: ^0.5.8
-    version: 0.5.8(@metaplex-foundation/umi@0.7.10)
+    specifier: 6.0.0-alpha.16
+    version: 6.0.0-alpha.16(@metaplex-foundation/umi@0.8.2)
   '@metaplex-foundation/mpl-token-metadata':
-    specifier: 3.0.0-alpha.18
-    version: 3.0.0-alpha.18(@metaplex-foundation/umi@0.7.10)
+    specifier: 3.0.0-alpha.24
+    version: 3.0.0-alpha.24(@metaplex-foundation/umi@0.8.2)
+  '@metaplex-foundation/mpl-toolbox':
+    specifier: ^0.8.0
+    version: 0.8.0(@metaplex-foundation/umi@0.8.2)
   '@metaplex-foundation/umi':
-    specifier: ^0.7.10
-    version: 0.7.10
+    specifier: ^0.8.2
+    version: 0.8.2
   '@metaplex-foundation/umi-bundle-defaults':
-    specifier: ^0.7.10
-    version: 0.7.10(@metaplex-foundation/umi@0.7.10)(@solana/web3.js@1.75.0)
+    specifier: ^0.8.2
+    version: 0.8.3(@metaplex-foundation/umi@0.8.2)(@solana/web3.js@1.75.0)
   '@metaplex-foundation/umi-rpc-web3js':
-    specifier: ^0.7.10
-    version: 0.7.10(@metaplex-foundation/umi@0.7.10)(@solana/web3.js@1.75.0)
+    specifier: ^0.8.2
+    version: 0.8.3(@metaplex-foundation/umi@0.8.2)(@solana/web3.js@1.75.0)
   '@metaplex-foundation/umi-signer-wallet-adapters':
-    specifier: ^0.7.10
-    version: 0.7.10(@metaplex-foundation/umi@0.7.10)(@solana/web3.js@1.75.0)
+    specifier: ^0.8.2
+    version: 0.8.2(@metaplex-foundation/umi@0.8.2)(@solana/web3.js@1.75.0)
   '@metaplex-foundation/umi-uploader-nft-storage':
-    specifier: ^0.7.10
-    version: 0.7.10(@metaplex-foundation/umi@0.7.10)(typescript@4.9.5)
+    specifier: ^0.8.2
+    version: 0.8.2(@metaplex-foundation/umi@0.8.2)(typescript@4.9.5)
   '@next/font':
     specifier: 13.1.6
     version: 13.1.6
@@ -3066,150 +3066,186 @@ packages:
     resolution: {integrity: sha512-z+ILK8Q3y+nfUl43ctCPuR4Y2bIxk/ooCQFwZxhtci1EhAtMDzMAx2W25qx8G1PPL9UUOdnUax19+F0OjXoj4w==}
     dev: false
 
-  /@metaplex-foundation/mpl-candy-machine@6.0.0-alpha.11(@metaplex-foundation/umi@0.7.10):
-    resolution: {integrity: sha512-Pr12PsEfR9sPReHqwW3wwy7Nvhcj2M4+0D0Hr0Uc7dtJmdEv0mwI7firVxGw5wEdaIbBx7MQxKVBrX7r24dxqw==}
+  /@metaplex-foundation/mpl-candy-machine@6.0.0-alpha.16(@metaplex-foundation/umi@0.8.2):
+    resolution: {integrity: sha512-F5b1v5vQi5EmfMqHPc/vfFo4/L4n94Chtyzy3SZA/mplGZnqSBEW+tvxu5d0BKbymWdURocRe32cVLC192hQLQ==}
     peerDependencies:
-      '@metaplex-foundation/umi': 0.6 - 0.7
+      '@metaplex-foundation/umi': ^0.8.2
     dependencies:
-      '@metaplex-foundation/mpl-essentials': 0.5.8(@metaplex-foundation/umi@0.7.10)
-      '@metaplex-foundation/mpl-token-metadata': 3.0.0-alpha.18(@metaplex-foundation/umi@0.7.10)
-      '@metaplex-foundation/umi': 0.7.10
+      '@metaplex-foundation/mpl-token-metadata': 3.0.0-alpha.24(@metaplex-foundation/umi@0.8.2)
+      '@metaplex-foundation/mpl-toolbox': 0.8.0(@metaplex-foundation/umi@0.8.2)
+      '@metaplex-foundation/umi': 0.8.2
       '@noble/hashes': 1.3.0
       merkletreejs: 0.3.10
     dev: false
 
-  /@metaplex-foundation/mpl-essentials@0.5.8(@metaplex-foundation/umi@0.7.10):
-    resolution: {integrity: sha512-bPer6uIhMkqcaKqF9PyIuOR2+chAxX5bIsJNplTGZM8ROwvkzwdgN65BVDkkevsPNCKiQt1L8HWMtLWxxwJnYg==}
+  /@metaplex-foundation/mpl-token-metadata@3.0.0-alpha.24(@metaplex-foundation/umi@0.8.2):
+    resolution: {integrity: sha512-1idZ+9yKGq58OaRQuAjJwPxtgEp62x2iWerMB0b5SRHvHHZc+vvjPX0jjPaiX2MjG1dq18Xua6FpSsIay3+Gjg==}
     peerDependencies:
-      '@metaplex-foundation/umi': 0.6 - 0.7
+      '@metaplex-foundation/umi': ^0.8.2
     dependencies:
-      '@metaplex-foundation/umi': 0.7.10
+      '@metaplex-foundation/mpl-toolbox': 0.8.0(@metaplex-foundation/umi@0.8.2)
+      '@metaplex-foundation/umi': 0.8.2
     dev: false
 
-  /@metaplex-foundation/mpl-token-metadata@3.0.0-alpha.18(@metaplex-foundation/umi@0.7.10):
-    resolution: {integrity: sha512-8nCi4q+jmr5z8AHApKwPHtMeahQB+TZZzhrgaxI4F2J0y99pdmbYHgcN9czBEG0neF0oNpcyDT7r08kfYTaF9g==}
+  /@metaplex-foundation/mpl-toolbox@0.8.0(@metaplex-foundation/umi@0.8.2):
+    resolution: {integrity: sha512-SK1VUPU4hCaL3sozgtoVjjbZxqx2gWiRt0YTFbwEt5LAHWOlCb7J7rcrrA5XwymX4iV2bIWygYs0yz7hYyx2rg==}
     peerDependencies:
-      '@metaplex-foundation/umi': 0.6 - 0.7
+      '@metaplex-foundation/umi': ^0.8.2
     dependencies:
-      '@metaplex-foundation/mpl-essentials': 0.5.8(@metaplex-foundation/umi@0.7.10)
-      '@metaplex-foundation/umi': 0.7.10
+      '@metaplex-foundation/umi': 0.8.2
     dev: false
 
-  /@metaplex-foundation/umi-bundle-defaults@0.7.10(@metaplex-foundation/umi@0.7.10)(@solana/web3.js@1.75.0):
-    resolution: {integrity: sha512-3y6fXARs3vbdyOrTKD4BiHnp+/OHTyfazWwyqwORWomoeOXQY0KUvzAbUFTJH/DphKnwUqPAImhcX5qZw9Ik8Q==}
+  /@metaplex-foundation/umi-bundle-defaults@0.8.3(@metaplex-foundation/umi@0.8.2)(@solana/web3.js@1.75.0):
+    resolution: {integrity: sha512-6zr8UFOVvdCuFk5c6BaJckLA+FgiKWbZbFyVelzhpkuZ+kS5KJNWs1D5qftcqFfdrmZZTFOGWqFfnBqLQwB8ag==}
     peerDependencies:
-      '@metaplex-foundation/umi': ^0.7.10
+      '@metaplex-foundation/umi': ^0.8.2
       '@solana/web3.js': ^1.72.0
     dependencies:
-      '@metaplex-foundation/umi': 0.7.10
-      '@metaplex-foundation/umi-downloader-http': 0.7.10(@metaplex-foundation/umi@0.7.10)
-      '@metaplex-foundation/umi-eddsa-web3js': 0.7.10(@metaplex-foundation/umi@0.7.10)(@solana/web3.js@1.75.0)
-      '@metaplex-foundation/umi-http-fetch': 0.7.10(@metaplex-foundation/umi@0.7.10)
-      '@metaplex-foundation/umi-program-repository': 0.7.10(@metaplex-foundation/umi@0.7.10)
-      '@metaplex-foundation/umi-rpc-chunk-get-accounts': 0.7.10(@metaplex-foundation/umi@0.7.10)
-      '@metaplex-foundation/umi-rpc-web3js': 0.7.10(@metaplex-foundation/umi@0.7.10)(@solana/web3.js@1.75.0)
-      '@metaplex-foundation/umi-serializer-data-view': 0.7.10(@metaplex-foundation/umi@0.7.10)
-      '@metaplex-foundation/umi-transaction-factory-web3js': 0.7.10(@metaplex-foundation/umi@0.7.10)(@solana/web3.js@1.75.0)
+      '@metaplex-foundation/umi': 0.8.2
+      '@metaplex-foundation/umi-downloader-http': 0.8.2(@metaplex-foundation/umi@0.8.2)
+      '@metaplex-foundation/umi-eddsa-web3js': 0.8.2(@metaplex-foundation/umi@0.8.2)(@solana/web3.js@1.75.0)
+      '@metaplex-foundation/umi-http-fetch': 0.8.2(@metaplex-foundation/umi@0.8.2)
+      '@metaplex-foundation/umi-program-repository': 0.8.2(@metaplex-foundation/umi@0.8.2)
+      '@metaplex-foundation/umi-rpc-chunk-get-accounts': 0.8.2(@metaplex-foundation/umi@0.8.2)
+      '@metaplex-foundation/umi-rpc-web3js': 0.8.3(@metaplex-foundation/umi@0.8.2)(@solana/web3.js@1.75.0)
+      '@metaplex-foundation/umi-serializer-data-view': 0.8.2(@metaplex-foundation/umi@0.8.2)
+      '@metaplex-foundation/umi-transaction-factory-web3js': 0.8.2(@metaplex-foundation/umi@0.8.2)(@solana/web3.js@1.75.0)
       '@solana/web3.js': 1.75.0
     transitivePeerDependencies:
       - encoding
     dev: false
 
-  /@metaplex-foundation/umi-downloader-http@0.7.10(@metaplex-foundation/umi@0.7.10):
-    resolution: {integrity: sha512-X6GMh8/nDwEuwDEDHFPt7mbn9eh1EzQwC4BcoiQp4aHZI+CE2KpiXiNZbGYfbeDqAu/Bkq1tagCgBtkvI0nBKg==}
+  /@metaplex-foundation/umi-downloader-http@0.8.2(@metaplex-foundation/umi@0.8.2):
+    resolution: {integrity: sha512-vbzjAncZEj/ghrT8L7RjmcVxKxbQwiKMJIguI8QyPAPweCxNFZZl0N9vF0pOQyO+TOu6Kc8AhL9aO07Vw6/FjA==}
     peerDependencies:
-      '@metaplex-foundation/umi': ^0.7.10
+      '@metaplex-foundation/umi': ^0.8.2
     dependencies:
-      '@metaplex-foundation/umi': 0.7.10
+      '@metaplex-foundation/umi': 0.8.2
     dev: false
 
-  /@metaplex-foundation/umi-eddsa-web3js@0.7.10(@metaplex-foundation/umi@0.7.10)(@solana/web3.js@1.75.0):
-    resolution: {integrity: sha512-cQAp3JxQ+rKYJFm6DRGAg3Q4gyDmLlxfOtr7IsUs/mtedKqvEjZonspapkAAg/0baBV9V+8vsH0Euuxm3kVPBQ==}
+  /@metaplex-foundation/umi-eddsa-web3js@0.8.2(@metaplex-foundation/umi@0.8.2)(@solana/web3.js@1.75.0):
+    resolution: {integrity: sha512-zlKyQEhwzfTYK0aaOA9jyBRVudaK7TU1bBzn0LPDXGCLjIbfvqqY9oPah+e1XiMWUCqLawyJtgGPd/0Ph5AScg==}
     peerDependencies:
-      '@metaplex-foundation/umi': ^0.7.10
+      '@metaplex-foundation/umi': ^0.8.2
       '@solana/web3.js': ^1.72.0
     dependencies:
-      '@metaplex-foundation/umi': 0.7.10
-      '@metaplex-foundation/umi-web3js-adapters': 0.7.10(@metaplex-foundation/umi@0.7.10)(@solana/web3.js@1.75.0)
+      '@metaplex-foundation/umi': 0.8.2
+      '@metaplex-foundation/umi-web3js-adapters': 0.8.2(@metaplex-foundation/umi@0.8.2)(@solana/web3.js@1.75.0)
       '@noble/curves': 1.0.0
       '@solana/web3.js': 1.75.0
     dev: false
 
-  /@metaplex-foundation/umi-http-fetch@0.7.10(@metaplex-foundation/umi@0.7.10):
-    resolution: {integrity: sha512-6zZeNPmQgjfVKmvdnICveqKRUkV3BTxnJioYdgUMRwxaZwUaMioUcGHVSHdeD/829CuQfb8K4EmJoG3KTKmovQ==}
+  /@metaplex-foundation/umi-http-fetch@0.8.2(@metaplex-foundation/umi@0.8.2):
+    resolution: {integrity: sha512-Sxym4EcBvcKsCbpY+ge0EGUBAP+b5HFdIepOSwF1Aw5vbn8HCaiD+bu25v7KxHaokPRHBHMH/aAuG+UG7fr4mw==}
     peerDependencies:
-      '@metaplex-foundation/umi': ^0.7.10
+      '@metaplex-foundation/umi': ^0.8.2
     dependencies:
-      '@metaplex-foundation/umi': 0.7.10
+      '@metaplex-foundation/umi': 0.8.2
       node-fetch: 2.6.9
     transitivePeerDependencies:
       - encoding
     dev: false
 
-  /@metaplex-foundation/umi-program-repository@0.7.10(@metaplex-foundation/umi@0.7.10):
-    resolution: {integrity: sha512-LHGlpViliTjv8gf7ja11trrOKMNMQH+VZSjpvdJQTn6zH1TOpMcPyHN0PGkktQh4CNjJ8NEp4TUhGtLf4Ymv5Q==}
-    peerDependencies:
-      '@metaplex-foundation/umi': ^0.7.10
-    dependencies:
-      '@metaplex-foundation/umi': 0.7.10
+  /@metaplex-foundation/umi-options@0.8.2:
+    resolution: {integrity: sha512-xFoViuyVHZ1xtZjd7r6AieecfoRbx9bEwlUByqqWs8tmeA1MZb8bg/neO3vUN4aB3DbWxUbJZTEHZrq8fUP1AA==}
     dev: false
 
-  /@metaplex-foundation/umi-rpc-chunk-get-accounts@0.7.10(@metaplex-foundation/umi@0.7.10):
-    resolution: {integrity: sha512-Tnekp73eHENczFNrSyo+UbQlVPenFMVwhjsUvs+sVXRcjOTcRIV3CVIiWd9iyAq1UvgYUFLAtg/pzmP5anqk5Q==}
+  /@metaplex-foundation/umi-program-repository@0.8.2(@metaplex-foundation/umi@0.8.2):
+    resolution: {integrity: sha512-2o/icihbnMOgBUXvLvWTSz3aHTvWMj3jrbh6WIsWOkvN8Synjt7isHJK0h97ao0hlTCfxY5QGuM3CmBuP7HgJQ==}
     peerDependencies:
-      '@metaplex-foundation/umi': ^0.7.10
+      '@metaplex-foundation/umi': ^0.8.2
     dependencies:
-      '@metaplex-foundation/umi': 0.7.10
+      '@metaplex-foundation/umi': 0.8.2
     dev: false
 
-  /@metaplex-foundation/umi-rpc-web3js@0.7.10(@metaplex-foundation/umi@0.7.10)(@solana/web3.js@1.75.0):
-    resolution: {integrity: sha512-XkZhc9UWxxCWMEzAPKGew8EWkBwMvTIoixzA5v89l/tqTFtVCj1Kbh4hxJWwn7H34x7nkoPaSq6efgIiVdZpuw==}
+  /@metaplex-foundation/umi-public-keys@0.8.2:
+    resolution: {integrity: sha512-66ZXWJAFtdfc228q61fPtdi5o3ILqinhdf84rT2lYy21SzoLNcveqm4sbp5pDJ482hBU6xAs8W6xeGpzTTBRDw==}
+    dependencies:
+      '@metaplex-foundation/umi-serializers-encodings': 0.8.2
+    dev: false
+
+  /@metaplex-foundation/umi-rpc-chunk-get-accounts@0.8.2(@metaplex-foundation/umi@0.8.2):
+    resolution: {integrity: sha512-zoZWDAwuODj672sKAoX0vriYmioZId5UpE4uUv6AziahidLipTHpXO7O+v5XpB+gRwcg0s4aVal6BNYPFGWqQw==}
     peerDependencies:
-      '@metaplex-foundation/umi': ^0.7.10
+      '@metaplex-foundation/umi': ^0.8.2
+    dependencies:
+      '@metaplex-foundation/umi': 0.8.2
+    dev: false
+
+  /@metaplex-foundation/umi-rpc-web3js@0.8.3(@metaplex-foundation/umi@0.8.2)(@solana/web3.js@1.75.0):
+    resolution: {integrity: sha512-LUUdKm4pfQzWxGvL1ZHGMD+k//7z1aMiXTnq4/XxAwGEAoHcXWWifivQU+/tPtawKKr86LhXvUCygVlifbVY6A==}
+    peerDependencies:
+      '@metaplex-foundation/umi': ^0.8.2
       '@solana/web3.js': ^1.72.0
     dependencies:
-      '@metaplex-foundation/umi': 0.7.10
-      '@metaplex-foundation/umi-web3js-adapters': 0.7.10(@metaplex-foundation/umi@0.7.10)(@solana/web3.js@1.75.0)
+      '@metaplex-foundation/umi': 0.8.2
+      '@metaplex-foundation/umi-web3js-adapters': 0.8.2(@metaplex-foundation/umi@0.8.2)(@solana/web3.js@1.75.0)
       '@solana/web3.js': 1.75.0
     dev: false
 
-  /@metaplex-foundation/umi-serializer-data-view@0.7.10(@metaplex-foundation/umi@0.7.10):
-    resolution: {integrity: sha512-f4cCdq2NYW19QDcgAM5AZ9mSE7P85q2xHLMEZwwsRgckgZiqZ+rG5eHMti9MV3m/qgpLuZL9L9OT3eVBstvkSw==}
+  /@metaplex-foundation/umi-serializer-data-view@0.8.2(@metaplex-foundation/umi@0.8.2):
+    resolution: {integrity: sha512-LrQsbJiNYwTRjjTUET+Bzui+agIZbNJag1pVH0z4sWn6AICct3/pUJt+l8XWdK6Bt5/ETKuQS7gLY7+QOYXMsA==}
     peerDependencies:
-      '@metaplex-foundation/umi': ^0.7.10
+      '@metaplex-foundation/umi': ^0.8.2
     dependencies:
-      '@metaplex-foundation/umi': 0.7.10
+      '@metaplex-foundation/umi': 0.8.2
     dev: false
 
-  /@metaplex-foundation/umi-signer-wallet-adapters@0.7.10(@metaplex-foundation/umi@0.7.10)(@solana/web3.js@1.75.0):
-    resolution: {integrity: sha512-+SM+YhGWMhGLomoC0oTuc22AyrWesSVGftl4BPyNaC7/TXPflWPNbbRONYCZlnIqdC4TaJ3UmnAJ5yGtawABpA==}
+  /@metaplex-foundation/umi-serializers-core@0.8.2:
+    resolution: {integrity: sha512-grncCh1iyMmoWuFowulLMaoQOdetnVVa+m7CXXxEQ340ygnH3ls8WWBHHnP338309DCsRN2J+pPbqwkOHF/3yA==}
+    dev: false
+
+  /@metaplex-foundation/umi-serializers-encodings@0.8.2:
+    resolution: {integrity: sha512-Em9oxKSHlY30upbQ40V5zV82+gIfKqYpcGkoHAM5ensDx6G0JKLthooazLdSp1hHOP5QfwOpL+Srj76MXyoq4Q==}
+    dependencies:
+      '@metaplex-foundation/umi-serializers-core': 0.8.2
+    dev: false
+
+  /@metaplex-foundation/umi-serializers-numbers@0.8.2:
+    resolution: {integrity: sha512-STQEKGjkFXmG5okZHw9z3mXpHGf6SAcH5xr0K49mb5NIOY9icW9YZEVaccIhUpwYykMXgUI3IEetR2Rmrvhs0Q==}
+    dependencies:
+      '@metaplex-foundation/umi-serializers-core': 0.8.2
+    dev: false
+
+  /@metaplex-foundation/umi-serializers@0.8.2:
+    resolution: {integrity: sha512-N+BCKGb2RnLWvNHY+U3B9dfZUATDLWHp9/5ufJLqGDY1uFS84aTmSPGb3/lOisdtHG6//t6IBY9cprnEOP0l8g==}
+    dependencies:
+      '@metaplex-foundation/umi-options': 0.8.2
+      '@metaplex-foundation/umi-public-keys': 0.8.2
+      '@metaplex-foundation/umi-serializers-core': 0.8.2
+      '@metaplex-foundation/umi-serializers-encodings': 0.8.2
+      '@metaplex-foundation/umi-serializers-numbers': 0.8.2
+    dev: false
+
+  /@metaplex-foundation/umi-signer-wallet-adapters@0.8.2(@metaplex-foundation/umi@0.8.2)(@solana/web3.js@1.75.0):
+    resolution: {integrity: sha512-6Pt0vs/2TwSl5ziklz0PLxXsGh+JcTIhKp3z+D30PAKJ5LsjAK/ZAbGBdMuR2PG3MgrSalNquJIOeJZRNkdt0A==}
     peerDependencies:
-      '@metaplex-foundation/umi': ^0.7.10
+      '@metaplex-foundation/umi': ^0.8.2
       '@solana/web3.js': ^1.72.0
     dependencies:
-      '@metaplex-foundation/umi': 0.7.10
-      '@metaplex-foundation/umi-web3js-adapters': 0.7.10(@metaplex-foundation/umi@0.7.10)(@solana/web3.js@1.75.0)
+      '@metaplex-foundation/umi': 0.8.2
+      '@metaplex-foundation/umi-web3js-adapters': 0.8.2(@metaplex-foundation/umi@0.8.2)(@solana/web3.js@1.75.0)
       '@solana/web3.js': 1.75.0
     dev: false
 
-  /@metaplex-foundation/umi-transaction-factory-web3js@0.7.10(@metaplex-foundation/umi@0.7.10)(@solana/web3.js@1.75.0):
-    resolution: {integrity: sha512-c2hAq8vCGDVMJ/u0iruWPxb6tlF+L2Dzgautlq3k6OoaTqVMqgEVoL74hE861AKPFv1UcYlOyEnUn3aTQhR3IA==}
+  /@metaplex-foundation/umi-transaction-factory-web3js@0.8.2(@metaplex-foundation/umi@0.8.2)(@solana/web3.js@1.75.0):
+    resolution: {integrity: sha512-4611wi/4POy3dSdzd4RkkHpCEnxpl9i11R2DDr0T3xMbgEaMFoI9rNCSjnR/Vi2MezIhkP3MbN8bvaPEW4/AJg==}
     peerDependencies:
-      '@metaplex-foundation/umi': ^0.7.10
+      '@metaplex-foundation/umi': ^0.8.2
       '@solana/web3.js': ^1.72.0
     dependencies:
-      '@metaplex-foundation/umi': 0.7.10
-      '@metaplex-foundation/umi-web3js-adapters': 0.7.10(@metaplex-foundation/umi@0.7.10)(@solana/web3.js@1.75.0)
+      '@metaplex-foundation/umi': 0.8.2
+      '@metaplex-foundation/umi-web3js-adapters': 0.8.2(@metaplex-foundation/umi@0.8.2)(@solana/web3.js@1.75.0)
       '@solana/web3.js': 1.75.0
     dev: false
 
-  /@metaplex-foundation/umi-uploader-nft-storage@0.7.10(@metaplex-foundation/umi@0.7.10)(typescript@4.9.5):
-    resolution: {integrity: sha512-r5PdoCLSsUi3HydX8exlsRQ9374vdAEl51MX76KKunJRy/oMU4J7QjR+yFqsNkjWUWMLvm0Pob/bCVmzjxnlwg==}
+  /@metaplex-foundation/umi-uploader-nft-storage@0.8.2(@metaplex-foundation/umi@0.8.2)(typescript@4.9.5):
+    resolution: {integrity: sha512-/3Sm1TzSfxPEy14SOVQjHRxrJH0c4w7cj0ZmUWeZzYp3TmeWYGNApaX46eUohZn4GS2Z0mZP4qZdKhW7Dco59w==}
     peerDependencies:
-      '@metaplex-foundation/umi': ^0.7.10
+      '@metaplex-foundation/umi': ^0.8.2
     dependencies:
       '@ipld/dag-pb': 2.1.18
-      '@metaplex-foundation/umi': 0.7.10
+      '@metaplex-foundation/umi': 0.8.2
       '@nftstorage/metaplex-auth': 1.2.0(node-fetch@2.6.9)(typescript@4.9.5)
       ipfs-car: 0.7.0(node-fetch@2.6.9)
       ipfs-unixfs: 6.0.9
@@ -3227,19 +3263,23 @@ packages:
       - utf-8-validate
     dev: false
 
-  /@metaplex-foundation/umi-web3js-adapters@0.7.10(@metaplex-foundation/umi@0.7.10)(@solana/web3.js@1.75.0):
-    resolution: {integrity: sha512-tnW17EUzSY0oK7jvmBlvhGSKQql4EB0fWmAcJmEVP7znkr9BreRoo+EBGvSFrzFJPJdlfRBLPTVsIgO1+lDDMA==}
+  /@metaplex-foundation/umi-web3js-adapters@0.8.2(@metaplex-foundation/umi@0.8.2)(@solana/web3.js@1.75.0):
+    resolution: {integrity: sha512-aOVY1CP80r+3V4MBi32hbocZTT2i1vFvAKWJxUHmo22ER0ZWCDLF9Tatlt50drubd9ODw45JChFk1ZGA0MOU1w==}
     peerDependencies:
-      '@metaplex-foundation/umi': ^0.7.10
+      '@metaplex-foundation/umi': ^0.8.2
       '@solana/web3.js': ^1.72.0
     dependencies:
-      '@metaplex-foundation/umi': 0.7.10
+      '@metaplex-foundation/umi': 0.8.2
       '@solana/web3.js': 1.75.0
       buffer: 6.0.3
     dev: false
 
-  /@metaplex-foundation/umi@0.7.10:
-    resolution: {integrity: sha512-RrYRZc0ApAeOccILoiUCJZuOKQAnV9VuWXmt6g/FAakmQNeVn1XmxW4EiL2SYnKN+xiakRVXb1LiRflTLS6RLA==}
+  /@metaplex-foundation/umi@0.8.2:
+    resolution: {integrity: sha512-HfMcV9nILwavrS+Rv7FO5k7eRp4NMDxKAcx3ebeRF4fOvZ1rx5B/IthpN1G1frWkdqOOke1uWH112imEJHpqmQ==}
+    dependencies:
+      '@metaplex-foundation/umi-options': 0.8.2
+      '@metaplex-foundation/umi-public-keys': 0.8.2
+      '@metaplex-foundation/umi-serializers': 0.8.2
     dev: false
 
   /@morgan-stanley/ts-mocking-bird@0.6.4(typescript@4.9.5):
@@ -8402,6 +8442,7 @@ packages:
 
   /ipfs-core-types@0.8.4(node-fetch@2.6.9):
     resolution: {integrity: sha512-sbRZA1QX3xJ6ywTiVQZMOxhlhp4osAZX2SXx3azOLxAtxmGWDMkHYt722VV4nZ2GyJy8qyk5GHQIZ0uvQnpaTg==}
+    deprecated: js-IPFS has been deprecated in favour of Helia - please see https://github.com/ipfs/js-ipfs/issues/4336 for details
     dependencies:
       interface-datastore: 6.1.1
       multiaddr: 10.0.1(node-fetch@2.6.9)
@@ -8413,6 +8454,7 @@ packages:
 
   /ipfs-core-utils@0.12.2(node-fetch@2.6.9):
     resolution: {integrity: sha512-RfxP3rPhXuqKIUmTAUhmee6fmaV3A7LMnjOUikRKpSyqESz/DR7aGK7tbttMxkZdkSEr0rFXlqbyb0vVwmn0wQ==}
+    deprecated: js-IPFS has been deprecated in favour of Helia - please see https://github.com/ipfs/js-ipfs/issues/4336 for details
     dependencies:
       any-signal: 2.1.2
       blob-to-it: 1.0.4

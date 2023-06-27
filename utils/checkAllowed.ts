@@ -19,15 +19,9 @@ import {
   getMerkleRoot,
 } from "@metaplex-foundation/mpl-candy-machine";
 import {
-  Token,
-  fetchAllTokenByOwner,
-} from "@metaplex-foundation/mpl-essentials";
-import {
-  PublicKey,
   SolAmount,
   Some,
   Umi,
-  amountToNumber,
   assertAccountExists,
   publicKey,
   sol,

@@ -21,7 +21,7 @@ import Head from "next/head";
 import { FormEvent, useState } from "react";
 import { useUmi } from "../utils/useUmi";
 import { fetchCandyMachine, mintV2, safeFetchCandyGuard, DefaultGuardSetMintArgs, findMintCounterPda, AddressGate, BotTax } from "@metaplex-foundation/mpl-candy-machine"
-import { fetchTokensByOwner, setComputeUnitLimit } from '@metaplex-foundation/mpl-essentials';
+import { fetchTokensByOwner, setComputeUnitLimit } from '@metaplex-foundation/mpl-toolbox';
 import styles from "@/styles/Home.module.css";
 import { guardChecker } from "@/utils/checkAllowed";
 import { Card, CardHeader, CardBody, CardFooter, StackDivider, Heading, Stack, Box, Text, Button } from '@chakra-ui/react'
@@ -73,8 +73,7 @@ export default function Home() {
           mintArgs: mintArgs,
           tokenStandard: TokenStandard.ProgrammableNonFungible
         }))
-      umi.transactions.serialize(tx.build(umi))
-      const txArray = [tx]
+
 
       const { signature } = await tx.sendAndConfirm(umi, {
         confirm: { commitment: "finalized" }, send: {

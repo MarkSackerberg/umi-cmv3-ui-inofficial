@@ -7,7 +7,7 @@ import {
 import {
   fetchToken,
   findAssociatedTokenPda,
-} from "@metaplex-foundation/mpl-essentials";
+} from "@metaplex-foundation/mpl-toolbox";
 import {
   PublicKey,
   SolAmount,
