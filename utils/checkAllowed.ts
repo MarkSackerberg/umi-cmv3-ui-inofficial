@@ -35,8 +35,6 @@ import {
   getSolanaTime,
   mintLimitChecker,
   ownedNftChecker,
-  solBalanceChecker,
-  tokenBalanceChecker,
 } from "./checkerHelper";
 import { allowLists } from "./../allowlist";
 import {
@@ -228,7 +226,7 @@ export const guardChecker = async (
     }
 
     if (singleGuard.startDate.__option === "Some") {
-      const startDate = singleGuard.solPayment as Some<StartDate>;
+      const startDate = singleGuard.startDate as Some<StartDate>;
       if (solanaTime < startDate.value.date) {
         guardReturn.push({ label: eachGuard.label, allowed: false });
         console.error(`${eachGuard.label} StartDate not reached!`);
