@@ -15,9 +15,14 @@ import { ChakraProvider } from '@chakra-ui/react'
 
 
 export default function App({ Component, pageProps }: AppProps) {
-  //TODO: Use network and endpoint from .env
-  const network = WalletAdapterNetwork.Devnet;
-  const endpoint = "https://solana-mainnet.rpc.extrnode.com";
+  let network = WalletAdapterNetwork.Devnet;
+  if (process.env.NEXT_PUBLIC_ENVIRONMENT === "mainnet-beta" || process.env.NEXT_PUBLIC_ENVIRONMENT === "mainnet"){
+    network = WalletAdapterNetwork.Mainnet;
+  }
+  let endpoint = "https://api.devnet.solana.com";
+  if (process.env.NEXT_PUBLIC_RPC){
+    endpoint = process.env.NEXT_PUBLIC_RPC;
+  }
   const wallets = useMemo(
     () => [
       new SolflareWalletAdapter({ network }),
