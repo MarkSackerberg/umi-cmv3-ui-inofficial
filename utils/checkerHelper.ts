@@ -12,7 +12,7 @@ import {
   PublicKey,
   SolAmount,
   Umi,
-  base58PublicKey,
+  publicKey,
 } from "@metaplex-foundation/umi";
 import { DigitalAssetWithToken } from "@metaplex-foundation/mpl-token-metadata";
 
@@ -104,7 +104,7 @@ export const allowlistChecker = (
   if (
     !allowLists
       .get(guardlabel)
-      ?.includes(base58PublicKey(umi.identity.publicKey))
+      ?.includes(publicKey(umi.identity.publicKey))
   ) {
     console.error(`Guard ${guardlabel}; allowlist wallet not allowlisted`);
     return false;
