@@ -98,7 +98,7 @@ export const allowlistChecker = (
   guardlabel: string
 ) => {
   if (!allowLists.has(guardlabel)) {
-    console.error(`Guard ${guardlabel}; allowlist missing in template`);
+    console.error(`Guard ${guardlabel}; allowlist missing from allowlist.tsx`);
     return false;
   }
   if (
