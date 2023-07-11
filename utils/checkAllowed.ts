@@ -35,17 +35,13 @@ import {
   getSolanaTime,
   mintLimitChecker,
   ownedNftChecker,
+  GuardReturn,
 } from "./checkerHelper";
 import { allowLists } from "./../allowlist";
 import {
   DigitalAssetWithToken,
   fetchAllDigitalAssetWithTokenByOwner,
 } from "@metaplex-foundation/mpl-token-metadata";
-
-export interface GuardReturn {
-  label: string;
-  allowed: boolean;
-}
 
 export const guardChecker = async (
   umi: Umi,
@@ -61,10 +57,10 @@ export const guardChecker = async (
 
   let guardsToCheck: { label: string; guards: GuardSet }[] = candyGuard.groups;
 
-  guardsToCheck.push({
-    label: "default",
-    guards: candyGuard.guards,
-  });
+  //guardsToCheck.push({
+  //  label: "default",
+  //  guards: candyGuard.guards,
+  //});
 
   //no wallet connected. return dummies
   const dummyPublicKey = publicKey("11111111111111111111111111111111");
@@ -98,6 +94,7 @@ export const guardChecker = async (
   }
 
   for (const eachGuard of guardsToCheck) {
+    console.log(eachGuard.label);
     const singleGuard = eachGuard.guards;
     if (singleGuard.addressGate.__option === "Some") {
       const addressGate = singleGuard.addressGate as Some<AddressGate>;
@@ -135,10 +132,11 @@ export const guardChecker = async (
 
     if (singleGuard.endDate.__option === "Some") {
       const addressGate = singleGuard.endDate as Some<EndDate>;
-      if (solanaTime > addressGate.value.date)
+      if (solanaTime > addressGate.value.date) {
         guardReturn.push({ label: eachGuard.label, allowed: false });
-      console.error(`Guard ${eachGuard.label}; endDate reached!`);
-      continue;
+        console.error(`Guard ${eachGuard.label}; endDate reached!`);
+        continue;
+      }
     }
 
     if (singleGuard.freezeSolPayment.__option === "Some") {
@@ -155,9 +153,9 @@ export const guardChecker = async (
 
     if (singleGuard.mintLimit.__option === "Some") {
       const mintLimit = singleGuard.mintLimit as Some<MintLimit>;
-      if (!mintLimitChecker(umi, candyMachine, mintLimit.value)) {
+      if (!mintLimitChecker(umi, candyMachine, eachGuard)) {
         guardReturn.push({ label: eachGuard.label, allowed: false });
-        console.error(`Guard ${eachGuard.label}; mintLimit: not enough SOL`);
+        console.error(`Guard ${eachGuard.label}; mintLimit reached`);
         continue;
       }
     }
@@ -282,5 +280,5 @@ export const guardChecker = async (
 
     guardReturn.push({ label: eachGuard.label, allowed: true });
   }
-  return { guardReturn, ownedNfts: ownedTokens };
+  return { guardReturn, ownedTokens };
 };

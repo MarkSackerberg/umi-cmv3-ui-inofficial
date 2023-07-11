@@ -11,10 +11,16 @@ import {
 import {
   PublicKey,
   SolAmount,
+  Some,
   Umi,
   publicKey,
 } from "@metaplex-foundation/umi";
 import { DigitalAssetWithToken } from "@metaplex-foundation/mpl-token-metadata";
+
+export interface GuardReturn {
+  label: string;
+  allowed: boolean;
+}
 
 export const addressGateChecker = (wallet: PublicKey, address: PublicKey) => {
   if (wallet != address) {
@@ -56,20 +62,21 @@ export const tokenBalanceChecker = async (
 export const mintLimitChecker = async (
   umi: Umi,
   candyMachine: CandyMachine,
-  mintLimit: MintLimit
+  guard: {
+    label: string;
+    guards: GuardSet;
+}
 ) => {
-  if (!mintLimit) {
-    return;
-  }
+  const mintLimit = guard.guards.mintLimit as Some<MintLimit>;
   const mintLimitCounter = await safeFetchMintCounterFromSeeds(umi, {
-    id: mintLimit.id,
+    id: mintLimit.value.id,
     user: umi.identity.publicKey,
     candyMachine: candyMachine.publicKey,
     candyGuard: candyMachine.mintAuthority,
   });
 
-  if (!mintLimitCounter || mintLimitCounter.count >= mintLimit.limit) {
-    console.error("mintLimit: mintLimit reached!");
+  if (!mintLimitCounter || mintLimitCounter.count >= mintLimit.value.limit) {
+    console.error(`Guard ${guard.label}: mintLimit reached!`);
     return false;
   }
   return true;

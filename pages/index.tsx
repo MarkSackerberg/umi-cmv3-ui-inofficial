@@ -1,30 +1,21 @@
 import {
-  base58PublicKey,
-  createGenericFileFromBrowserFile,
-  generateSigner,
-  Umi,
-  percentAmount,
   PublicKey,
   publicKey,
-  some,
-  transactionBuilder,
-  assertAccountExists,
-  lamports,
-  amountToNumber,
-  Some
+  Umi,
 } from "@metaplex-foundation/umi";
-import { createNft, fetchAllDigitalAssetWithTokenByOwner, fetchDigitalAsset, TokenStandard } from "@metaplex-foundation/mpl-token-metadata";
+import { DigitalAssetWithToken } from "@metaplex-foundation/mpl-token-metadata";
 import { Inter } from "@next/font/google";
-import { useWallet } from "@solana/wallet-adapter-react";
 import dynamic from "next/dynamic";
 import Head from "next/head";
-import { FormEvent, useState } from "react";
-import { useUmi } from "../utils/useUmi";
-import { fetchCandyMachine, mintV2, safeFetchCandyGuard, DefaultGuardSetMintArgs, findMintCounterPda, AddressGate, BotTax } from "@metaplex-foundation/mpl-candy-machine"
-import { fetchTokensByOwner, setComputeUnitLimit } from '@metaplex-foundation/mpl-toolbox';
+import { useEffect, useMemo, useState } from "react";
+import { useUmi } from "@/utils/useUmi";
+import { fetchCandyMachine, safeFetchCandyGuard, CandyGuard, CandyMachine } from "@metaplex-foundation/mpl-candy-machine"
 import styles from "@/styles/Home.module.css";
 import { guardChecker } from "@/utils/checkAllowed";
-import { Card, CardHeader, CardBody, CardFooter, StackDivider, Heading, Stack, Box, Text, Button } from '@chakra-ui/react'
+import { Card, CardHeader, CardBody, StackDivider, Heading, Stack, useToast, Spinner } from '@chakra-ui/react';
+import { ButtonList } from "@/components/mintButton";
+import { GuardReturn } from "@/utils/checkerHelper";
+
 const inter = Inter({ subsets: ["latin"] });
 
 const WalletMultiButtonDynamic = dynamic(
@@ -33,91 +24,154 @@ const WalletMultiButtonDynamic = dynamic(
   { ssr: false }
 );
 
+const useCandyMachine = (umi: Umi, candyMachineId: string) => {
+  const [loading, setLoading] = useState(true);
+  const [candyMachine, setCandyMachine] = useState<CandyMachine>();
+  const [candyGuard, setCandyGuard] = useState<CandyGuard>();
+  const toast =  useToast();
+
+
+  useEffect(() => {
+    (async () => {
+      if (!candyMachineId) {
+        console.error("No candy machine in .env!");
+        if (!toast.isActive("no-cm")) {
+          toast({
+            id: "no-cm",
+            title: "No candy machine in .env!",
+            description: "Add your candy machine address to the .env file!",
+            status: "error",
+            duration: 999999,
+            isClosable: true,
+          });
+        }
+        return;
+      }
+
+      let candyMachine;
+      try {
+        candyMachine = await fetchCandyMachine(umi, publicKey(candyMachineId));
+        console.log("loading candyMachine");
+        console.log(candyMachine);
+      } catch (e) {
+        console.error(e);
+        toast({
+          id: "no-cm-found",
+          title: "The CM from .env is invalid",
+          description: "Are you using the correct environment?",
+          status: "error",
+          duration: 999999,
+          isClosable: true,
+        });
+      }
+      setCandyMachine(candyMachine);
+      if (!candyMachine) {
+        return;
+      }
+      let candyGuard;
+      try {
+        candyGuard = await safeFetchCandyGuard(umi, candyMachine.mintAuthority);
+        console.log("candyGuard");
+        console.log(candyGuard);
+      } catch (e) {
+        console.error(e);
+        toast({
+          id: "no-guard-found",
+          title: "No Candy Guard found!",
+          description: "Do you have one assigned?",
+          status: "error",
+          duration: 999999,
+          isClosable: true,
+        });
+      }
+      if (!candyGuard) {
+        return;
+      }
+      setCandyGuard(candyGuard);
+      setLoading(false);
+    })();
+  }, []);
+
+  return { loading, candyMachine, candyGuard };
+};
+
 
 export default function Home() {
-  const wallet = useWallet();
   const umi = useUmi();
-  const [loading, setLoading] = useState(false);
+  const toast = useToast()
   const [mintCreated, setMintCreated] = useState<PublicKey | null>(null);
+  const [isAllowed, setIsAllowed] = useState<boolean>(false);
+  const [isMinting, setIsMinting] = useState<boolean>(false);
+  const [ownedTokens, setOwnedTokens] = useState<DigitalAssetWithToken[]>();
+  const [guards, setGuards] = useState<GuardReturn[]>([
+    { label: "startDefault", allowed: false },
+  ]);
 
-  const onSubmit = async (event: FormEvent) => {
-    event.preventDefault();
-    setLoading(true);
-
-
-    try {
-      const candyMachine = await fetchCandyMachine(umi, publicKey("375upFCTLSYcjzJdPBXufZkStPGeqSyFZtwoJ5xbywZL"))
-      const candyGuard = await safeFetchCandyGuard(umi, candyMachine.mintAuthority)
-
-      console.log(candyGuard)
-      console.log((candyGuard?.guards.botTax as Some<BotTax>).value.lamports)
-      console.log(publicKey((candyGuard?.groups[0].guards.addressGate as Some<AddressGate>).value.address))
-      if (!candyGuard) { return }
-      if (!guardChecker(umi, candyGuard, candyMachine)) {
-
-      }
-
-
-      const nftSigner = generateSigner(umi);
-      const mintArgs: Partial<DefaultGuardSetMintArgs> = {
-        mintLimit: some({ id: 2 }),
-      }
-
-      const tx = transactionBuilder()
-        .add(setComputeUnitLimit(umi, { units: 600_000 }))
-        .add(mintV2(umi, {
-          candyMachine: candyMachine.publicKey,
-          collectionMint: candyMachine.collectionMint, collectionUpdateAuthority: candyMachine.authority, nftMint: nftSigner,
-          //group: some("test"),
-          candyGuard: candyGuard?.publicKey,
-          mintArgs: mintArgs,
-          tokenStandard: TokenStandard.ProgrammableNonFungible
-        }))
-
-
-      const { signature } = await tx.sendAndConfirm(umi, {
-        confirm: { commitment: "finalized" }, send: {
-          skipPreflight: true,
-        },
-      });
-
-      const nft = await fetchDigitalAsset(umi, nftSigner.publicKey)
-      setMintCreated(nftSigner.publicKey);
-    } finally {
-      setLoading(false);
+  if (!process.env.NEXT_PUBLIC_CANDY_MACHINE_ID) {
+    console.error("No candy machine in .env!")
+    if (!toast.isActive('no-cm')) {
+      toast({
+        id: 'no-cm',
+        title: 'No candy machine in .env!',
+        description: "Add your candy machine address to the .env file!",
+        status: 'error',
+        duration: 999999,
+        isClosable: true,
+      })
     }
-  };
+  }
+  const candyMachineId: PublicKey = useMemo(() => {
+    console.log("candyMachineId")
+    console.log(process.env.NEXT_PUBLIC_CANDY_MACHINE_ID)
+
+    if (process.env.NEXT_PUBLIC_CANDY_MACHINE_ID) {
+      return publicKey(process.env.NEXT_PUBLIC_CANDY_MACHINE_ID);
+    } else {
+      console.error(`NO CANDY MACHINE IN .env FILE DEFINED!`);
+      toast({
+        id: 'no-cm',
+        title: 'No candy machine in .env!',
+        description: "Add your candy machine address to the .env file!",
+        status: 'error',
+        duration: 999999,
+        isClosable: true,
+      })
+      return publicKey("11111111111111111111111111111111");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const { loading, candyMachine, candyGuard } = useCandyMachine(umi, candyMachineId);
+
+  useEffect(() => {
+    const checkEligibility = async () => {
+      if (candyMachine === undefined || !candyGuard) {
+        return;
+      }
+
+      const { guardReturn, ownedTokens } = await guardChecker(
+        umi, candyGuard, candyMachine
+      );
+
+      setOwnedTokens(ownedTokens);
+      setGuards(guardReturn);
+      setIsAllowed(false);
+
+      let allowed = false;
+      for (const guard of guardReturn) {
+        if (guard.allowed) {
+          allowed = true;
+          break;
+        }
+      }
+
+      setIsAllowed(allowed);
+    };
+
+    checkEligibility();
+  }, [candyMachine, candyGuard, umi]);
+
 
   const PageContent = () => {
-    if (!wallet.connected) {
-      return <p>Please connect your wallet to get started.</p>;
-    }
-
-    if (loading) {
-      return (
-        <div className={styles.loading}>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="192"
-            height="192"
-            fill="currentColor"
-            viewBox="0 0 256 256"
-          >
-            <rect width="256" height="256" fill="none"></rect>
-            <path
-              d="M168,40.7a96,96,0,1,1-80,0"
-              fill="none"
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="24"
-            ></path>
-          </svg>
-          <p>Creating the NFT...</p>
-        </div>
-      );
-    }
-
     if (mintCreated) {
       return (
         <a
@@ -125,44 +179,17 @@ export default function Home() {
           target="_blank"
           href={
             "https://www.solaneyes.com/address/" +
-            base58PublicKey(mintCreated) +
+            publicKey(mintCreated) +
             "?cluster=devnet"
           }
           rel="noreferrer"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="192"
-            height="192"
-            fill="currentColor"
-            viewBox="0 0 256 256"
-          >
-            <rect width="256" height="256" fill="none"></rect>
-            <polyline
-              points="172 104 113.3 160 84 132"
-              fill="none"
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="24"
-            ></polyline>
-            <circle
-              cx="128"
-              cy="128"
-              r="96"
-              fill="none"
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="24"
-            ></circle>
-          </svg>
           <div>
             <p>
               <strong>NFT Created</strong> at the following address
             </p>
             <p>
-              <code>{base58PublicKey(mintCreated)}</code>
+              <code>{publicKey(mintCreated)}</code>
             </p>
           </div>
         </a>
@@ -170,58 +197,28 @@ export default function Home() {
     }
 
     return (
-      <form method="post" onSubmit={onSubmit} className={styles.form}>
-        <Card>
-          <CardHeader>
-            <Heading size='md'>Client Report</Heading>
-          </CardHeader>
+      <Card>
+        <CardHeader>
+          <Heading size='md'>Mark&apos;s mint UI</Heading>
+        </CardHeader>
 
-          <CardBody>
-            <Stack divider={<StackDivider />} spacing='4'>
-              <Box>
-                <Heading size='xs' textTransform='uppercase'>
-                  Summary
-                </Heading>
-                <Text pt='2' fontSize='sm'>
-                  View a summary of all your clients over the last month.
-                </Text>
-              </Box>
-              <Box>
-                <Heading size='xs' textTransform='uppercase'>
-                  Overview
-                </Heading>
-                <Text pt='2' fontSize='sm'>
-                  Check out the overview of your clients.
-                </Text>
-              </Box>
-              <Box>
-                <Heading size='xs' textTransform='uppercase'>
-                  Analysis
-                </Heading>
-                <Text pt='2' fontSize='sm'>
-                  See a detailed analysis of all your business clients.
-                </Text>
-                <Button colorScheme='teal200' isLoading type="submit">Button</Button>
-              </Box>
-            </Stack>
-          </CardBody>
-        </Card>
-
-        <button type="submit">
-          <span>Create NFT</span>
-          <svg
-            aria-hidden="true"
-            role="img"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 448 512"
-          >
-            <path
-              fill="currentColor"
-              d="M438.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-160-160c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L338.8 224 32 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l306.7 0L233.4 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l160-160z"
-            ></path>
-          </svg>
-        </button>
-      </form>
+        <CardBody>
+          <Stack divider={<StackDivider />} spacing='4'>
+            {loading ? (
+              <Spinner />
+            ) : (
+              <ButtonList
+                guardList={guards}
+                candyMachine={candyMachine}
+                candyGuard={candyGuard}
+                umi={umi}
+                ownedTokens={ownedTokens}
+                toast={toast} 
+              />
+            )}
+          </Stack>
+        </CardBody>
+      </Card>
     );
   };
 
@@ -239,7 +236,7 @@ export default function Home() {
         </div>
 
         <div className={styles.center}>
-          <PageContent />
+          <PageContent key="content" />
         </div>
       </main>
     </>
