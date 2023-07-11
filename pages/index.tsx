@@ -8,13 +8,13 @@ import { Inter } from "@next/font/google";
 import dynamic from "next/dynamic";
 import Head from "next/head";
 import { useEffect, useMemo, useState } from "react";
-import { useUmi } from "@/utils/useUmi";
+import { useUmi } from "../utils/useUmi";
 import { fetchCandyMachine, safeFetchCandyGuard, CandyGuard, CandyMachine } from "@metaplex-foundation/mpl-candy-machine"
-import styles from "@/styles/Home.module.css";
-import { guardChecker } from "@/utils/checkAllowed";
+import styles from "../styles/Home.module.css";
+import { guardChecker } from "../utils/checkAllowed";
 import { Card, CardHeader, CardBody, StackDivider, Heading, Stack, useToast, Spinner } from '@chakra-ui/react';
-import { ButtonList } from "@/components/mintButton";
-import { GuardReturn } from "@/utils/checkerHelper";
+import { ButtonList } from "../components/mintButton";
+import { GuardReturn } from "../utils/checkerHelper";
 
 const inter = Inter({ subsets: ["latin"] });
 
