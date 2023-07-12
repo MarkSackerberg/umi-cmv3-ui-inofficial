@@ -6,6 +6,8 @@ import { mintText } from "../mintText";
 import { Box, Button, Heading, SimpleGrid, Text, UseToastOptions } from "@chakra-ui/react";
 import { setComputeUnitLimit } from "@metaplex-foundation/mpl-toolbox";
 import { allowLists } from "./../allowlist";
+import { Dispatch, SetStateAction, useContext } from "react";
+import { IsMinting } from "@/pages";
 
 interface GuardList extends GuardReturn {
     header: string;
@@ -173,7 +175,8 @@ const mintClick = async (
     candyMachine: CandyMachine,
     candyGuard: CandyGuard,
     ownedTokens: DigitalAssetWithToken[],
-    toast: (options: Omit<UseToastOptions, "id">) => void
+    toast: (options: Omit<UseToastOptions, "id">) => void,
+    setIsMinting: Dispatch<SetStateAction<IsMinting[]>>
 ) => {
 
     const guardToUse = chooseGuardToUse(guard, candyGuard);
@@ -182,30 +185,44 @@ const mintClick = async (
         return;
     }
 
-
-
-    const nftMint = generateSigner(umi);
-
-    const mintArgs = mintArgsBuilder(candyMachine, guardToUse, ownedTokens)
-
-    const tx = transactionBuilder()
-        .add(setComputeUnitLimit(umi, { units: 800_000 }))
-        .add(mintV2(umi, {
-            candyMachine: candyMachine.publicKey,
-            collectionMint: candyMachine.collectionMint, collectionUpdateAuthority: candyMachine.authority, nftMint,
-            group: guardToUse.label === "default" ? none() : some(guardToUse.label),
-            candyGuard: candyGuard.publicKey,
-            mintArgs,
-            tokenStandard: candyMachine.tokenStandard
-        }))
-
     try {
+        setIsMinting((prev) => {
+            const newIsMinting = [...prev];
+            const index = newIsMinting.findIndex((el) => el.label === guardToUse.label);
+            if (index !== -1) {
+                newIsMinting[index].minting = true;
+            } else {
+                newIsMinting.push({ label: guardToUse.label, minting: true });
+            }
+            return newIsMinting;
+        });
+        const nftMint = generateSigner(umi);
+
+        const mintArgs = mintArgsBuilder(candyMachine, guardToUse, ownedTokens)
+
+        const tx = transactionBuilder()
+            .add(setComputeUnitLimit(umi, { units: 800_000 }))
+            .add(mintV2(umi, {
+                candyMachine: candyMachine.publicKey,
+                collectionMint: candyMachine.collectionMint, collectionUpdateAuthority: candyMachine.authority, nftMint,
+                group: guardToUse.label === "default" ? none() : some(guardToUse.label),
+                candyGuard: candyGuard.publicKey,
+                mintArgs,
+                tokenStandard: candyMachine.tokenStandard
+            }))
 
         const { signature } = await tx.sendAndConfirm(umi, {
-            confirm: { commitment: "finalized" }, send: {
+            confirm: { commitment: "processed" }, send: {
                 skipPreflight: true,
             },
         });
+        toast({
+            title: 'Mint successful!',
+            description: `You can find your NFT in your wallet or see it on a <a href="https://explorer.solana.com/tx/${nftMint.publicKey}">explorer</a> `,
+            status: 'success',
+            duration: 90000,
+            isClosable: true,
+        })
     } catch (e) {
         console.error(`minting failed because of ${e}`);
 
@@ -216,6 +233,18 @@ const mintClick = async (
             duration: 9000,
             isClosable: true,
         })
+    } finally {
+                //set the minting state for the guard to true
+        setIsMinting((prev) => {
+            const newIsMinting = [...prev];
+            const index = newIsMinting.findIndex((el) => el.label === guardToUse.label);
+            if (index !== -1) {
+                newIsMinting[index].minting = false;
+            } else {
+                newIsMinting.push({ label: guardToUse.label, minting: false });
+            }
+            return newIsMinting;
+        });
     }
 };
 
@@ -226,6 +255,8 @@ type Props = {
     candyGuard: CandyGuard | undefined;
     ownedTokens: DigitalAssetWithToken[] | undefined;
     toast: (options: Omit<UseToastOptions, "id">) => void;
+    setIsMinting: Dispatch<SetStateAction<IsMinting[]>>;
+    isMinting: IsMinting[];
 };
 
 export function ButtonList({
@@ -234,8 +265,11 @@ export function ButtonList({
     candyMachine,
     candyGuard,
     ownedTokens,
-    toast
+    toast,
+    setIsMinting,
+    isMinting
 }: Props): JSX.Element {
+
     if (!candyMachine || !candyGuard || !ownedTokens) {
         return <></>;
     }
@@ -261,11 +295,18 @@ export function ButtonList({
                 : "buttonLabel missing in mintText.tsx",
         };
         buttonGuardList.push(buttonElement);
+        // add isMinting state for each button if it doesn't exist yet
+        setIsMinting((prev) => {
+            if (prev.find((elem) => elem.label === buttonElement.label)) {
+                return prev;
+            } else {
+                return [...prev, { label: buttonElement.label, minting: false }];
+            }
+        });
     }
 
-
     //TODO: Placeholder for start + end time?
-    //TODO: isLoading when minting
+    //TODO: isMinting only for the button that is clicked
     const listItems = buttonGuardList.map((buttonGuard) => (
         <>
             <Box key={buttonGuard.buttonLabel}>
@@ -277,8 +318,8 @@ export function ButtonList({
                         {buttonGuard.mintText}
                     </Text>
                     <Button onClick={() =>
-                        mintClick(umi, buttonGuard, candyMachine, candyGuard, ownedTokens, toast)
-                    } key={buttonGuard.label} size="sm" backgroundColor='teal.100' isDisabled={!buttonGuard.allowed} isLoading={false} >{buttonGuard.buttonLabel}</Button>
+                        mintClick(umi, buttonGuard, candyMachine, candyGuard, ownedTokens, toast, setIsMinting)
+                    } key={buttonGuard.label} size="sm" backgroundColor='teal.100' isDisabled={!buttonGuard.allowed} isLoading={isMinting.find((elem) => elem.label === buttonGuard.label)?.minting} >{buttonGuard.buttonLabel}</Button>
                 </SimpleGrid>
             </Box>
         </>

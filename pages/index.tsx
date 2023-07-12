@@ -28,7 +28,7 @@ const useCandyMachine = (umi: Umi, candyMachineId: string) => {
   const [loading, setLoading] = useState(true);
   const [candyMachine, setCandyMachine] = useState<CandyMachine>();
   const [candyGuard, setCandyGuard] = useState<CandyGuard>();
-  const toast =  useToast();
+  const toast = useToast();
 
 
   useEffect(() => {
@@ -95,13 +95,17 @@ const useCandyMachine = (umi: Umi, candyMachineId: string) => {
   return { loading, candyMachine, candyGuard };
 };
 
+export interface IsMinting {
+  label: string;
+  minting: boolean;
+}
 
 export default function Home() {
   const umi = useUmi();
   const toast = useToast()
   const [mintCreated, setMintCreated] = useState<PublicKey | null>(null);
   const [isAllowed, setIsAllowed] = useState<boolean>(false);
-  const [isMinting, setIsMinting] = useState<boolean>(false);
+  const [isMinting, setIsMinting] = useState<IsMinting[]>([{ label: "default", minting: false}]);
   const [ownedTokens, setOwnedTokens] = useState<DigitalAssetWithToken[]>();
   const [guards, setGuards] = useState<GuardReturn[]>([
     { label: "startDefault", allowed: false },
@@ -207,18 +211,20 @@ export default function Home() {
             {loading ? (
               <Spinner />
             ) : (
-              <ButtonList
-                guardList={guards}
-                candyMachine={candyMachine}
-                candyGuard={candyGuard}
-                umi={umi}
-                ownedTokens={ownedTokens}
-                toast={toast} 
-              />
+                <ButtonList
+                  guardList={guards}
+                  candyMachine={candyMachine}
+                  candyGuard={candyGuard}
+                  umi={umi}
+                  ownedTokens={ownedTokens}
+                  toast={toast}
+                  setIsMinting={setIsMinting}
+                  isMinting={isMinting}
+                />
             )}
           </Stack>
         </CardBody>
-      </Card>
+      </Card >
     );
   };
 
