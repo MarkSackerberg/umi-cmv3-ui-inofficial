@@ -4,3 +4,5 @@ export const mintText = [
   { label: "OG", mintText: "Mint Paying with ABC", buttonLabel: "Mint now!", header: "OG Mint" },
   { label: "publi", mintText: "Mint Paying with DEF", buttonLabel: "Mint now!", header: "Public Mint" },
 ];
+
+export const image = "https://avatars.githubusercontent.com/u/93528482?v=4";
