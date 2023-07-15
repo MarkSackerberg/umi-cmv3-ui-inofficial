@@ -2,7 +2,7 @@ import { CandyGuard, CandyMachine, mintV2 } from "@metaplex-foundation/mpl-candy
 import { GuardReturn } from "../utils/checkerHelper";
 import { PublicKey, Umi, generateSigner, none, publicKey, some, transactionBuilder } from "@metaplex-foundation/umi";
 import { DigitalAssetWithToken } from "@metaplex-foundation/mpl-token-metadata";
-import { mintText } from "../mintText";
+import { mintText } from "../settings";
 import { Box, Button, Divider, Heading, SimpleGrid, Text, Tooltip, UseToastOptions } from "@chakra-ui/react";
 import { setComputeUnitLimit } from "@metaplex-foundation/mpl-toolbox";
 import { Dispatch, SetStateAction } from "react";

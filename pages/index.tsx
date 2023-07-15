@@ -9,14 +9,15 @@ import dynamic from "next/dynamic";
 import Head from "next/head";
 import { useEffect, useMemo, useState } from "react";
 import { useUmi } from "../utils/useUmi";
-import { fetchCandyMachine, safeFetchCandyGuard, CandyGuard, CandyMachine } from "@metaplex-foundation/mpl-candy-machine"
+import { fetchCandyMachine, safeFetchCandyGuard, CandyGuard, CandyMachine, CmHiddenSettingsDoNotHaveConfigLinesError } from "@metaplex-foundation/mpl-candy-machine"
 import styles from "../styles/Home.module.css";
 import { guardChecker } from "../utils/checkAllowed";
 import { Center, Card, CardHeader, CardBody, StackDivider, Heading, Stack, useToast, Spinner, Skeleton, useDisclosure, Button, Modal, ModalBody, ModalCloseButton, ModalContent, Image, ModalHeader, ModalOverlay, Box, Divider } from '@chakra-ui/react';
 import { ButtonList } from "../components/mintButton";
 import { GuardReturn } from "../utils/checkerHelper";
-import { ShowNft } from "@/components/showNft";
-import { InitializeModal } from "@/components/initializeModal";
+import { ShowNft } from "../components/showNft";
+import { InitializeModal } from "../components/initializeModal";
+import { image } from "../settings";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -200,7 +201,7 @@ export default function Home() {
                   height={230}
                   objectFit={'cover'}
                   alt={"project Image"}
-                  src={"https://avatars.githubusercontent.com/u/93528482?v=4"}
+                  src={image}
                 />
               </Box>
             </Center>
