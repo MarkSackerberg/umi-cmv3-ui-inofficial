@@ -3,7 +3,7 @@ import {
   publicKey,
   Umi,
 } from "@metaplex-foundation/umi";
-import { DigitalAssetWithToken } from "@metaplex-foundation/mpl-token-metadata";
+import { DigitalAssetWithToken, fetchDigitalAsset } from "@metaplex-foundation/mpl-token-metadata";
 import { Inter } from "@next/font/google";
 import dynamic from "next/dynamic";
 import Head from "next/head";
@@ -12,9 +12,11 @@ import { useUmi } from "../utils/useUmi";
 import { fetchCandyMachine, safeFetchCandyGuard, CandyGuard, CandyMachine } from "@metaplex-foundation/mpl-candy-machine"
 import styles from "../styles/Home.module.css";
 import { guardChecker } from "../utils/checkAllowed";
-import { Card, CardHeader, CardBody, StackDivider, Heading, Stack, useToast, Spinner } from '@chakra-ui/react';
+import { Center, Card, CardHeader, CardBody, StackDivider, Heading, Stack, useToast, Spinner, Skeleton, useDisclosure, Button, Modal, ModalBody, ModalCloseButton, ModalContent, Image, ModalHeader, ModalOverlay, Box, Divider } from '@chakra-ui/react';
 import { ButtonList } from "../components/mintButton";
 import { GuardReturn } from "../utils/checkerHelper";
+import { ShowNft } from "@/components/showNft";
+import { InitializeModal } from "@/components/initializeModal";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -25,7 +27,6 @@ const WalletMultiButtonDynamic = dynamic(
 );
 
 const useCandyMachine = (umi: Umi, candyMachineId: string) => {
-  const [loading, setLoading] = useState(true);
   const [candyMachine, setCandyMachine] = useState<CandyMachine>();
   const [candyGuard, setCandyGuard] = useState<CandyGuard>();
   const toast = useToast();
@@ -51,8 +52,6 @@ const useCandyMachine = (umi: Umi, candyMachineId: string) => {
       let candyMachine;
       try {
         candyMachine = await fetchCandyMachine(umi, publicKey(candyMachineId));
-        console.log("loading candyMachine");
-        console.log(candyMachine);
       } catch (e) {
         console.error(e);
         toast({
@@ -71,8 +70,6 @@ const useCandyMachine = (umi: Umi, candyMachineId: string) => {
       let candyGuard;
       try {
         candyGuard = await safeFetchCandyGuard(umi, candyMachine.mintAuthority);
-        console.log("candyGuard");
-        console.log(candyGuard);
       } catch (e) {
         console.error(e);
         toast({
@@ -88,11 +85,12 @@ const useCandyMachine = (umi: Umi, candyMachineId: string) => {
         return;
       }
       setCandyGuard(candyGuard);
-      setLoading(false);
     })();
   }, []);
 
-  return { loading, candyMachine, candyGuard };
+  return { candyMachine, candyGuard };
+
+
 };
 
 export interface IsMinting {
@@ -102,10 +100,13 @@ export interface IsMinting {
 
 export default function Home() {
   const umi = useUmi();
-  const toast = useToast()
-  const [mintCreated, setMintCreated] = useState<PublicKey | null>(null);
+  const toast = useToast();
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const { isOpen: isInitializerOpen, onOpen: onInitializerOpen, onClose: onInitializerClose } = useDisclosure();
+  const [mintsCreated, setMintsCreated] = useState<PublicKey[]>([publicKey("11111111111111111111111111111111")]);
   const [isAllowed, setIsAllowed] = useState<boolean>(false);
-  const [isMinting, setIsMinting] = useState<IsMinting[]>([{ label: "default", minting: false}]);
+  const [loading, setLoading] = useState(true);
+  const [isMinting, setIsMinting] = useState<IsMinting[]>([{ label: "default", minting: false }]);
   const [ownedTokens, setOwnedTokens] = useState<DigitalAssetWithToken[]>();
   const [guards, setGuards] = useState<GuardReturn[]>([
     { label: "startDefault", allowed: false },
@@ -125,9 +126,6 @@ export default function Home() {
     }
   }
   const candyMachineId: PublicKey = useMemo(() => {
-    console.log("candyMachineId")
-    console.log(process.env.NEXT_PUBLIC_CANDY_MACHINE_ID)
-
     if (process.env.NEXT_PUBLIC_CANDY_MACHINE_ID) {
       return publicKey(process.env.NEXT_PUBLIC_CANDY_MACHINE_ID);
     } else {
@@ -144,7 +142,7 @@ export default function Home() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  const { loading, candyMachine, candyGuard } = useCandyMachine(umi, candyMachineId);
+  const { candyMachine, candyGuard } = useCandyMachine(umi, candyMachineId);
 
   useEffect(() => {
     const checkEligibility = async () => {
@@ -169,48 +167,52 @@ export default function Home() {
       }
 
       setIsAllowed(allowed);
+      setLoading(false);
     };
 
     checkEligibility();
   }, [candyMachine, candyGuard, umi]);
 
-
   const PageContent = () => {
-    if (mintCreated) {
-      return (
-        <a
-          className={styles.success}
-          target="_blank"
-          href={
-            "https://www.solaneyes.com/address/" +
-            publicKey(mintCreated) +
-            "?cluster=devnet"
-          }
-          rel="noreferrer"
-        >
-          <div>
-            <p>
-              <strong>NFT Created</strong> at the following address
-            </p>
-            <p>
-              <code>{publicKey(mintCreated)}</code>
-            </p>
-          </div>
-        </a>
-      );
-    }
 
     return (
-      <Card>
-        <CardHeader>
-          <Heading size='md'>Mark&apos;s mint UI</Heading>
-        </CardHeader>
+      <>
+        <style jsx global>
+          {`
+      body {
+          background: #2d3748; 
+       }
+   `}
+        </style>
+        <Card>
+          <CardHeader>
+            <Heading size='md'>Mark&apos;s mint UI</Heading>
+          </CardHeader>
 
-        <CardBody>
-          <Stack divider={<StackDivider />} spacing='4'>
-            {loading ? (
-              <Spinner />
-            ) : (
+          <CardBody>
+            <Center>
+              <Box
+                rounded={'lg'}
+                mt={-12}
+                pos={'relative'}>
+                <Image
+                  rounded={'lg'}
+                  height={230}
+                  objectFit={'cover'}
+                  alt={"project Image"}
+                  src={"https://avatars.githubusercontent.com/u/93528482?v=4"}
+                />
+              </Box>
+            </Center>
+            <Divider my="10px" />
+            <Stack divider={<StackDivider />} spacing='8'>
+              {loading ? (
+                <div>
+                  <Skeleton height="30px" my="10px" />
+                  <Skeleton height="30px" my="10px" />
+                  <Skeleton height="30px" my="10px" />
+                </div>
+              ) : (
                 <ButtonList
                   guardList={guards}
                   candyMachine={candyMachine}
@@ -220,11 +222,45 @@ export default function Home() {
                   toast={toast}
                   setIsMinting={setIsMinting}
                   isMinting={isMinting}
+                  setMintsCreated={setMintsCreated}
+                  onOpen={onOpen}
                 />
-            )}
-          </Stack>
-        </CardBody>
-      </Card >
+              )}
+            </Stack>
+          </CardBody>
+        </Card >
+        {umi.identity.publicKey === candyMachine?.authority ? (
+          <>
+            <Center>
+              <Button backgroundColor={"red.200"} marginTop={"10"} onClick={onInitializerOpen}>Initialize Everything!</Button>
+            </Center>
+            <Modal isOpen={isInitializerOpen} onClose={onInitializerClose}>
+              <ModalOverlay />
+              <ModalContent>
+                <ModalHeader>Initializer</ModalHeader>
+                <ModalCloseButton />
+                <ModalBody>
+                  < InitializeModal umi={umi} candyMachine={candyMachine} candyGuard={candyGuard} toast={toast} />
+                </ModalBody>
+              </ModalContent>
+            </Modal>
+
+          </>)
+          :
+          (<></>)
+        }
+
+        <Modal isOpen={isOpen} onClose={onClose}>
+          <ModalOverlay />
+          <ModalContent>
+            <ModalHeader>Your minted NFT:</ModalHeader>
+            <ModalCloseButton />
+            <ModalBody>
+              <ShowNft umi={umi} nfts={mintsCreated} />
+            </ModalBody>
+          </ModalContent>
+        </Modal>
+      </>
     );
   };
 

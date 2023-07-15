@@ -56,19 +56,13 @@ export const guardChecker = async (
   }
 
   let guardsToCheck: { label: string; guards: GuardSet }[] = candyGuard.groups;
-
-  //guardsToCheck.push({
-  //  label: "default",
-  //  guards: candyGuard.guards,
-  //});
-
+  
   //no wallet connected. return dummies
   const dummyPublicKey = publicKey("11111111111111111111111111111111");
-  if (umi.identity.publicKey === dummyPublicKey) {
+  if (umi.identity.publicKey === dummyPublicKey || candyMachine.itemsLoaded - Number(candyMachine.itemsRedeemed) === 0) {
     for (const eachGuard of guardsToCheck) {
       guardReturn.push({ label: eachGuard.label, allowed: false });
     }
-    console.log("No wallet connected - returning dummy buttons");
     return { guardReturn, ownedNfts: ownedTokens };
   }
 
@@ -83,7 +77,6 @@ export const guardChecker = async (
     const account = await umi.rpc.getAccount(umi.identity.publicKey);
     assertAccountExists(account);
     solBalance = account.lamports;
-    console.log(`Wallet balance ${solBalance}`);
   }
 
   if (checkTokensRequired(guardsToCheck)) {
@@ -94,7 +87,6 @@ export const guardChecker = async (
   }
 
   for (const eachGuard of guardsToCheck) {
-    console.log(eachGuard.label);
     const singleGuard = eachGuard.guards;
     if (singleGuard.addressGate.__option === "Some") {
       const addressGate = singleGuard.addressGate as Some<AddressGate>;
@@ -152,8 +144,7 @@ export const guardChecker = async (
     }
 
     if (singleGuard.mintLimit.__option === "Some") {
-      const mintLimit = singleGuard.mintLimit as Some<MintLimit>;
-      if (!mintLimitChecker(umi, candyMachine, eachGuard)) {
+      if (!await mintLimitChecker(umi, candyMachine, eachGuard)) {
         guardReturn.push({ label: eachGuard.label, allowed: false });
         console.error(`Guard ${eachGuard.label}; mintLimit reached`);
         continue;
@@ -277,7 +268,7 @@ export const guardChecker = async (
         continue;
       }
     }
-
+    console.log(eachGuard.label, "allowed")
     guardReturn.push({ label: eachGuard.label, allowed: true });
   }
   return { guardReturn, ownedTokens };

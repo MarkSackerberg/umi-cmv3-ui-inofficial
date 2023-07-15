@@ -1,171 +1,13 @@
-import { CandyGuard, CandyMachine, DefaultGuardSet, DefaultGuardSetMintArgs, GuardGroup, getMerkleProof, getMerkleRoot, mintV2, route } from "@metaplex-foundation/mpl-candy-machine";
+import { CandyGuard, CandyMachine, mintV2 } from "@metaplex-foundation/mpl-candy-machine";
 import { GuardReturn } from "../utils/checkerHelper";
-import { TransactionBuilder, Umi, generateSigner, none, publicKey, some, transactionBuilder } from "@metaplex-foundation/umi";
-import { DigitalAssetWithToken, TokenStandard } from "@metaplex-foundation/mpl-token-metadata";
+import { PublicKey, Umi, generateSigner, none, publicKey, some, transactionBuilder } from "@metaplex-foundation/umi";
+import { DigitalAssetWithToken } from "@metaplex-foundation/mpl-token-metadata";
 import { mintText } from "../mintText";
-import { Box, Button, Heading, SimpleGrid, Text, UseToastOptions } from "@chakra-ui/react";
+import { Box, Button, Divider, Heading, SimpleGrid, Text, Tooltip, UseToastOptions } from "@chakra-ui/react";
 import { setComputeUnitLimit } from "@metaplex-foundation/mpl-toolbox";
-import { allowLists } from "./../allowlist";
-import { Dispatch, SetStateAction, useContext } from "react";
-import { IsMinting } from "@/pages";
-
-interface GuardList extends GuardReturn {
-    header: string;
-    mintText: string;
-    buttonLabel: string;
-}
-
-const chooseGuardToUse = (
-    guard: GuardReturn,
-    candyGuard: CandyGuard
-) => {
-    let guardGroup = candyGuard?.groups.find(
-        (item) => item.label === guard.label
-    );
-    if (guardGroup) {
-        return guardGroup;
-    }
-
-    if (candyGuard != null) {
-        return {
-            label: "default",
-            guards: candyGuard.guards,
-        };
-    }
-
-    console.error("No guards defined! No minting possible.");
-    return {
-        label: "default",
-        guards: undefined,
-    };
-};
-
-const mintArgsBuilder = (candyMachine: CandyMachine, guardToUse: GuardGroup<DefaultGuardSet>, ownedTokens: DigitalAssetWithToken[]
-) => {
-    const guards = guardToUse.guards;
-    let ruleset = undefined;
-    if (candyMachine.ruleSet.__option === "Some") {
-        ruleset = candyMachine.ruleSet.value
-    }
-
-    let mintArgs: Partial<DefaultGuardSetMintArgs> = {};
-    if (guards.allocation.__option === "Some") {
-        mintArgs.allocation = some({ id: guards.allocation.value.id })
-    }
-
-    if (guards.allowList.__option === "Some") {
-        const allowlist = allowLists.get(guardToUse.label)
-        if (!allowlist) {
-            console.error(`allowlist for guard ${guardToUse.label} not found!`);
-        } else {
-            mintArgs.allowList = some({ merkleRoot: getMerkleRoot(allowlist) });
-            //TODO: add route instruction!
-        }
-    }
-
-    if (guards.freezeSolPayment.__option === "Some") {
-        mintArgs.freezeSolPayment = some({ destination: guards.freezeSolPayment.value.destination });
-    }
-
-    if (guards.freezeTokenPayment.__option === "Some") {
-        mintArgs.freezeTokenPayment = some({ destinationAta: guards.freezeTokenPayment.value.destinationAta, mint: guards.freezeTokenPayment.value.mint, nftRuleSet: ruleset });
-    }
-
-    if (guards.gatekeeper.__option === "Some") {
-        mintArgs.gatekeeper = some({ expireOnUse: guards.gatekeeper.value.expireOnUse, gatekeeperNetwork: guards.gatekeeper.value.gatekeeperNetwork })
-    }
-
-    if (guards.mintLimit.__option === "Some") {
-        mintArgs.mintLimit = some({ id: guards.mintLimit.value.id })
-    }
-
-    if (guards.nftBurn.__option === "Some") {
-        const requiredCollection = guards.nftBurn.value.requiredCollection;
-        //TODO: have the use choose the NFT
-        const nft = ownedTokens.find(
-            (el) =>
-                el.metadata.collection.__option === "Some" &&
-                el.metadata.collection.value.key === requiredCollection
-        )
-        if (!nft) {
-            console.error("no nft to burn found!");
-        } else {
-            let tokenStandard = TokenStandard.NonFungible;
-            if (nft.metadata.tokenStandard.__option === "Some") {
-                if (nft.metadata.tokenStandard.value === TokenStandard.ProgrammableNonFungible) {
-                    tokenStandard = TokenStandard.ProgrammableNonFungible;
-                }
-            }
-            mintArgs.nftBurn = some({ mint: nft.publicKey, requiredCollection, tokenStandard })
-        }
-    }
-
-    if (guards.nftGate.__option === "Some") {
-        const requiredCollection = guards.nftGate.value.requiredCollection;
-        const nft = ownedTokens.find(
-            (el) =>
-                el.metadata.collection.__option === "Some" &&
-                el.metadata.collection.value.key === requiredCollection
-        )
-        if (!nft) {
-            console.error("no nft for tokenGate found!");
-        } else {
-            let tokenStandard = TokenStandard.NonFungible;
-            if (nft.metadata.tokenStandard.__option === "Some") {
-                if (nft.metadata.tokenStandard.value === TokenStandard.ProgrammableNonFungible) {
-                    tokenStandard = TokenStandard.ProgrammableNonFungible;
-                }
-            }
-            mintArgs.nftGate = some({ mint: nft.publicKey, requiredCollection, tokenStandard })
-        }
-    }
-
-    if (guards.nftPayment.__option === "Some") {
-        const requiredCollection = guards.nftPayment.value.requiredCollection;
-        const nft = ownedTokens.find(
-            (el) =>
-                el.metadata.collection.__option === "Some" &&
-                el.metadata.collection.value.key === requiredCollection
-        )
-        if (!nft) {
-            console.error("no nft for tokenGate found!");
-        } else {
-            let tokenStandard = TokenStandard.NonFungible;
-            if (nft.metadata.tokenStandard.__option === "Some") {
-                if (nft.metadata.tokenStandard.value === TokenStandard.ProgrammableNonFungible) {
-                    tokenStandard = TokenStandard.ProgrammableNonFungible;
-                }
-            }
-            mintArgs.nftPayment = some({ destination: guards.nftPayment.value.destination, mint: nft.publicKey, requiredCollection, tokenStandard })
-        }
-    }
-
-    if (guards.solPayment.__option === "Some") {
-        mintArgs.solPayment = some({ destination: guards.solPayment.value.destination });
-    }
-
-    if (guards.thirdPartySigner.__option === "Some") {
-        console.error("not supported. you need a backend")
-    }
-
-    if (guards.token2022Payment.__option === "Some") {
-        mintArgs.token2022Payment = some({ destinationAta: guards.token2022Payment.value.destinationAta, mint: guards.token2022Payment.value.mint });
-    }
-
-    if (guards.tokenBurn.__option === "Some") {
-        mintArgs.tokenBurn = some({ mint: guards.tokenBurn.value.mint });
-    }
-
-    if (guards.tokenGate.__option === "Some") {
-        mintArgs.tokenGate = some({ mint: guards.tokenGate.value.mint });
-    }
-
-    if (guards.tokenPayment.__option === "Some") {
-        mintArgs.tokenPayment = some({ destinationAta: guards.tokenPayment.value.destinationAta, mint: guards.tokenPayment.value.mint });
-    }
-    return mintArgs;
-}
-
+import { Dispatch, SetStateAction } from "react";
+import { IsMinting } from "../pages";
+import { chooseGuardToUse, routeBuilder, mintArgsBuilder, combineTransactions, GuardList } from "../utils/mintHelper";
 
 
 
@@ -176,15 +18,15 @@ const mintClick = async (
     candyGuard: CandyGuard,
     ownedTokens: DigitalAssetWithToken[],
     toast: (options: Omit<UseToastOptions, "id">) => void,
-    setIsMinting: Dispatch<SetStateAction<IsMinting[]>>
+    setIsMinting: Dispatch<SetStateAction<IsMinting[]>>,
+    setMintsCreated: Dispatch<SetStateAction<PublicKey[]>>,
+    onOpen: () => void
 ) => {
-
     const guardToUse = chooseGuardToUse(guard, candyGuard);
     if (!guardToUse.guards) {
         console.error("no guard defined!");
         return;
     }
-
     try {
         setIsMinting((prev) => {
             const newIsMinting = [...prev];
@@ -196,12 +38,15 @@ const mintClick = async (
             }
             return newIsMinting;
         });
+
+        let routeBuild = await routeBuilder(umi, guardToUse, candyMachine);
+        if (!routeBuild) {
+            routeBuild = transactionBuilder();
+        }
         const nftMint = generateSigner(umi);
 
         const mintArgs = mintArgsBuilder(candyMachine, guardToUse, ownedTokens)
-
         const tx = transactionBuilder()
-            .add(setComputeUnitLimit(umi, { units: 800_000 }))
             .add(mintV2(umi, {
                 candyMachine: candyMachine.publicKey,
                 collectionMint: candyMachine.collectionMint, collectionUpdateAuthority: candyMachine.authority, nftMint,
@@ -211,18 +56,60 @@ const mintClick = async (
                 tokenStandard: candyMachine.tokenStandard
             }))
 
-        const { signature } = await tx.sendAndConfirm(umi, {
-            confirm: { commitment: "processed" }, send: {
-                skipPreflight: true,
-            },
-        });
+        const groupedTx = await combineTransactions(umi, [routeBuild, tx], toast);
+        if (!groupedTx || groupedTx.length === 0) {
+            console.error("no transaction to send");
+            return;
+        }
+
+        if (groupedTx.length > 1) {
+            let counter = 0;
+            for (let tx of groupedTx) {
+                tx = tx.prepend(setComputeUnitLimit(umi, { units: 800_000 }))
+                await tx.sendAndConfirm(umi, {
+                    confirm: { commitment: "processed" }, send: {
+                        skipPreflight: true,
+                    },
+                });
+                if (counter < groupedTx.length - 1) {
+                    toast({
+                        title: `Transaction ${counter}/${groupedTx.length} successful!`,
+                        description: `Please sign the next...`,
+                        status: 'success',
+                        duration: 90000,
+                        isClosable: true,
+                    })
+                }
+            }
+        } else {
+            let tx = groupedTx[0].prepend(setComputeUnitLimit(umi, { units: 800_000 }))
+            await tx.sendAndConfirm(umi, {
+                confirm: { commitment: "finalized" }, send: {
+                    skipPreflight: true,
+                },
+            });
+        }
         toast({
             title: 'Mint successful!',
-            description: `You can find your NFT in your wallet or see it on a <a href="https://explorer.solana.com/tx/${nftMint.publicKey}">explorer</a> `,
+            description: `You can find your NFT in your wallet.`,
             status: 'success',
             duration: 90000,
             isClosable: true,
         })
+        //setMintsCreated, add the minted nft to the list and make sure that the initial dummy value is removed
+        setMintsCreated((prev) => {
+            const newMintsCreated = [...prev];
+            const index = newMintsCreated.findIndex((el) => el === publicKey("11111111111111111111111111111111"));
+            if (index !== -1) {
+                newMintsCreated[index] = nftMint.publicKey;
+            } else {
+                newMintsCreated.push(nftMint.publicKey);
+            }
+            return newMintsCreated;
+        });
+
+        onOpen();
+
     } catch (e) {
         console.error(`minting failed because of ${e}`);
 
@@ -234,7 +121,7 @@ const mintClick = async (
             isClosable: true,
         })
     } finally {
-                //set the minting state for the guard to true
+        //set the minting state for the guard to true
         setIsMinting((prev) => {
             const newIsMinting = [...prev];
             const index = newIsMinting.findIndex((el) => el.label === guardToUse.label);
@@ -257,6 +144,8 @@ type Props = {
     toast: (options: Omit<UseToastOptions, "id">) => void;
     setIsMinting: Dispatch<SetStateAction<IsMinting[]>>;
     isMinting: IsMinting[];
+    setMintsCreated: Dispatch<SetStateAction<PublicKey[]>>;
+    onOpen: () => void;
 };
 
 export function ButtonList({
@@ -264,16 +153,16 @@ export function ButtonList({
     guardList,
     candyMachine,
     candyGuard,
-    ownedTokens,
+    ownedTokens = [], // provide default empty array
     toast,
     setIsMinting,
-    isMinting
+    isMinting,
+    setMintsCreated,
+    onOpen
 }: Props): JSX.Element {
-
-    if (!candyMachine || !candyGuard || !ownedTokens) {
+    if (!candyMachine || !candyGuard) {
         return <></>;
     }
-
 
     // Guard "default" can only be used to mint in case no other guard exists
     let filteredGuardlist = guardList;
@@ -306,10 +195,13 @@ export function ButtonList({
     }
 
     //TODO: Placeholder for start + end time?
-    //TODO: isMinting only for the button that is clicked
+    let toolTip = "";
+    if (umi.identity.publicKey === publicKey("11111111111111111111111111111111")) {
+        toolTip = "Please connect your wallet to mint";
+    }
     const listItems = buttonGuardList.map((buttonGuard) => (
         <>
-            <Box key={buttonGuard.buttonLabel}>
+            <Box key={buttonGuard.buttonLabel} marginTop={"20px"}>
                 <Heading size='xs' textTransform='uppercase'>
                     {buttonGuard.header}
                 </Heading>
@@ -317,9 +209,34 @@ export function ButtonList({
                     <Text pt='2' fontSize='sm'>
                         {buttonGuard.mintText}
                     </Text>
-                    <Button onClick={() =>
-                        mintClick(umi, buttonGuard, candyMachine, candyGuard, ownedTokens, toast, setIsMinting)
-                    } key={buttonGuard.label} size="sm" backgroundColor='teal.100' isDisabled={!buttonGuard.allowed} isLoading={isMinting.find((elem) => elem.label === buttonGuard.label)?.minting} >{buttonGuard.buttonLabel}</Button>
+                    <Tooltip label={toolTip} aria-label="Mint button">
+
+                        <Button
+                            onClick={() =>
+                                mintClick(
+                                    umi,
+                                    buttonGuard,
+                                    candyMachine,
+                                    candyGuard,
+                                    ownedTokens,
+                                    toast,
+                                    setIsMinting,
+                                    setMintsCreated,
+                                    onOpen
+                                )
+                            }
+                            key={buttonGuard.label}
+                            size="sm"
+                            backgroundColor="teal.100"
+                            isDisabled={!buttonGuard.allowed}
+                            isLoading={
+                                isMinting.find((elem) => elem.label === buttonGuard.label)?.minting
+                            }
+                        >
+                            {buttonGuard.buttonLabel}
+                        </Button>
+                    </Tooltip>
+
                 </SimpleGrid>
             </Box>
         </>
@@ -327,4 +244,3 @@ export function ButtonList({
 
     return <>{listItems}</>;
 }
-
