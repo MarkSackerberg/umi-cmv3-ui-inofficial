@@ -1,28 +1,10 @@
-# Upload and Create NFTs using Wallet Adapters
+# Deploy your own Candy Machine easily
+This repository is for Candy Machine V3, Account Version V2. (This is what you have when using the latest sugar version to create the candy machine)
 
-- Uses wallet adapters to connect to a wallet in the browser.
-- Uploads image and metadata via NFT Storage.
-- Creates an NFT from the uploaded image and metadata.
+## What does this repo support?
+You can use this repo to deploy your own candy machine UI. It supports most of the existing guards
+...
 
-```shell
-# Create a new Next app with all default values.
-npx create-next-app@latest ui-create-nft
-cd ui-create-nft
-
-# Install dependencies.
-npm install @metaplex-foundation/umi \
-  @metaplex-foundation/umi-signer-wallet-adapters \
-  @metaplex-foundation/umi-uploader-nft-storage \
-  @metaplex-foundation/mpl-token-metadata@alpha \
-  @solana/web3.js \
-  @solana/wallet-adapter-base \
-  @solana/wallet-adapter-react \
-  @solana/wallet-adapter-react-ui \
-  @solana/wallet-adapter-wallets
-
-# Check out the code for the index page.
-cat pages/index.tsx
-
-# Run locally.
-npm run dev
-```
+## Prerequisites
+- [pnpm](https://pnpm.io/installation) as package manager - I used 8.1.0
+- [sugar](https://docs.metaplex.com/developer-tools/sugar/guides/sugar-for-cmv3) to create your candy machine
