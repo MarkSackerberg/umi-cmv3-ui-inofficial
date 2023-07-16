@@ -3,8 +3,7 @@ import {
   publicKey,
   Umi,
 } from "@metaplex-foundation/umi";
-import { DigitalAssetWithToken, fetchDigitalAsset } from "@metaplex-foundation/mpl-token-metadata";
-import { Inter } from "@next/font/google";
+import { DigitalAssetWithToken } from "@metaplex-foundation/mpl-token-metadata";
 import dynamic from "next/dynamic";
 import Head from "next/head";
 import { useEffect, useMemo, useState } from "react";
@@ -12,14 +11,12 @@ import { useUmi } from "../utils/useUmi";
 import { fetchCandyMachine, safeFetchCandyGuard, CandyGuard, CandyMachine, CmHiddenSettingsDoNotHaveConfigLinesError } from "@metaplex-foundation/mpl-candy-machine"
 import styles from "../styles/Home.module.css";
 import { guardChecker } from "../utils/checkAllowed";
-import { Center, Card, CardHeader, CardBody, StackDivider, Heading, Stack, useToast, Spinner, Skeleton, useDisclosure, Button, Modal, ModalBody, ModalCloseButton, ModalContent, Image, ModalHeader, ModalOverlay, Box, Divider } from '@chakra-ui/react';
+import { Center, Card, CardHeader, CardBody, StackDivider, Heading, Stack, useToast, Text, Skeleton, useDisclosure, Button, Modal, ModalBody, ModalCloseButton, ModalContent, Image, ModalHeader, ModalOverlay, Box, Divider, HStack, VStack, Flex } from '@chakra-ui/react';
 import { ButtonList } from "../components/mintButton";
 import { GuardReturn } from "../utils/checkerHelper";
 import { ShowNft } from "../components/showNft";
 import { InitializeModal } from "../components/initializeModal";
-import { image } from "../settings";
-
-const inter = Inter({ subsets: ["latin"] });
+import { image, headerText } from "../settings";
 
 const WalletMultiButtonDynamic = dynamic(
   async () =>
@@ -187,7 +184,21 @@ export default function Home() {
         </style>
         <Card>
           <CardHeader>
-            <Heading size='md'>Mark&apos;s mint UI</Heading>
+            <Flex minWidth='max-content' alignItems='center' gap='2'>
+              <Box>
+                <Heading size='md'>{headerText}</Heading>
+              </Box>
+              {loading ? (<></>) : (
+                  <Flex justifyContent="flex-end" marginLeft="auto">
+                    <Box background={"teal.100"} borderRadius={"5px"} minWidth={"50px"} minHeight={"50px"} p={2} >
+                      <VStack >
+                        <Text fontSize={"sm" }>Minted:</Text>
+                        <Text fontWeight={"semibold"}>{candyMachine ? Number(candyMachine.itemsLoaded - Number(candyMachine.itemsRedeemed)) : "?"}/{candyMachine.itemsLoaded}</Text>
+                      </VStack>
+                    </Box>
+                  </Flex>
+                )}
+            </Flex>
           </CardHeader>
 
           <CardBody>
@@ -273,7 +284,7 @@ export default function Home() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className={inter.className}>
+      <main>
         <div className={styles.wallet}>
           <WalletMultiButtonDynamic />
         </div>
