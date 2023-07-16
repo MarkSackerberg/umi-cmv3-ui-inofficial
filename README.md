@@ -9,7 +9,7 @@ You can use this repo to deploy your own candy machine UI. It supports most of t
 - [pnpm](https://pnpm.io/installation) as package manager - I used 8.1.0
 - [sugar](https://docs.metaplex.com/developer-tools/sugar/guides/sugar-for-cmv3) to create your candy machine
 
-## how to use
+## How to use
 1. Clone this repo
 2. Run `pnpm install`
 3. copy the `./.env.example` to `./.env` and fill in the NEXT_PUBLIC_CANDY_MACHINE_ID value. You should have this value after creating your candy machine with sugar.
