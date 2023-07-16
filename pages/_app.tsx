@@ -11,7 +11,8 @@ import { UmiProvider } from "../utils/UmiProvider";
 
 import "@/styles/globals.css";
 import "@solana/wallet-adapter-react-ui/styles.css";
-import { ChakraProvider, DarkMode } from '@chakra-ui/react'
+import { ChakraProvider } from '@chakra-ui/react'
+import { image, headerText } from 'settings'
 
 
 export default function App({ Component, pageProps }: AppProps) {
@@ -32,6 +33,16 @@ export default function App({ Component, pageProps }: AppProps) {
   );
   return (
     <ChakraProvider>
+      <meta name="description" content="Based on MarkSackerbers work" key="desc" />
+      <meta property="og:title" content={headerText} />
+      <meta
+        property="og:description"
+        content="Based on MarkSackerbers work"
+      />
+      <meta
+        property="og:image"
+        content={image}
+      />
       <WalletProvider wallets={wallets} autoConnect>
         <UmiProvider endpoint={endpoint}>
           <WalletModalProvider>
