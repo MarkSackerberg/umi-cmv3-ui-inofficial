@@ -20,3 +20,7 @@ You can use this repo to deploy your own candy machine UI. It supports most of t
 7. Copy the LUT address that you see in the green success box and paste it into the `./.env` file as the value for `NEXT_PUBLIC_CANDY_MACHINE_CONFIG`
 8. Deploy your Candy Machine e.g. to Vercel or Cloudflare Pages
 Done!
+
+
+# Thank you!
+Thanks to the metaplex team for creating NFTs on Solana, Candy Machine and Umi. Special Thanks to @lorisleiva for creating Umi and being so helpful. Also thanks to @tonyboylehub !
