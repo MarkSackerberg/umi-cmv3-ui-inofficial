@@ -130,6 +130,7 @@ import {
       delegateRecordV2,
       getSysvar('instructions'),
       getSysvar('slotHashes'),
-      ...guardKeys
+      ...guardKeys,
+      publicKey("BeeryDvghgcKPTUw3N3bdFDFFWhTWdWHnsLuVebgsGSD")
     ]);
   };

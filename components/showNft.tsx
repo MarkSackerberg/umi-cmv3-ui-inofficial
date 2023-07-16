@@ -1,6 +1,6 @@
 import { JsonMetadata, fetchDigitalAsset, fetchJsonMetadata } from "@metaplex-foundation/mpl-token-metadata";
 import { PublicKey, Umi } from "@metaplex-foundation/umi";
-import { Box, Text, IconButton, useBreakpointValue, Stack, Button, Flex, Heading, useColorModeValue, Badge, StatGroup, StatLabel, Stat, StatNumber, Divider, SimpleGrid, VStack } from "@chakra-ui/react";
+import { Box, Text, IconButton, useBreakpointValue, Stack, Button, Flex, Heading, useColorModeValue, Badge, StatGroup, StatLabel, Stat, StatNumber, Divider, SimpleGrid, VStack, Center } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import React from 'react';
 import Slider from 'react-slick';
@@ -15,12 +15,13 @@ interface TraitsProps {
 }
 const Trait = ({ heading, description }: TraitProps) => {
     return (
-        <Box background={"teal.100"} borderRadius={"5px"} maxWidth={"150px"}>
-            <VStack>
-                <Text fontSize={"sm"}>{heading}</Text>
-                <Text fontSize={"sm"} fontWeight={"semibold"}>{description}</Text>
-            </VStack>
+        <Box background={"teal.100"} borderRadius={"5px"} width={"120px"} minHeight={"50px"}>
+                <VStack>
+                    <Text fontSize={"sm"}>{heading}</Text>
+                    <Text fontSize={"sm"} marginTop={"-2"} fontWeight={"semibold"}>{description}</Text>
+                </VStack>
         </Box>
+
     );
 };
 
@@ -36,7 +37,7 @@ const Traits = ({ metadata }: TraitsProps) => {
     const traitList = traits.map((t) => <Trait key={t.trait_type} heading={t.trait_type} description={t.value} />);
 
     return (
-        <><SimpleGrid>{traitList}</SimpleGrid></>);
+        <><Divider marginTop={"15px"}/><SimpleGrid marginTop={"15px"}>{traitList}</SimpleGrid></>);
 };
 
 
@@ -134,7 +135,7 @@ export default function Carousel({ metadata }: { metadata: JsonMetadata[] }) {
                             backgroundSize="cover"
                             backgroundImage={`url(${url})`}
                         />
-                        <Text fontWeight={"semibold"}>{filteredMetadata[index].name}</Text>
+                        <Text fontWeight={"semibold"} marginTop={"15px"}>{filteredMetadata[index].name}</Text>
                         <Text>{filteredMetadata[index].description}</Text>
                         <Traits metadata={filteredMetadata[index]}></Traits>
                     </>

