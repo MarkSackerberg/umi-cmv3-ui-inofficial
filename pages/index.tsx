@@ -192,8 +192,8 @@ export default function Home() {
                   <Flex justifyContent="flex-end" marginLeft="auto">
                     <Box background={"teal.100"} borderRadius={"5px"} minWidth={"50px"} minHeight={"50px"} p={2} >
                       <VStack >
-                        <Text fontSize={"sm" }>Minted:</Text>
-                        <Text fontWeight={"semibold"}>{candyMachine ? Number(candyMachine.itemsLoaded - Number(candyMachine.itemsRedeemed)) : "?"}/{candyMachine.itemsLoaded}</Text>
+                        <Text fontSize={"sm" }>Minted NFTs:</Text>
+                        <Text fontWeight={"semibold"}>{Number(candyMachine?.itemsLoaded) - Number(candyMachine?.itemsRedeemed)}/{candyMachine?.itemsLoaded}</Text>
                       </VStack>
                     </Box>
                   </Flex>
