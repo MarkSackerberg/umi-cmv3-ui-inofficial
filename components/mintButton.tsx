@@ -6,7 +6,7 @@ import { mintText } from "../settings";
 import { Box, Button, Flex, HStack, Heading, SimpleGrid, Text, Tooltip, UseToastOptions } from "@chakra-ui/react";
 import { setComputeUnitLimit } from "@metaplex-foundation/mpl-toolbox";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
-import { chooseGuardToUse, routeBuilder, mintArgsBuilder, combineTransactions, GuardList } from "../utils/mintHelper";
+import { chooseGuardToUse, routeBuilder, mintArgsBuilder, combineTransactions, GuardButtonList } from "../utils/mintHelper";
 import { useSolanaTime } from "@/utils/SolanaTimeContext";
 
 const mintClick = async (
@@ -131,7 +131,7 @@ const mintClick = async (
     }
 };
 // new component called timer that calculates the remaining Time based on the bigint solana time and the bigint toTime difference.
-const Timer = ({ solanaTime, toTime }: { solanaTime: bigint, toTime: bigint }) => {
+const Timer = ({ solanaTime, toTime, setCheckEligibility }: { solanaTime: bigint, toTime: bigint, setCheckEligibility:Dispatch<SetStateAction<boolean>> }) => {
     const [remainingTime, setRemainingTime] = useState<bigint>(toTime - solanaTime);
     useEffect(() => {
         const interval = setInterval(() => {
@@ -156,6 +156,9 @@ const Timer = ({ solanaTime, toTime }: { solanaTime: bigint, toTime: bigint }) =
     if (minutes > BigInt(0) || seconds > BigInt(0)) {
         return <Text fontSize="sm" fontWeight="bold">{minutes.toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false })}m {seconds.toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false })}s</Text>;
     }
+    if (remainingTime === BigInt(0)) {
+        setCheckEligibility(true);
+    }
     return <Text></Text>;
 }
 
@@ -169,6 +172,7 @@ type Props = {
     setGuardList: Dispatch<SetStateAction<GuardReturn[]>>;
     setMintsCreated: Dispatch<SetStateAction<PublicKey[]>>;
     onOpen: () => void;
+    setCheckEligibility:Dispatch<SetStateAction<boolean>>;
 };
 
 export function ButtonList({
@@ -181,16 +185,22 @@ export function ButtonList({
     toast,
     setMintsCreated,
     onOpen,
+    setCheckEligibility
 }: Props): JSX.Element {
     const solanaTime = useSolanaTime();
 
     if (!candyMachine || !candyGuard) {
         return <></>;
     }
-
+    // remove duplicates from guardList
+    //fucked up bugfix
+    let filteredGuardlist = guardList.filter((elem, index, self) =>
+        index === self.findIndex((t) => (
+            t.label === elem.label
+        ))
+    )
     // Guard "default" can only be used to mint in case no other guard exists
-    let filteredGuardlist = guardList;
-    if (guardList.length > 1) {
+    if (filteredGuardlist.length > 1) {
         filteredGuardlist = guardList.filter((elem) => elem.label != "default");
     }
     let buttonGuardList = [];
@@ -209,7 +219,7 @@ export function ButtonList({
             }
         }
 
-        let buttonElement: GuardList = {
+        let buttonElement: GuardButtonList = {
             label: guard ? guard.label : "default",
             allowed: guard.allowed,
             header: text
@@ -221,13 +231,12 @@ export function ButtonList({
                 : "buttonLabel missing in mintText.tsx",
             startTime,
             endTime,
+            tooltip: guard.reason
         };
+        console.log(guard.reason)
         buttonGuardList.push(buttonElement);
     }
-    let toolTip = "";
-    if (umi.identity.publicKey === publicKey("11111111111111111111111111111111")) {
-        toolTip = "Please connect your wallet to mint";
-    }
+
     const listItems = buttonGuardList.map((buttonGuard, index) => (
         <Box key={index} marginTop={"20px"}>
             <HStack>
@@ -237,11 +246,11 @@ export function ButtonList({
                 <Flex justifyContent="flex-end" marginLeft="auto">
                     {
                         buttonGuard.endTime > createBigInt(0) && buttonGuard.endTime - solanaTime > createBigInt(0) &&
-                        <><Text fontSize="sm" marginRight={"2"} >Ending in: </Text><Timer toTime={buttonGuard.endTime} solanaTime={solanaTime} /></>
+                        <><Text fontSize="sm" marginRight={"2"} >Ending in: </Text><Timer toTime={buttonGuard.endTime} solanaTime={solanaTime} setCheckEligibility={setCheckEligibility} /></>
                     }
                     {
                         buttonGuard.startTime > createBigInt(0) && buttonGuard.startTime - solanaTime > createBigInt(0) &&
-                        <><Text fontSize="sm" marginRight={"2"} >Starting in: </Text><Timer toTime={buttonGuard.startTime} solanaTime={solanaTime} /></>
+                        <><Text fontSize="sm" marginRight={"2"} >Starting in: </Text><Timer toTime={buttonGuard.startTime} solanaTime={solanaTime} setCheckEligibility={setCheckEligibility}/></>
                     }
                 </Flex>
             </HStack>
@@ -249,7 +258,7 @@ export function ButtonList({
                 <Text pt='2' fontSize='sm'>
                     {buttonGuard.mintText}
                 </Text>
-                <Tooltip label={toolTip} aria-label="Mint button">
+                <Tooltip label={buttonGuard.tooltip} aria-label="Mint button">
 
                     <Button
                         onClick={() =>
