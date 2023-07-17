@@ -8,10 +8,10 @@ import dynamic from "next/dynamic";
 import Head from "next/head";
 import { useEffect, useMemo, useState } from "react";
 import { useUmi } from "../utils/useUmi";
-import { fetchCandyMachine, safeFetchCandyGuard, CandyGuard, CandyMachine, CmHiddenSettingsDoNotHaveConfigLinesError, GuardSet } from "@metaplex-foundation/mpl-candy-machine"
+import { fetchCandyMachine, safeFetchCandyGuard, CandyGuard, CandyMachine } from "@metaplex-foundation/mpl-candy-machine"
 import styles from "../styles/Home.module.css";
 import { guardChecker } from "../utils/checkAllowed";
-import { Center, Card, CardHeader, CardBody, StackDivider, Heading, Stack, useToast, Text, Skeleton, useDisclosure, Button, Modal, ModalBody, ModalCloseButton, ModalContent, Image, ModalHeader, ModalOverlay, Box, Divider, HStack, VStack, Flex } from '@chakra-ui/react';
+import { Center, Card, CardHeader, CardBody, StackDivider, Heading, Stack, useToast, Text, Skeleton, useDisclosure, Button, Modal, ModalBody, ModalCloseButton, ModalContent, Image, ModalHeader, ModalOverlay, Box, Divider, VStack, Flex } from '@chakra-ui/react';
 import { ButtonList } from "../components/mintButton";
 import { GuardReturn } from "../utils/checkerHelper";
 import { ShowNft } from "../components/showNft";

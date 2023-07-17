@@ -1,12 +1,11 @@
 import { CandyGuard, CandyMachine, mintV2 } from "@metaplex-foundation/mpl-candy-machine";
-import { GuardReturn, getSolanaTime } from "../utils/checkerHelper";
-import { PublicKey, Umi, createBigInt, dateTime, formatDateTime, generateSigner, none, now, publicKey, some, transactionBuilder } from "@metaplex-foundation/umi";
+import { GuardReturn } from "../utils/checkerHelper";
+import { PublicKey, Umi, createBigInt, generateSigner, none, publicKey, some, transactionBuilder } from "@metaplex-foundation/umi";
 import { DigitalAssetWithToken } from "@metaplex-foundation/mpl-token-metadata";
 import { mintText } from "../settings";
-import { Box, Button, Divider, Flex, HStack, Heading, SimpleGrid, Text, Tooltip, UseToastOptions, VStack } from "@chakra-ui/react";
+import { Box, Button, Flex, HStack, Heading, SimpleGrid, Text, Tooltip, UseToastOptions } from "@chakra-ui/react";
 import { setComputeUnitLimit } from "@metaplex-foundation/mpl-toolbox";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
-import { IsMinting } from "../pages";
 import { chooseGuardToUse, routeBuilder, mintArgsBuilder, combineTransactions, GuardList } from "../utils/mintHelper";
 import { useSolanaTime } from "@/utils/SolanaTimeContext";
 
