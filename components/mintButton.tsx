@@ -224,7 +224,6 @@ export function ButtonList({
         };
         buttonGuardList.push(buttonElement);
     }
-
     let toolTip = "";
     if (umi.identity.publicKey === publicKey("11111111111111111111111111111111")) {
         toolTip = "Please connect your wallet to mint";
@@ -237,12 +236,12 @@ export function ButtonList({
                 </Heading>
                 <Flex justifyContent="flex-end" marginLeft="auto">
                     {
-                        buttonGuard.endTime > createBigInt(0) && solanaTime - buttonGuard.endTime > createBigInt(0) &&
-                        <Timer toTime={buttonGuard.endTime} solanaTime={solanaTime} />
+                        buttonGuard.endTime > createBigInt(0) && buttonGuard.endTime - solanaTime > createBigInt(0) &&
+                        <><Text fontSize="sm" marginRight={"2"} >Ending in: </Text><Timer toTime={buttonGuard.endTime} solanaTime={solanaTime} /></>
                     }
                     {
                         buttonGuard.startTime > createBigInt(0) && buttonGuard.startTime - solanaTime > createBigInt(0) &&
-                        <Timer toTime={buttonGuard.startTime} solanaTime={solanaTime} />
+                        <><Text fontSize="sm" marginRight={"2"} >Starting in: </Text><Timer toTime={buttonGuard.startTime} solanaTime={solanaTime} /></>
                     }
                 </Flex>
             </HStack>
