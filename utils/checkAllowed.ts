@@ -102,19 +102,6 @@ export const guardChecker = async (
   for (const eachGuard of guardsToCheck) {
     const singleGuard = eachGuard.guards;
     if (singleGuard.addressGate.__option === "Some") {
-      //generate and print merkleRoot in case the guardlabel is present in allowlist.tsx but not assigned
-      if (umi.identity.publicKey === candyMachine.authority) {
-        const allowlist = allowLists.get(eachGuard.label);
-        if (allowlist) {
-          console.log(
-            `add this merkleRoot to your candy guard config! ${getMerkleRoot(
-              allowlist
-              //@ts-ignore
-            ).toString("hex")}`
-          );
-        }
-      }
-
       const addressGate = singleGuard.addressGate as Some<AddressGate>;
       if (
         !addressGateChecker(
