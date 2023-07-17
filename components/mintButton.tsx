@@ -156,6 +156,7 @@ const Timer = ({ solanaTime, toTime }: { solanaTime: bigint, toTime: bigint }) =
     if (minutes > BigInt(0) || seconds > BigInt(0)) {
         return <Text fontSize="sm" fontWeight="bold">{minutes.toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false })}m {seconds.toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false })}s</Text>;
     }
+    return <Text></Text>;
 }
 
 type Props = {
