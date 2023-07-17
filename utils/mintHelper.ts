@@ -31,12 +31,13 @@ import {
 } from "@metaplex-foundation/mpl-toolbox";
 import { UseToastOptions } from "@chakra-ui/react";
 
-export interface GuardList extends GuardReturn {
+export interface GuardButtonList extends GuardReturn {
   header: string;
   mintText: string;
   buttonLabel: string;
   startTime: bigint;
   endTime: bigint;
+  tooltip?: string;
 }
 
 export const chooseGuardToUse = (
