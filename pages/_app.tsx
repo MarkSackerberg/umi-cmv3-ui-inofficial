@@ -44,7 +44,7 @@ export default function App({ Component, pageProps }: AppProps) {
         property="og:image"
         content={image}
       />
-      <WalletProvider wallets={wallets} autoConnect>
+      <WalletProvider wallets={wallets}>
         <UmiProvider endpoint={endpoint}>
           <WalletModalProvider>
             <SolanaTimeProvider>
