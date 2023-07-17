@@ -9,7 +9,7 @@ Visible to the user:
 Visible to the admin:
 ![image](https://github.com/MarkSackerberg/umi-cmv3-ui-inofficial/assets/93528482/560f29bd-3d25-411a-b099-9609820ca223)
 
-## What does this repo support?
+# What does this repo support?
 You can use this repo to deploy your own candy machine UI. 
 - It supports multiple candy machine groups, but also just using a default group
 - It creates a Lookup table for you to allow more active guards at the same time
@@ -18,6 +18,7 @@ You can use this repo to deploy your own candy machine UI.
 - It supports most of the existing guards
 ...
 
+# How to use
 ## Prerequisites
 - [pnpm](https://pnpm.io/installation) as package manager - I used 8.1.0
 - [sugar](https://docs.metaplex.com/developer-tools/sugar/guides/sugar-for-cmv3) to create your candy machine
