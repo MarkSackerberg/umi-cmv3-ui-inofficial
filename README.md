@@ -1,3 +1,5 @@
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://makeapullrequest.com)
+
 # Deploy your own Candy Machine easily
 This repository is for Candy Machine V3, Account Version V2. (This is what you have when using the latest sugar version to create the candy machine)
 
