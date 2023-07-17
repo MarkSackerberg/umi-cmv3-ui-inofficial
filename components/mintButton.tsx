@@ -233,7 +233,6 @@ export function ButtonList({
             endTime,
             tooltip: guard.reason
         };
-        console.log(guard.reason)
         buttonGuardList.push(buttonElement);
     }
 

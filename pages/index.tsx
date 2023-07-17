@@ -253,7 +253,7 @@ export default function Home() {
             </Center>
             <Modal isOpen={isInitializerOpen} onClose={onInitializerClose}>
               <ModalOverlay />
-              <ModalContent>
+              <ModalContent maxW="600px">
                 <ModalHeader>Initializer</ModalHeader>
                 <ModalCloseButton />
                 <ModalBody>
