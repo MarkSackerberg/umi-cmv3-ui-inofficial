@@ -76,9 +76,20 @@ export const guardChecker = async (
 
   let solBalance: SolAmount = sol(0);
   if (checkSolBalanceRequired(guardsToCheck)) {
-    const account = await umi.rpc.getAccount(umi.identity.publicKey);
-    assertAccountExists(account);
-    solBalance = account.lamports;
+    try {
+      const account = await umi.rpc.getAccount(umi.identity.publicKey);
+      assertAccountExists(account);
+      solBalance = account.lamports;
+    } catch (e) {
+      for (const eachGuard of guardsToCheck) {
+        guardReturn.push({
+          label: eachGuard.label,
+          allowed: false,
+          reason: "Wallet does not exist. Do you have SOL?",
+        });
+      }
+      return { guardReturn, ownedNfts: ownedTokens };
+    }
   }
 
   if (checkTokensRequired(guardsToCheck)) {
