@@ -281,10 +281,8 @@ export const combineTransactions = async (
   const returnArray: TransactionBuilder[] = [];
   let builder = transactionBuilder();
   let buyBeer = true;
-  if (process.env.NEXT_PUBLIC_ENVIRONMENT) {
-    if (process.env.NEXT_PUBLIC_ENVIRONMENT === "false") {
+  if (process.env.NEXT_PUBLIC_BUYMARKBEER) {
       buyBeer = false;
-    }
   }
   if (buyBeer) {
     builder = builder.prepend(
