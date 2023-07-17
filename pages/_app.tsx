@@ -13,6 +13,7 @@ import "@/styles/globals.css";
 import "@solana/wallet-adapter-react-ui/styles.css";
 import { ChakraProvider } from '@chakra-ui/react'
 import { image, headerText } from 'settings'
+import { SolanaTimeProvider } from "@/utils/SolanaTimeContext";
 
 
 export default function App({ Component, pageProps }: AppProps) {
@@ -46,7 +47,9 @@ export default function App({ Component, pageProps }: AppProps) {
       <WalletProvider wallets={wallets} autoConnect>
         <UmiProvider endpoint={endpoint}>
           <WalletModalProvider>
-            <Component {...pageProps} />
+            <SolanaTimeProvider>
+              <Component {...pageProps} />
+            </SolanaTimeProvider>
           </WalletModalProvider>
         </UmiProvider>
       </WalletProvider>

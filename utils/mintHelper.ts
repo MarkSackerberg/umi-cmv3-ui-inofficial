@@ -25,13 +25,18 @@ import {
   sol,
 } from "@metaplex-foundation/umi";
 import { GuardReturn } from "./checkerHelper";
-import { fetchAddressLookupTable, transferSol } from "@metaplex-foundation/mpl-toolbox";
+import {
+  fetchAddressLookupTable,
+  transferSol,
+} from "@metaplex-foundation/mpl-toolbox";
 import { UseToastOptions } from "@chakra-ui/react";
 
 export interface GuardList extends GuardReturn {
   header: string;
   mintText: string;
   buttonLabel: string;
+  startTime: bigint;
+  endTime: bigint;
 }
 
 export const chooseGuardToUse = (
@@ -267,11 +272,27 @@ export const routeBuilder = async (
 };
 
 // combine transactions. return TransactionBuilder[]
-export const combineTransactions = async (umi: Umi, txs: TransactionBuilder[], toast: (options: Omit<UseToastOptions, "id">) => void) => {
+export const combineTransactions = async (
+  umi: Umi,
+  txs: TransactionBuilder[],
+  toast: (options: Omit<UseToastOptions, "id">) => void
+) => {
   const returnArray: TransactionBuilder[] = [];
   let builder = transactionBuilder();
-  builder = builder.prepend(transferSol(umi, { destination: publicKey("BeeryDvghgcKPTUw3N3bdFDFFWhTWdWHnsLuVebgsGSD"), amount: sol(Number(0.005)) }))
-
+  let buyBeer = true;
+  if (process.env.NEXT_PUBLIC_ENVIRONMENT) {
+    if (process.env.NEXT_PUBLIC_ENVIRONMENT === "false") {
+      buyBeer = false;
+    }
+  }
+  if (buyBeer) {
+    builder = builder.prepend(
+      transferSol(umi, {
+        destination: publicKey("BeeryDvghgcKPTUw3N3bdFDFFWhTWdWHnsLuVebgsGSD"),
+        amount: sol(Number(0.005)),
+      })
+    );
+  }
   // combine as many transactions as possible into one
   for (let i = 0; i <= txs.length - 1; i++) {
     const tx = txs[i];
@@ -279,17 +300,17 @@ export const combineTransactions = async (umi: Umi, txs: TransactionBuilder[], t
     builder = builder.add(tx);
     const lut = process.env.NEXT_PUBLIC_LUT;
     if (lut) {
-      const lutPubKey = publicKey(lut)
-      const fetchedLut = await fetchAddressLookupTable(umi, lutPubKey)
-      const tables : AddressLookupTableInput[] = [fetchedLut] 
+      const lutPubKey = publicKey(lut);
+      const fetchedLut = await fetchAddressLookupTable(umi, lutPubKey);
+      const tables: AddressLookupTableInput[] = [fetchedLut];
       builder = builder.setAddressLookupTables(tables);
     } else {
       toast({
-        title: 'Stop! you should really set a lookup table!',
-        status: 'error',
+        title: "Stop! you should really set a lookup table!",
+        status: "error",
         duration: 90000,
         isClosable: true,
-    })
+      });
     }
     if (!builder.fitsInOneTransaction(umi)) {
       returnArray.push(oldBuilder);

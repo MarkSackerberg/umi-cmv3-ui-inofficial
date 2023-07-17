@@ -46,7 +46,8 @@ import {
 export const guardChecker = async (
   umi: Umi,
   candyGuard: CandyGuard,
-  candyMachine: CandyMachine
+  candyMachine: CandyMachine,
+  solanaTime: bigint,
 ) => {
   let guardReturn: GuardReturn[] = [];
   let ownedTokens: DigitalAssetWithToken[] = [];
@@ -65,12 +66,6 @@ export const guardChecker = async (
       guardReturn.push({ label: eachGuard.label, allowed: false });
     }
     return { guardReturn, ownedNfts: ownedTokens };
-  }
-
-  // get as much required data upfront as possible
-  let solanaTime = BigInt(0);
-  if (checkDateRequired(guardsToCheck)) {
-    solanaTime = await getSolanaTime(umi);
   }
 
   let solBalance: SolAmount = sol(0);

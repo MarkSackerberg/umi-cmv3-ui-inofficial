@@ -8,7 +8,7 @@ import dynamic from "next/dynamic";
 import Head from "next/head";
 import { useEffect, useMemo, useState } from "react";
 import { useUmi } from "../utils/useUmi";
-import { fetchCandyMachine, safeFetchCandyGuard, CandyGuard, CandyMachine, CmHiddenSettingsDoNotHaveConfigLinesError } from "@metaplex-foundation/mpl-candy-machine"
+import { fetchCandyMachine, safeFetchCandyGuard, CandyGuard, CandyMachine, CmHiddenSettingsDoNotHaveConfigLinesError, GuardSet } from "@metaplex-foundation/mpl-candy-machine"
 import styles from "../styles/Home.module.css";
 import { guardChecker } from "../utils/checkAllowed";
 import { Center, Card, CardHeader, CardBody, StackDivider, Heading, Stack, useToast, Text, Skeleton, useDisclosure, Button, Modal, ModalBody, ModalCloseButton, ModalContent, Image, ModalHeader, ModalOverlay, Box, Divider, HStack, VStack, Flex } from '@chakra-ui/react';
@@ -17,6 +17,7 @@ import { GuardReturn } from "../utils/checkerHelper";
 import { ShowNft } from "../components/showNft";
 import { InitializeModal } from "../components/initializeModal";
 import { image, headerText } from "../settings";
+import { useSolanaTime } from "@/utils/SolanaTimeContext";
 
 const WalletMultiButtonDynamic = dynamic(
   async () =>
@@ -98,13 +99,13 @@ export interface IsMinting {
 
 export default function Home() {
   const umi = useUmi();
+  const solanaTime = useSolanaTime();
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { isOpen: isInitializerOpen, onOpen: onInitializerOpen, onClose: onInitializerClose } = useDisclosure();
   const [mintsCreated, setMintsCreated] = useState<PublicKey[]>([publicKey("11111111111111111111111111111111")]);
   const [isAllowed, setIsAllowed] = useState<boolean>(false);
   const [loading, setLoading] = useState(true);
-  const [isMinting, setIsMinting] = useState<IsMinting[]>([{ label: "default", minting: false }]);
   const [ownedTokens, setOwnedTokens] = useState<DigitalAssetWithToken[]>();
   const [guards, setGuards] = useState<GuardReturn[]>([
     { label: "startDefault", allowed: false },
@@ -149,7 +150,7 @@ export default function Home() {
       }
 
       const { guardReturn, ownedTokens } = await guardChecker(
-        umi, candyGuard, candyMachine
+        umi, candyGuard, candyMachine, solanaTime
       );
 
       setOwnedTokens(ownedTokens);
@@ -169,7 +170,7 @@ export default function Home() {
     };
 
     checkEligibility();
-  }, [candyMachine, candyGuard, umi]);
+  }, [candyMachine, candyGuard, umi, solanaTime]);
 
   const PageContent = () => {
 
@@ -232,8 +233,7 @@ export default function Home() {
                   umi={umi}
                   ownedTokens={ownedTokens}
                   toast={toast}
-                  setIsMinting={setIsMinting}
-                  isMinting={isMinting}
+                  setGuardList={setGuards}
                   setMintsCreated={setMintsCreated}
                   onOpen={onOpen}
                 />

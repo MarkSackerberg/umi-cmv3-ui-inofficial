@@ -1,15 +1,14 @@
 import { CandyGuard, CandyMachine, mintV2 } from "@metaplex-foundation/mpl-candy-machine";
-import { GuardReturn } from "../utils/checkerHelper";
-import { PublicKey, Umi, generateSigner, none, publicKey, some, transactionBuilder } from "@metaplex-foundation/umi";
+import { GuardReturn, getSolanaTime } from "../utils/checkerHelper";
+import { PublicKey, Umi, createBigInt, dateTime, formatDateTime, generateSigner, none, now, publicKey, some, transactionBuilder } from "@metaplex-foundation/umi";
 import { DigitalAssetWithToken } from "@metaplex-foundation/mpl-token-metadata";
 import { mintText } from "../settings";
-import { Box, Button, Divider, Heading, SimpleGrid, Text, Tooltip, UseToastOptions } from "@chakra-ui/react";
+import { Box, Button, Divider, Flex, HStack, Heading, SimpleGrid, Text, Tooltip, UseToastOptions, VStack } from "@chakra-ui/react";
 import { setComputeUnitLimit } from "@metaplex-foundation/mpl-toolbox";
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { IsMinting } from "../pages";
 import { chooseGuardToUse, routeBuilder, mintArgsBuilder, combineTransactions, GuardList } from "../utils/mintHelper";
-
-
+import { useSolanaTime } from "@/utils/SolanaTimeContext";
 
 const mintClick = async (
     umi: Umi,
@@ -18,8 +17,9 @@ const mintClick = async (
     candyGuard: CandyGuard,
     ownedTokens: DigitalAssetWithToken[],
     toast: (options: Omit<UseToastOptions, "id">) => void,
-    setIsMinting: Dispatch<SetStateAction<IsMinting[]>>,
     setMintsCreated: Dispatch<SetStateAction<PublicKey[]>>,
+    guardList: GuardReturn[],
+    setGuardList: Dispatch<SetStateAction<GuardReturn[]>>,
     onOpen: () => void
 ) => {
     const guardToUse = chooseGuardToUse(guard, candyGuard);
@@ -28,16 +28,15 @@ const mintClick = async (
         return;
     }
     try {
-        setIsMinting((prev) => {
-            const newIsMinting = [...prev];
-            const index = newIsMinting.findIndex((el) => el.label === guardToUse.label);
-            if (index !== -1) {
-                newIsMinting[index].minting = true;
-            } else {
-                newIsMinting.push({ label: guardToUse.label, minting: true });
-            }
-            return newIsMinting;
-        });
+        //find the guard by guardToUse.label and set minting to true
+        const guardIndex = guardList.findIndex((g) => g.label === guardToUse.label);
+        if (guardIndex === -1) {
+            console.error("guard not found");
+            return;
+        }
+        const newGuardList = [...guardList];
+        newGuardList[guardIndex].minting = true;
+        setGuardList(newGuardList);
 
         let routeBuild = await routeBuilder(umi, guardToUse, candyMachine);
         if (!routeBuild) {
@@ -121,19 +120,43 @@ const mintClick = async (
             isClosable: true,
         })
     } finally {
-        //set the minting state for the guard to true
-        setIsMinting((prev) => {
-            const newIsMinting = [...prev];
-            const index = newIsMinting.findIndex((el) => el.label === guardToUse.label);
-            if (index !== -1) {
-                newIsMinting[index].minting = false;
-            } else {
-                newIsMinting.push({ label: guardToUse.label, minting: false });
-            }
-            return newIsMinting;
-        });
+        //find the guard by guardToUse.label and set minting to true
+        const guardIndex = guardList.findIndex((g) => g.label === guardToUse.label);
+        if (guardIndex === -1) {
+            console.error("guard not found");
+            return;
+        }
+        const newGuardList = [...guardList];
+        newGuardList[guardIndex].minting = false;
+        setGuardList(newGuardList);
     }
 };
+// new component called timer that calculates the remaining Time based on the bigint solana time and the bigint toTime difference.
+const Timer = ({ solanaTime, toTime }: { solanaTime: bigint, toTime: bigint }) => {
+    const [remainingTime, setRemainingTime] = useState<bigint>(toTime - solanaTime);
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setRemainingTime((prev) => {
+                return prev - BigInt(1);
+            });
+        }, 1000);
+        return () => clearInterval(interval);
+    }, []);
+
+    //convert the remaining time in seconds to the amount of days, hours, minutes and seconds left
+    const days = remainingTime / BigInt(86400);
+    const hours = (remainingTime % BigInt(86400)) / BigInt(3600);
+    const minutes = (remainingTime % BigInt(3600)) / BigInt(60);
+    const seconds = remainingTime % BigInt(60);
+    console.log(days.toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false }), hours.toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false }), minutes.toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false }), seconds.toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false }))
+    if (days > BigInt(0)) {
+        return <Text fontSize="sm" fontWeight="bold">{days.toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false })}d {hours.toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false })}h {minutes.toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false })}m {seconds.toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false })}s</Text>;
+    }
+    if (hours > BigInt(0)) {
+        return <Text fontSize="sm" fontWeight="bold">{hours.toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false })}h {minutes.toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false })}m {seconds.toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false })}s</Text>;
+    }
+    return <Text fontSize="sm" fontWeight="bold">{minutes.toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false })}m {seconds.toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false })}s</Text>;
+}
 
 type Props = {
     umi: Umi;
@@ -142,8 +165,7 @@ type Props = {
     candyGuard: CandyGuard | undefined;
     ownedTokens: DigitalAssetWithToken[] | undefined;
     toast: (options: Omit<UseToastOptions, "id">) => void;
-    setIsMinting: Dispatch<SetStateAction<IsMinting[]>>;
-    isMinting: IsMinting[];
+    setGuardList: Dispatch<SetStateAction<GuardReturn[]>>;
     setMintsCreated: Dispatch<SetStateAction<PublicKey[]>>;
     onOpen: () => void;
 };
@@ -154,12 +176,13 @@ export function ButtonList({
     candyMachine,
     candyGuard,
     ownedTokens = [], // provide default empty array
+    setGuardList,
     toast,
-    setIsMinting,
-    isMinting,
     setMintsCreated,
-    onOpen
+    onOpen,
 }: Props): JSX.Element {
+    const solanaTime = useSolanaTime();
+
     if (!candyMachine || !candyGuard) {
         return <></>;
     }
@@ -172,6 +195,19 @@ export function ButtonList({
     let buttonGuardList = [];
     for (const guard of filteredGuardlist) {
         const text = mintText.find((elem) => elem.label === guard.label);
+        // find guard by label in candyGuard
+        const group = candyGuard.groups.find((elem) => elem.label === guard.label);
+        let startTime = createBigInt(0);
+        let endTime = createBigInt(0);
+        if (group) {
+            if (group.guards.startDate.__option === "Some") {
+                startTime = group.guards.startDate.value.date
+            }
+            if (group.guards.endDate.__option === "Some") {
+                endTime = group.guards.endDate.value.date
+            }
+        }
+
         let buttonElement: GuardList = {
             label: guard ? guard.label : "default",
             allowed: guard.allowed,
@@ -182,64 +218,68 @@ export function ButtonList({
             buttonLabel: text
                 ? text.buttonLabel
                 : "buttonLabel missing in mintText.tsx",
+            startTime,
+            endTime,
         };
         buttonGuardList.push(buttonElement);
-        // add isMinting state for each button if it doesn't exist yet
-        setIsMinting((prev) => {
-            if (prev.find((elem) => elem.label === buttonElement.label)) {
-                return prev;
-            } else {
-                return [...prev, { label: buttonElement.label, minting: false }];
-            }
-        });
     }
 
-    //TODO: Placeholder for start + end time?
     let toolTip = "";
     if (umi.identity.publicKey === publicKey("11111111111111111111111111111111")) {
         toolTip = "Please connect your wallet to mint";
     }
-    const listItems = buttonGuardList.map((buttonGuard) => (
-        <>
-            <Box key={buttonGuard.buttonLabel} marginTop={"20px"}>
+    const listItems = buttonGuardList.map((buttonGuard, index) => (
+        <Box key={index} marginTop={"20px"}>
+            <HStack>
                 <Heading size='xs' textTransform='uppercase'>
                     {buttonGuard.header}
                 </Heading>
-                <SimpleGrid columns={2} spacing={5}>
-                    <Text pt='2' fontSize='sm'>
-                        {buttonGuard.mintText}
-                    </Text>
-                    <Tooltip label={toolTip} aria-label="Mint button">
+                <Flex justifyContent="flex-end" marginLeft="auto">
+                    {
+                        buttonGuard.endTime > createBigInt(0) && solanaTime - buttonGuard.endTime > createBigInt(0) &&
+                        <Timer toTime={buttonGuard.endTime} solanaTime={solanaTime} />
+                    }
+                    {
+                        buttonGuard.startTime > createBigInt(0) && buttonGuard.startTime - solanaTime > createBigInt(0) &&
+                        <Timer toTime={buttonGuard.startTime} solanaTime={solanaTime} />
+                    }
+                </Flex>
+            </HStack>
+            <SimpleGrid columns={2} spacing={5}>
+                <Text pt='2' fontSize='sm'>
+                    {buttonGuard.mintText}
+                </Text>
+                <Tooltip label={toolTip} aria-label="Mint button">
 
-                        <Button
-                            onClick={() =>
-                                mintClick(
-                                    umi,
-                                    buttonGuard,
-                                    candyMachine,
-                                    candyGuard,
-                                    ownedTokens,
-                                    toast,
-                                    setIsMinting,
-                                    setMintsCreated,
-                                    onOpen
-                                )
-                            }
-                            key={buttonGuard.label}
-                            size="sm"
-                            backgroundColor="teal.100"
-                            isDisabled={!buttonGuard.allowed}
-                            isLoading={
-                                isMinting.find((elem) => elem.label === buttonGuard.label)?.minting
-                            }
-                        >
-                            {buttonGuard.buttonLabel}
-                        </Button>
-                    </Tooltip>
+                    <Button
+                        onClick={() =>
+                            mintClick(
+                                umi,
+                                buttonGuard,
+                                candyMachine,
+                                candyGuard,
+                                ownedTokens,
+                                toast,
+                                setMintsCreated,
+                                guardList,
+                                setGuardList,
+                                onOpen
+                            )
+                        }
+                        key={buttonGuard.label}
+                        size="sm"
+                        backgroundColor="teal.100"
+                        isDisabled={!buttonGuard.allowed}
+                        isLoading={
+                            guardList.find((elem) => elem.label === buttonGuard.label)?.minting
+                        }
+                    >
+                        {buttonGuard.buttonLabel}
+                    </Button>
+                </Tooltip>
 
-                </SimpleGrid>
-            </Box>
-        </>
+            </SimpleGrid>
+        </Box>
     ));
 
     return <>{listItems}</>;
