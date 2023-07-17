@@ -147,14 +147,15 @@ const Timer = ({ solanaTime, toTime }: { solanaTime: bigint, toTime: bigint }) =
     const hours = (remainingTime % BigInt(86400)) / BigInt(3600);
     const minutes = (remainingTime % BigInt(3600)) / BigInt(60);
     const seconds = remainingTime % BigInt(60);
-    console.log(days.toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false }), hours.toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false }), minutes.toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false }), seconds.toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false }))
     if (days > BigInt(0)) {
         return <Text fontSize="sm" fontWeight="bold">{days.toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false })}d {hours.toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false })}h {minutes.toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false })}m {seconds.toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false })}s</Text>;
     }
     if (hours > BigInt(0)) {
         return <Text fontSize="sm" fontWeight="bold">{hours.toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false })}h {minutes.toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false })}m {seconds.toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false })}s</Text>;
     }
-    return <Text fontSize="sm" fontWeight="bold">{minutes.toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false })}m {seconds.toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false })}s</Text>;
+    if (minutes > BigInt(0) || seconds > BigInt(0)) {
+        return <Text fontSize="sm" fontWeight="bold">{minutes.toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false })}m {seconds.toLocaleString('en-US', { minimumIntegerDigits: 2, useGrouping: false })}s</Text>;
+    }
 }
 
 type Props = {
