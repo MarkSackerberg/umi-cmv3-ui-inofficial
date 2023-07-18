@@ -4,6 +4,7 @@ import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
 import {
   BackpackWalletAdapter,
   SolflareWalletAdapter,
+  PhantomWalletAdapter,
 } from "@solana/wallet-adapter-wallets";
 import type { AppProps } from "next/app";
 import Head from "next/head";
@@ -28,6 +29,7 @@ export default function App({ Component, pageProps }: AppProps) {
   const wallets = useMemo(
     () => [
       new SolflareWalletAdapter({ network }),
+       new PhantomWalletAdapter(),
       new BackpackWalletAdapter(),
     ],
     [network]
