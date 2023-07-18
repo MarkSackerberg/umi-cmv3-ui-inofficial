@@ -55,7 +55,6 @@ const settings = {
 };
 
 export default function Carousel({ metadata }: { metadata: JsonMetadata[] }) {
-    console.log(metadata)
     // As we have used custom buttons, we need a reference variable to
     // change the state
     const [slider, setSlider] = React.useState<Slider | null>(null);
@@ -73,7 +72,6 @@ export default function Carousel({ metadata }: { metadata: JsonMetadata[] }) {
 
     // push all the image urls from metadata in an array. If it exists use animation_url instead
     const cards = filteredMetadata.map((m) => m.animation_url || m.image);
-    console.log(cards)
 
     return (
         <Box
@@ -176,7 +174,6 @@ export const ShowNft = ({ umi, nfts }: Props) => {
                     }
                     return newOffChainMetadata;
                 });
-                console.log(jsonMetadata)
                 setMetadataVersion((prev) => prev + 1);
             }
 

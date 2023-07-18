@@ -174,7 +174,7 @@ export default function Home() {
     };
 
     checkEligibility();
-  }, [candyMachine, candyGuard, umi, solanaTime]);
+  }, [candyMachine, candyGuard, umi, solanaTime, checkEligibility]);
 
   const PageContent = () => {
 

@@ -19,7 +19,8 @@ const mintClick = async (
     setMintsCreated: Dispatch<SetStateAction<PublicKey[]>>,
     guardList: GuardReturn[],
     setGuardList: Dispatch<SetStateAction<GuardReturn[]>>,
-    onOpen: () => void
+    onOpen: () => void,
+    setCheckEligibility: Dispatch<SetStateAction<boolean>>
 ) => {
     const guardToUse = chooseGuardToUse(guard, candyGuard);
     if (!guardToUse.guards) {
@@ -128,6 +129,7 @@ const mintClick = async (
         const newGuardList = [...guardList];
         newGuardList[guardIndex].minting = false;
         setGuardList(newGuardList);
+        setCheckEligibility(true)
     }
 };
 // new component called timer that calculates the remaining Time based on the bigint solana time and the bigint toTime difference.
@@ -271,7 +273,8 @@ export function ButtonList({
                                 setMintsCreated,
                                 guardList,
                                 setGuardList,
-                                onOpen
+                                onOpen,
+                                setCheckEligibility
                             )
                         }
                         key={buttonGuard.label}
