@@ -20,6 +20,8 @@ import { DigitalAssetWithToken } from "@metaplex-foundation/mpl-token-metadata";
 export interface GuardReturn {
   label: string;
   allowed: boolean;
+  minting?: boolean;
+  reason?: string;
 }
 
 export const addressGateChecker = (wallet: PublicKey, address: PublicKey) => {

@@ -6,9 +6,9 @@ import {
 import { DigitalAssetWithToken } from "@metaplex-foundation/mpl-token-metadata";
 import dynamic from "next/dynamic";
 import Head from "next/head";
-import { useEffect, useMemo, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react";
 import { useUmi } from "../utils/useUmi";
-import { fetchCandyMachine, safeFetchCandyGuard, CandyGuard, CandyMachine, CmHiddenSettingsDoNotHaveConfigLinesError } from "@metaplex-foundation/mpl-candy-machine"
+import { fetchCandyMachine, safeFetchCandyGuard, CandyGuard, CandyMachine } from "@metaplex-foundation/mpl-candy-machine"
 import styles from "../styles/Home.module.css";
 import { guardChecker } from "../utils/checkAllowed";
 import { Center, Card, CardHeader, CardBody, StackDivider, Heading, Stack, useToast, Text, Skeleton, useDisclosure, Button, Modal, ModalBody, ModalCloseButton, ModalContent, Image, ModalHeader, ModalOverlay, Box, Divider, HStack, VStack, Flex } from '@chakra-ui/react';
@@ -17,6 +17,7 @@ import { GuardReturn } from "../utils/checkerHelper";
 import { ShowNft } from "../components/showNft";
 import { InitializeModal } from "../components/initializeModal";
 import { image, headerText } from "../settings";
+import { useSolanaTime } from "@/utils/SolanaTimeContext";
 
 const WalletMultiButtonDynamic = dynamic(
   async () =>
@@ -24,7 +25,7 @@ const WalletMultiButtonDynamic = dynamic(
   { ssr: false }
 );
 
-const useCandyMachine = (umi: Umi, candyMachineId: string) => {
+const useCandyMachine = (umi: Umi, candyMachineId: string, checkEligibility: boolean, setCheckEligibility: Dispatch<SetStateAction<boolean>>) => {
   const [candyMachine, setCandyMachine] = useState<CandyMachine>();
   const [candyGuard, setCandyGuard] = useState<CandyGuard>();
   const toast = useToast();
@@ -32,59 +33,62 @@ const useCandyMachine = (umi: Umi, candyMachineId: string) => {
 
   useEffect(() => {
     (async () => {
-      if (!candyMachineId) {
-        console.error("No candy machine in .env!");
-        if (!toast.isActive("no-cm")) {
+      if (checkEligibility) {
+        if (!candyMachineId) {
+          console.error("No candy machine in .env!");
+          if (!toast.isActive("no-cm")) {
+            toast({
+              id: "no-cm",
+              title: "No candy machine in .env!",
+              description: "Add your candy machine address to the .env file!",
+              status: "error",
+              duration: 999999,
+              isClosable: true,
+            });
+          }
+          return;
+        }
+
+        let candyMachine;
+        try {
+          candyMachine = await fetchCandyMachine(umi, publicKey(candyMachineId));
+        } catch (e) {
+          console.error(e);
           toast({
-            id: "no-cm",
-            title: "No candy machine in .env!",
-            description: "Add your candy machine address to the .env file!",
+            id: "no-cm-found",
+            title: "The CM from .env is invalid",
+            description: "Are you using the correct environment?",
             status: "error",
             duration: 999999,
             isClosable: true,
           });
         }
-        return;
+        setCandyMachine(candyMachine);
+        if (!candyMachine) {
+          return;
+        }
+        let candyGuard;
+        try {
+          candyGuard = await safeFetchCandyGuard(umi, candyMachine.mintAuthority);
+        } catch (e) {
+          console.error(e);
+          toast({
+            id: "no-guard-found",
+            title: "No Candy Guard found!",
+            description: "Do you have one assigned?",
+            status: "error",
+            duration: 999999,
+            isClosable: true,
+          });
+        }
+        if (!candyGuard) {
+          return;
+        }
+        setCandyGuard(candyGuard);
+        setCheckEligibility(false)
       }
-
-      let candyMachine;
-      try {
-        candyMachine = await fetchCandyMachine(umi, publicKey(candyMachineId));
-      } catch (e) {
-        console.error(e);
-        toast({
-          id: "no-cm-found",
-          title: "The CM from .env is invalid",
-          description: "Are you using the correct environment?",
-          status: "error",
-          duration: 999999,
-          isClosable: true,
-        });
-      }
-      setCandyMachine(candyMachine);
-      if (!candyMachine) {
-        return;
-      }
-      let candyGuard;
-      try {
-        candyGuard = await safeFetchCandyGuard(umi, candyMachine.mintAuthority);
-      } catch (e) {
-        console.error(e);
-        toast({
-          id: "no-guard-found",
-          title: "No Candy Guard found!",
-          description: "Do you have one assigned?",
-          status: "error",
-          duration: 999999,
-          isClosable: true,
-        });
-      }
-      if (!candyGuard) {
-        return;
-      }
-      setCandyGuard(candyGuard);
     })();
-  }, []);
+  }, [umi, checkEligibility]);
 
   return { candyMachine, candyGuard };
 
@@ -98,17 +102,18 @@ export interface IsMinting {
 
 export default function Home() {
   const umi = useUmi();
+  const solanaTime = useSolanaTime();
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { isOpen: isInitializerOpen, onOpen: onInitializerOpen, onClose: onInitializerClose } = useDisclosure();
   const [mintsCreated, setMintsCreated] = useState<PublicKey[]>([publicKey("11111111111111111111111111111111")]);
   const [isAllowed, setIsAllowed] = useState<boolean>(false);
   const [loading, setLoading] = useState(true);
-  const [isMinting, setIsMinting] = useState<IsMinting[]>([{ label: "default", minting: false }]);
   const [ownedTokens, setOwnedTokens] = useState<DigitalAssetWithToken[]>();
   const [guards, setGuards] = useState<GuardReturn[]>([
     { label: "startDefault", allowed: false },
   ]);
+  const [checkEligibility, setCheckEligibility] = useState<boolean>(true);
 
   if (!process.env.NEXT_PUBLIC_CANDY_MACHINE_ID) {
     console.error("No candy machine in .env!")
@@ -140,7 +145,7 @@ export default function Home() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  const { candyMachine, candyGuard } = useCandyMachine(umi, candyMachineId);
+  const { candyMachine, candyGuard } = useCandyMachine(umi, candyMachineId, checkEligibility, setCheckEligibility);
 
   useEffect(() => {
     const checkEligibility = async () => {
@@ -149,7 +154,7 @@ export default function Home() {
       }
 
       const { guardReturn, ownedTokens } = await guardChecker(
-        umi, candyGuard, candyMachine
+        umi, candyGuard, candyMachine, solanaTime
       );
 
       setOwnedTokens(ownedTokens);
@@ -169,7 +174,7 @@ export default function Home() {
     };
 
     checkEligibility();
-  }, [candyMachine, candyGuard, umi]);
+  }, [candyMachine, candyGuard, umi, solanaTime]);
 
   const PageContent = () => {
 
@@ -189,15 +194,15 @@ export default function Home() {
                 <Heading size='md'>{headerText}</Heading>
               </Box>
               {loading ? (<></>) : (
-                  <Flex justifyContent="flex-end" marginLeft="auto">
-                    <Box background={"teal.100"} borderRadius={"5px"} minWidth={"50px"} minHeight={"50px"} p={2} >
-                      <VStack >
-                        <Text fontSize={"sm" }>Minted NFTs:</Text>
-                        <Text fontWeight={"semibold"}>{Number(candyMachine?.itemsLoaded) - Number(candyMachine?.itemsRedeemed)}/{candyMachine?.itemsLoaded}</Text>
-                      </VStack>
-                    </Box>
-                  </Flex>
-                )}
+                <Flex justifyContent="flex-end" marginLeft="auto">
+                  <Box background={"teal.100"} borderRadius={"5px"} minWidth={"50px"} minHeight={"50px"} p={2} >
+                    <VStack >
+                      <Text fontSize={"sm"}>Minted NFTs:</Text>
+                      <Text fontWeight={"semibold"}>{Number(candyMachine?.itemsLoaded) - Number(candyMachine?.itemsRedeemed)}/{candyMachine?.itemsLoaded}</Text>
+                    </VStack>
+                  </Box>
+                </Flex>
+              )}
             </Flex>
           </CardHeader>
 
@@ -232,10 +237,10 @@ export default function Home() {
                   umi={umi}
                   ownedTokens={ownedTokens}
                   toast={toast}
-                  setIsMinting={setIsMinting}
-                  isMinting={isMinting}
+                  setGuardList={setGuards}
                   setMintsCreated={setMintsCreated}
                   onOpen={onOpen}
+                  setCheckEligibility={setCheckEligibility}
                 />
               )}
             </Stack>
@@ -248,7 +253,7 @@ export default function Home() {
             </Center>
             <Modal isOpen={isInitializerOpen} onClose={onInitializerClose}>
               <ModalOverlay />
-              <ModalContent>
+              <ModalContent maxW="600px">
                 <ModalHeader>Initializer</ModalHeader>
                 <ModalCloseButton />
                 <ModalBody>

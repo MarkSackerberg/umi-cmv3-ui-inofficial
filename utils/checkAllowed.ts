@@ -6,7 +6,6 @@ import {
   FreezeSolPayment,
   FreezeTokenPayment,
   GuardSet,
-  MintLimit,
   NftBurn,
   NftGate,
   NftPayment,
@@ -29,10 +28,8 @@ import {
 import {
   addressGateChecker,
   allowlistChecker,
-  checkDateRequired,
   checkTokensRequired,
   checkSolBalanceRequired,
-  getSolanaTime,
   mintLimitChecker,
   ownedNftChecker,
   GuardReturn,
@@ -46,38 +43,53 @@ import {
 export const guardChecker = async (
   umi: Umi,
   candyGuard: CandyGuard,
-  candyMachine: CandyMachine
+  candyMachine: CandyMachine,
+  solanaTime: bigint
 ) => {
   let guardReturn: GuardReturn[] = [];
   let ownedTokens: DigitalAssetWithToken[] = [];
   if (!candyGuard) {
-    guardReturn.push({ label: "default", allowed: false });
-    return { guardReturn, ownedNfts: ownedTokens };
-  }
-
-  let guardsToCheck: { label: string; guards: GuardSet }[] = candyGuard.groups;
-  guardsToCheck.push({label:"default", guards:candyGuard.guards})
-  
-  //no wallet connected. return dummies
-  const dummyPublicKey = publicKey("11111111111111111111111111111111");
-  if (umi.identity.publicKey === dummyPublicKey || candyMachine.itemsLoaded - Number(candyMachine.itemsRedeemed) === 0) {
-    for (const eachGuard of guardsToCheck) {
-      guardReturn.push({ label: eachGuard.label, allowed: false });
+    if (guardReturn.length === 0) {
+      //guardReturn.push({ label: "default", allowed: false });
     }
     return { guardReturn, ownedNfts: ownedTokens };
   }
 
-  // get as much required data upfront as possible
-  let solanaTime = BigInt(0);
-  if (checkDateRequired(guardsToCheck)) {
-    solanaTime = await getSolanaTime(umi);
+  let guardsToCheck: { label: string; guards: GuardSet }[] = candyGuard.groups;
+  guardsToCheck.push({ label: "default", guards: candyGuard.guards });
+
+  //no wallet connected. return dummies
+  const dummyPublicKey = publicKey("11111111111111111111111111111111");
+  if (
+    umi.identity.publicKey === dummyPublicKey ||
+    candyMachine.itemsLoaded - Number(candyMachine.itemsRedeemed) === 0
+  ) {
+    for (const eachGuard of guardsToCheck) {
+      guardReturn.push({
+        label: eachGuard.label,
+        allowed: false,
+        reason: "Please connect your wallet to mint",
+      });
+    }
+    return { guardReturn, ownedNfts: ownedTokens };
   }
 
   let solBalance: SolAmount = sol(0);
   if (checkSolBalanceRequired(guardsToCheck)) {
-    const account = await umi.rpc.getAccount(umi.identity.publicKey);
-    assertAccountExists(account);
-    solBalance = account.lamports;
+    try {
+      const account = await umi.rpc.getAccount(umi.identity.publicKey);
+      assertAccountExists(account);
+      solBalance = account.lamports;
+    } catch (e) {
+      for (const eachGuard of guardsToCheck) {
+        guardReturn.push({
+          label: eachGuard.label,
+          allowed: false,
+          reason: "Wallet does not exist. Do you have SOL?",
+        });
+      }
+      return { guardReturn, ownedNfts: ownedTokens };
+    }
   }
 
   if (checkTokensRequired(guardsToCheck)) {
@@ -97,28 +109,23 @@ export const guardChecker = async (
           publicKey(addressGate.value.address)
         )
       ) {
-        guardReturn.push({ label: eachGuard.label, allowed: false });
+        guardReturn.push({
+          label: eachGuard.label,
+          allowed: false,
+          reason: "AddressGate: Wrong Address",
+        });
         continue;
-      }
-    }
-
-    //generate and print merkleRoot in case the guardlabel is present in allowlist.tsx but not assigned
-    if (umi.identity.publicKey === candyMachine.authority) {
-      const allowlist = allowLists.get(eachGuard.label);
-      if (allowlist) {
-        console.log(
-          `add this merkleRoot to your candy guard config! ${getMerkleRoot(
-            allowlist
-            //@ts-ignore
-          ).toString("hex")}`
-        );
       }
     }
 
     if (singleGuard.allowList.__option === "Some") {
       if (!allowlistChecker(allowLists, umi, eachGuard.label)) {
+        guardReturn.push({
+          label: eachGuard.label,
+          allowed: false,
+          reason: "Wallet not allowlisted",
+        });
         console.error(`Guard ${eachGuard.label} wallet not allowlisted!`);
-        guardReturn.push({ label: eachGuard.label, allowed: false });
         continue;
       }
     }
@@ -126,7 +133,11 @@ export const guardChecker = async (
     if (singleGuard.endDate.__option === "Some") {
       const addressGate = singleGuard.endDate as Some<EndDate>;
       if (solanaTime > addressGate.value.date) {
-        guardReturn.push({ label: eachGuard.label, allowed: false });
+        guardReturn.push({
+          label: eachGuard.label,
+          allowed: false,
+          reason: "Mint time is over!",
+        });
         console.error(`Guard ${eachGuard.label}; endDate reached!`);
         continue;
       }
@@ -136,7 +147,11 @@ export const guardChecker = async (
       const freezeSolPayment =
         singleGuard.freezeSolPayment as Some<FreezeSolPayment>;
       if (freezeSolPayment.value.lamports > solBalance) {
-        guardReturn.push({ label: eachGuard.label, allowed: false });
+        guardReturn.push({
+          label: eachGuard.label,
+          allowed: false,
+          reason: "Not enough SOL",
+        });
         console.error(
           `Guard ${eachGuard.label}; freezeSolPayment: not enough SOL`
         );
@@ -145,8 +160,12 @@ export const guardChecker = async (
     }
 
     if (singleGuard.mintLimit.__option === "Some") {
-      if (!await mintLimitChecker(umi, candyMachine, eachGuard)) {
-        guardReturn.push({ label: eachGuard.label, allowed: false });
+      if (!(await mintLimitChecker(umi, candyMachine, eachGuard))) {
+        guardReturn.push({
+          label: eachGuard.label,
+          allowed: false,
+          reason: "Mint limit of this wallet reached",
+        });
         console.error(`Guard ${eachGuard.label}; mintLimit reached`);
         continue;
       }
@@ -162,7 +181,11 @@ export const guardChecker = async (
         !digitalAssetWithToken ||
         digitalAssetWithToken.token.amount >= freezeTokenPayment.value.amount
       ) {
-        guardReturn.push({ label: eachGuard.label, allowed: false });
+        guardReturn.push({
+          label: eachGuard.label,
+          allowed: false,
+          reason: "Not enough tokens!",
+        });
         console.error(`${eachGuard.label}: Token Balance too low !`);
         continue;
       }
@@ -171,7 +194,11 @@ export const guardChecker = async (
     if (singleGuard.nftBurn.__option === "Some") {
       const nftBurn = singleGuard.nftBurn as Some<NftBurn>;
       if (!ownedNftChecker(ownedTokens, nftBurn.value.requiredCollection)) {
-        guardReturn.push({ label: eachGuard.label, allowed: false });
+        guardReturn.push({
+          label: eachGuard.label,
+          allowed: false,
+          reason: "No NFT to burn!",
+        });
         console.error(`${eachGuard.label}: No Nft to burn!`);
         continue;
       }
@@ -180,7 +207,11 @@ export const guardChecker = async (
     if (singleGuard.nftGate.__option === "Some") {
       const nftGate = singleGuard.nftGate as Some<NftGate>;
       if (!ownedNftChecker(ownedTokens, nftGate.value.requiredCollection)) {
-        guardReturn.push({ label: eachGuard.label, allowed: false });
+        guardReturn.push({
+          label: eachGuard.label,
+          allowed: false,
+          reason: "No NFT of the requred held!",
+        });
         console.error(`${eachGuard.label}: NftGate no NFT held!`);
         continue;
       }
@@ -189,7 +220,11 @@ export const guardChecker = async (
     if (singleGuard.nftPayment.__option === "Some") {
       const nftPayment = singleGuard.nftPayment as Some<NftPayment>;
       if (!ownedNftChecker(ownedTokens, nftPayment.value.requiredCollection)) {
-        guardReturn.push({ label: eachGuard.label, allowed: false });
+        guardReturn.push({
+          label: eachGuard.label,
+          allowed: false,
+          reason: "No NFT to pay with!",
+        });
         console.error(`${eachGuard.label}: nftPayment no NFT to pay with`);
         continue;
       }
@@ -198,7 +233,11 @@ export const guardChecker = async (
     if (singleGuard.redeemedAmount.__option === "Some") {
       const redeemedAmount = singleGuard.redeemedAmount as Some<RedeemedAmount>;
       if (redeemedAmount.value.maximum >= candyMachine.itemsRedeemed) {
-        guardReturn.push({ label: eachGuard.label, allowed: false });
+        guardReturn.push({
+          label: eachGuard.label,
+          allowed: false,
+          reason: "Too many NFTs redeemed!",
+        });
         console.error(
           `${eachGuard.label}: redeemedAmount Too many NFTs redeemed!`
         );
@@ -209,7 +248,11 @@ export const guardChecker = async (
     if (singleGuard.solPayment.__option === "Some") {
       const solPayment = singleGuard.solPayment as Some<SolPayment>;
       if (solPayment.value.lamports > solBalance) {
-        guardReturn.push({ label: eachGuard.label, allowed: false });
+        guardReturn.push({
+          label: eachGuard.label,
+          allowed: false,
+          reason: "Not enough SOL!",
+        });
         console.error(`${eachGuard.label} SolPayment not enough SOL!`);
         continue;
       }
@@ -218,7 +261,11 @@ export const guardChecker = async (
     if (singleGuard.startDate.__option === "Some") {
       const startDate = singleGuard.startDate as Some<StartDate>;
       if (solanaTime < startDate.value.date) {
-        guardReturn.push({ label: eachGuard.label, allowed: false });
+        guardReturn.push({
+          label: eachGuard.label,
+          allowed: false,
+          reason: "StartDate not reached!",
+        });
         console.error(`${eachGuard.label} StartDate not reached!`);
 
         continue;
@@ -234,7 +281,11 @@ export const guardChecker = async (
         !digitalAssetWithToken ||
         digitalAssetWithToken.token.amount >= tokenBurn.value.amount
       ) {
-        guardReturn.push({ label: eachGuard.label, allowed: false });
+        guardReturn.push({
+          label: eachGuard.label,
+          allowed: false,
+          reason: "Not enough tokens!",
+        });
         console.error(`${eachGuard.label} tokenBurn not enough tokens!`);
         continue;
       }
@@ -249,7 +300,11 @@ export const guardChecker = async (
         !digitalAssetWithToken ||
         digitalAssetWithToken.token.amount >= tokenGate.value.amount
       ) {
-        guardReturn.push({ label: eachGuard.label, allowed: false });
+        guardReturn.push({
+          label: eachGuard.label,
+          allowed: false,
+          reason: "Not enough tokens!",
+        });
         console.error(`${eachGuard.label} tokenGate not enough tokens!`);
         continue;
       }
@@ -264,12 +319,16 @@ export const guardChecker = async (
         !digitalAssetWithToken ||
         digitalAssetWithToken.token.amount >= tokenPayment.value.amount
       ) {
-        guardReturn.push({ label: eachGuard.label, allowed: false });
+        guardReturn.push({
+          label: eachGuard.label,
+          allowed: false,
+          reason: "Not enough tokens!",
+        });
         console.error(`${eachGuard.label} tokenPayment not enough tokens!`);
         continue;
       }
     }
-    console.log(eachGuard.label, "allowed")
+    console.log(eachGuard.label, "allowed");
     guardReturn.push({ label: eachGuard.label, allowed: true });
   }
   return { guardReturn, ownedTokens };

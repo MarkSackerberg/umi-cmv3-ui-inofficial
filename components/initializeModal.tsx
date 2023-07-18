@@ -1,10 +1,11 @@
 import { createLutForCandyMachineAndGuard } from "../utils/createLutForCandyGuard";
-import { Button, Flex, HStack, NumberDecrementStepper, NumberIncrementStepper, NumberInput, NumberInputField, NumberInputStepper, SimpleGrid, Slider, SliderFilledTrack, SliderThumb, SliderTrack, UseToastOptions, VStack } from "@chakra-ui/react";
-import { CandyGuard, CandyMachine, route } from "@metaplex-foundation/mpl-candy-machine";
-import { GpaBuilder, Umi, publicKey, sol, some, transactionBuilder } from "@metaplex-foundation/umi";
+import { Button, HStack, NumberDecrementStepper, NumberIncrementStepper, NumberInput, NumberInputField, NumberInputStepper, SimpleGrid, Text, UseToastOptions, VStack } from "@chakra-ui/react";
+import { CandyGuard, CandyMachine, getMerkleRoot, route } from "@metaplex-foundation/mpl-candy-machine";
+import { Umi, publicKey, sol, some, transactionBuilder } from "@metaplex-foundation/umi";
 import { transferSol, addMemo } from '@metaplex-foundation/mpl-toolbox';
-import React, { Dispatch, SetStateAction } from "react";
+import React from "react";
 import { useEffect, useState } from "react";
+import { allowLists } from "@/allowlist";
 
 // new function createLUT that is called when the button is clicked and which calls createLutForCandyMachineAndGuard and returns a success toast
 const createLut = (umi: Umi, candyMachine: CandyMachine, candyGuard: CandyGuard, recentSlot: number, toast: (options: Omit<UseToastOptions, "id">) => void) => async () => {
@@ -147,14 +148,39 @@ export const InitializeModal = ({ umi, candyMachine, candyGuard, toast }: Props)
         return <></>
     }
 
+    //key value object with label and roots
+    const roots = new Map<string, string>();
+
+    allowLists.forEach((value, key) => {
+        //@ts-ignore
+        const root =  getMerkleRoot(value).toString("hex");
+        if (!roots.has(key)) {
+            roots.set(key, root)
+        }
+    });
+
+    //put each root into a <Text> element
+    const rootElements = Array.from(roots).map(([key, value]) => {
+        return <><Text fontWeight={"semibold"} key={key}>{key}:</Text><Text>{value}</Text></>
+    })
+    console.log(rootElements.length)
+
     return (
-        <><SimpleGrid><VStack>
-            <Button onClick={createLut(umi, candyMachine, candyGuard, recentSlot, toast)}>Create LUT</Button>
-            <Button onClick={initializeGuards(umi, candyMachine, candyGuard, toast)}>Initialize Guards</Button>
+        <><VStack>
+            <HStack>
+                <Button onClick={createLut(umi, candyMachine, candyGuard, recentSlot, toast)}>Create LUT</Button>
+                <Text>Reduces transaction size errors</Text>
+            </HStack>
+            <HStack>
+                <Button onClick={initializeGuards(umi, candyMachine, candyGuard, toast)}>Initialize Guards</Button>
+                <Text>Required for some guards</Text>
+            </HStack>
             <HStack>
                 <BuyABeerInput value={amount} setValue={setAmount} />
                 <Button onClick={buyABeer(umi, amount, toast)}>Buy me a Beer 🍻</Button>
             </HStack>
-        </VStack></SimpleGrid></>
+            {rootElements.length > 0 && <Text fontWeight={"bold"}>Merkle trees for your config.json:</Text>}
+            {rootElements.length > 0 && rootElements}
+        </VStack></>
     );
 }
