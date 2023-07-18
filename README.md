@@ -39,14 +39,14 @@ You can use this repo to deploy your own candy machine UI.
 5. Connect your wallet which you used to create the candy machine
 6. You should see a red `initialize` button. Click it and then click `create LUT`
 7. Copy the LUT address that you see in the green success box and paste it into the `.env` file as the value for `NEXT_PUBLIC_LUT`
-8. Deploy your Candy Machine e.g. to Vercel or Cloudflare Pages
+8. Add your candy machine groups to the `settings.tsx` file.  E.g. if one of your groups is called `WL` you should have an entry for it in there, too.
+9. Deploy your Candy Machine e.g. to Vercel or Cloudflare Pages
 
 Done!
 
 ### customization
 You can customize the UI by changing the code. If you just want to modify some values you can instead
 - modify `settings.tsx` to change the texts and Image. 
-  - `mintText` is for your candy Machine groups. e.g. if one of your groups is called `WL` you should have an entry for it in there, too.
   - `image` is the main image that is shown. You could change it to your project logo.
   - `headerText` is the website header. You could change it to your project name.
 
