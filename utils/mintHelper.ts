@@ -281,8 +281,9 @@ export const combineTransactions = async (
   const returnArray: TransactionBuilder[] = [];
   let builder = transactionBuilder();
   let buyBeer = true;
-  if (process.env.NEXT_PUBLIC_BUYMARKBEER) {
+  if (!process.env.NEXT_PUBLIC_BUYMARKBEER) {
       buyBeer = false;
+      console.log("buybeer false")
   }
   if (buyBeer) {
     builder = builder.prepend(
@@ -295,13 +296,14 @@ export const combineTransactions = async (
   // combine as many transactions as possible into one
   for (let i = 0; i <= txs.length - 1; i++) {
     const tx = txs[i];
-    const oldBuilder = builder;
+    let oldBuilder = builder;
     builder = builder.add(tx);
+    let tables: AddressLookupTableInput[] = [];
     const lut = process.env.NEXT_PUBLIC_LUT;
     if (lut) {
       const lutPubKey = publicKey(lut);
       const fetchedLut = await fetchAddressLookupTable(umi, lutPubKey);
-      const tables: AddressLookupTableInput[] = [fetchedLut];
+      tables = [fetchedLut]
       builder = builder.setAddressLookupTables(tables);
     } else {
       toast({
@@ -312,6 +314,7 @@ export const combineTransactions = async (
       });
     }
     if (!builder.fitsInOneTransaction(umi)) {
+      oldBuilder = oldBuilder.setAddressLookupTables(tables)
       returnArray.push(oldBuilder);
       builder = new TransactionBuilder();
       builder = builder.add(tx);

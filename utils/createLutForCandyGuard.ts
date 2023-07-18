@@ -117,6 +117,17 @@ import {
             guardKeys.push(group.guards.tokenPayment.value.destinationAta)
         }
 
+        // Add programs
+        guardKeys.push(publicKey("CndyV3LdqHUfDLmE5naZjVN8rBZz4tqhdefbAnjHG3JR"))
+        guardKeys.push(publicKey("metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"))
+        guardKeys.push(publicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"))
+        guardKeys.push(publicKey("ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"))
+        
+        // Add collection Authority PDA
+        guardKeys.push(publicKey(findCollectionAuthorityRecordPda(umi, {
+            mint: collectionMint,
+            collectionAuthority: umi.identity.publicKey
+        })))
     });
   
     return uniquePublicKeys([
