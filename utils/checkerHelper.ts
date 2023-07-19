@@ -70,18 +70,25 @@ export const mintLimitChecker = async (
 }
 ) => {
   const mintLimit = guard.guards.mintLimit as Some<MintLimit>;
-  const mintLimitCounter = await safeFetchMintCounterFromSeeds(umi, {
-    id: mintLimit.value.id,
-    user: umi.identity.publicKey,
-    candyMachine: candyMachine.publicKey,
-    candyGuard: candyMachine.mintAuthority,
-  });
 
-  if (!mintLimitCounter || mintLimitCounter.count >= mintLimit.value.limit) {
-    console.error(`Guard ${guard.label}: mintLimit reached!`);
+  //not minted yet
+  try {
+    const mintCounter = await safeFetchMintCounterFromSeeds(umi, {
+      id: mintLimit.value.id,
+      user: umi.identity.publicKey,
+      candyMachine: candyMachine.publicKey,
+      candyGuard: candyMachine.mintAuthority,
+    });
+
+    if (mintCounter && mintCounter.count >= mintLimit.value.limit) {
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error(`mintLimitChecker: ${error}`);
     return false;
   }
-  return true;
 };
 
 export const ownedNftChecker = async (
