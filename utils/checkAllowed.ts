@@ -328,6 +328,26 @@ export const guardChecker = async (
         continue;
       }
     }
+
+    if (singleGuard.token2022Payment.__option === "Some") {
+      const token2022Payment =
+        singleGuard.token2022Payment as Some<TokenPayment>;
+      const digitalAssetWithToken = ownedTokens?.find(
+        (el) => el.mint.publicKey === token2022Payment.value.mint
+      );
+      if (
+        !digitalAssetWithToken ||
+        digitalAssetWithToken.token.amount >= token2022Payment.value.amount
+      ) {
+        guardReturn.push({
+          label: eachGuard.label,
+          allowed: false,
+          reason: "Not enough tokens!",
+        });
+        console.error(`${eachGuard.label} token2022Payment not enough tokens!`);
+        continue;
+      }
+    }
     console.log(eachGuard.label, "allowed");
     guardReturn.push({ label: eachGuard.label, allowed: true });
   }
