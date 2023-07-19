@@ -282,22 +282,14 @@ export default function Home() {
   };
 
   return (
-    <>
-      <Head>
-        <title>Mint UI by MarkSackerberg</title>
-        <meta name="description" content="Mint UI by MarkSackerberg" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-      <main>
-        <div className={styles.wallet}>
-          <WalletMultiButtonDynamic />
-        </div>
+    <main>
+      <div className={styles.wallet}>
+        <WalletMultiButtonDynamic />
+      </div>
 
-        <div className={styles.center}>
-          <PageContent key="content" />
-        </div>
-      </main>
-    </>
+      <div className={styles.center}>
+        <PageContent key="content" />
+      </div>
+    </main>
   );
 }

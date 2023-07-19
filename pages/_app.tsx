@@ -41,10 +41,15 @@ export default function App({ Component, pageProps }: AppProps) {
           property="og:description"
           content="Website is based on MarkSackerbers work"
         />
+        <meta name="description" content="Website is based on MarkSackerbers work" />
+
         <meta
           property="og:image"
           content={image}
         />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>{headerText}</title>
+        <link rel="icon" href="/favicon.ico" />
       </Head>
       <ChakraProvider>
         <WalletProvider wallets={wallets}>
