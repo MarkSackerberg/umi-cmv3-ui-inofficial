@@ -20,10 +20,24 @@ You can use this repo to deploy your own candy machine UI.
 - It creates a Lookup table for you to allow more active guards at the same time
 - The initializer shows you the merkle root for your groups
 - The users see NFTs left, start and end countdowns, reasons for not being able to mint and more
-- It supports most of the existing guards
-...
 - Combining most of these guards is possible since we are lookup tables. For example using `allowlist`,`nftBurn`, `nftPayment`, `solPayment`, `startDate` and `endDate`
 - For larger allowlists this UI will automatically split the mint into two transactions to avoid hitting the transaction size limit
+- It supports most of the existing guards:
+  - `addressGate`
+  - `allowlist`
+  - `endDate`
+  - `freezeSolPayment`
+  - `freezeTokenPayment`
+  - `mintLimit`
+  - `nftBurn`
+  - `nftGate`
+  - `nftPayment`
+  - `solPayment`
+  - `startDate`
+  - `token2022Payment`
+  - `tokenBurn`
+  - `tokenGate`
+  - `tokenPayment`
 
 # How to use
 ## Prerequisites
@@ -53,8 +67,9 @@ You can customize the UI by changing the code. If you just want to modify some v
 ### Fees
 This ui has a buy me a beer feature. Each mint will transfer a very small amount (0.005) of SOL to a tip wallet. If you do not want to support me feel free to change the NEXT_PUBLIC_BUYMARKBEER variable to false. I would appreachiate it though if you leave it on. 🍻
 
-# Disclaimer
-This is not an official project by the metaplex team. You can use that code at your own risk. I am not responsible for any losses that you might incur by using this code.
+# To do
+- Add NFT Picker of `nftBurn` and `nftPayment` guards
+- Add guards `allocation` and `redeemed Amount`
 
 # Contact / Support
 If you need help with this repo, you can contact me. Also feel free to create an issue or a pull request.
@@ -62,6 +77,9 @@ If you need help with this repo, you can contact me. Also feel free to create an
 - [Twitter](https://twitter.com/MarkSackerberg)
 
 If you want to work together on projects let me know!
+
+# Disclaimer
+This is not an official project by the metaplex team. You can use that code at your own risk. I am not responsible for any losses that you might incur by using this code.
 
 # Thank you!
 Thanks to the metaplex team for creating NFTs on Solana, Candy Machine and Umi. Special Thanks to @lorisleiva for creating Umi and being so helpful. Also thanks to @tonyboylehub !
