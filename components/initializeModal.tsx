@@ -1,5 +1,5 @@
 import { createLutForCandyMachineAndGuard } from "../utils/createLutForCandyGuard";
-import { Button, HStack, NumberDecrementStepper, NumberIncrementStepper, NumberInput, NumberInputField, NumberInputStepper, SimpleGrid, Text, UseToastOptions, VStack } from "@chakra-ui/react";
+import { Box, Button, HStack, NumberDecrementStepper, NumberIncrementStepper, NumberInput, NumberInputField, NumberInputStepper, SimpleGrid, Text, UseToastOptions, VStack } from "@chakra-ui/react";
 import { CandyGuard, CandyMachine, getMerkleRoot, route } from "@metaplex-foundation/mpl-candy-machine";
 import { Umi, publicKey, sol, some, transactionBuilder } from "@metaplex-foundation/umi";
 import { transferSol, addMemo } from '@metaplex-foundation/mpl-toolbox';
@@ -161,9 +161,8 @@ export const InitializeModal = ({ umi, candyMachine, candyGuard, toast }: Props)
 
     //put each root into a <Text> element
     const rootElements = Array.from(roots).map(([key, value]) => {
-        return <><Text fontWeight={"semibold"} key={key}>{key}:</Text><Text>{value}</Text></>
+        return <Box key={key}><Text fontWeight={"semibold"} key={key}>{key}:</Text><Text>{value}</Text></Box>
     })
-    console.log(rootElements.length)
 
     return (
         <><VStack>
