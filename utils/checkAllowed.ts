@@ -146,7 +146,7 @@ export const guardChecker = async (
     if (singleGuard.freezeSolPayment.__option === "Some") {
       const freezeSolPayment =
         singleGuard.freezeSolPayment as Some<FreezeSolPayment>;
-      if (freezeSolPayment.value.lamports > solBalance) {
+      if (freezeSolPayment.value.lamports.basisPoints > solBalance.basisPoints) {
         guardReturn.push({
           label: eachGuard.label,
           allowed: false,
@@ -247,7 +247,7 @@ export const guardChecker = async (
 
     if (singleGuard.solPayment.__option === "Some") {
       const solPayment = singleGuard.solPayment as Some<SolPayment>;
-      if (solPayment.value.lamports > solBalance) {
+      if (solPayment.value.lamports.basisPoints > solBalance.basisPoints) {
         guardReturn.push({
           label: eachGuard.label,
           allowed: false,
