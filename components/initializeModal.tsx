@@ -10,18 +10,28 @@ import { allowLists } from "@/allowlist";
 // new function createLUT that is called when the button is clicked and which calls createLutForCandyMachineAndGuard and returns a success toast
 const createLut = (umi: Umi, candyMachine: CandyMachine, candyGuard: CandyGuard, recentSlot: number, toast: (options: Omit<UseToastOptions, "id">) => void) => async () => {
     const [builder, AddressLookupTableInput] = await createLutForCandyMachineAndGuard(umi, recentSlot, candyMachine, candyGuard);
-    const { signature } = await builder.sendAndConfirm(umi, {
-        confirm: { commitment: "processed" }, send: {
-            skipPreflight: true,
-        }
-    });
-    toast({
-        title: "LUT created",
-        description: `LUT ${AddressLookupTableInput.publicKey} created. Add it to your .env NEXT_PUBLIC_LUT NOW! This UI does not work properly without it!`,
-        status: "success",
-        duration: 99999999,
-        isClosable: true,
-    });
+    try {
+        const { signature } = await builder.sendAndConfirm(umi, {
+            confirm: { commitment: "processed" }, send: {
+                skipPreflight: true,
+            }
+        });
+        toast({
+            title: "LUT created",
+            description: `LUT ${AddressLookupTableInput.publicKey} created. Add it to your .env NEXT_PUBLIC_LUT NOW! This UI does not work properly without it!`,
+            status: "success",
+            duration: 99999999,
+            isClosable: true,
+        });        
+    } catch (e) {
+        toast({
+            title: "creating LUT failed!",
+            description: `Error: ${e}`,
+            status: "error",
+            duration: 99999999,
+            isClosable: true,
+        });   
+    }
 }
 
 const initializeGuards = (umi: Umi, candyMachine: CandyMachine, candyGuard: CandyGuard, toast: (options: Omit<UseToastOptions, "id">) => void) => async () => {
