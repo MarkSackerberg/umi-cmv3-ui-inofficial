@@ -1,7 +1,7 @@
 import { CandyGuard, CandyMachine, mintV2 } from "@metaplex-foundation/mpl-candy-machine";
 import { GuardReturn } from "../utils/checkerHelper";
-import { PublicKey, TransactionWithMeta, Umi, createBigInt, generateSigner, none, publicKey, some, transactionBuilder } from "@metaplex-foundation/umi";
-import { DigitalAssetWithToken } from "@metaplex-foundation/mpl-token-metadata";
+import { PublicKey, TransactionWithMeta, Umi, createBigInt, generateSigner, none, some, transactionBuilder } from "@metaplex-foundation/umi";
+import { DigitalAsset, DigitalAssetWithToken, JsonMetadata, fetchDigitalAsset, fetchJsonMetadata } from "@metaplex-foundation/mpl-token-metadata";
 import { mintText } from "../settings";
 import { Box, Button, Flex, HStack, Heading, SimpleGrid, Text, Tooltip, UseToastOptions } from "@chakra-ui/react";
 import { setComputeUnitLimit } from "@metaplex-foundation/mpl-toolbox";
@@ -27,6 +27,26 @@ const detectBotTax = (logs: string[]) => {
     return false;
 }
 
+const fetchNft = async (umi: Umi, nftAdress: PublicKey, toast: (options: Omit<UseToastOptions, "id">) => void) => {
+    let digitalAsset: DigitalAsset | undefined;
+    let jsonMetadata: JsonMetadata | undefined;
+    try {
+        digitalAsset = await fetchDigitalAsset(umi, nftAdress);
+        jsonMetadata = await fetchJsonMetadata(umi, digitalAsset.metadata.uri)
+    } catch (e) {
+        console.error(e);
+        toast({
+            title: 'Nft could not be fetched!',
+            description: "Please check your Wallet instead.",
+            status: 'error',
+            duration: 9000,
+            isClosable: true,
+        });
+    }
+
+    return { digitalAsset, jsonMetadata }
+}
+
 const mintClick = async (
     umi: Umi,
     guard: GuardReturn,
@@ -34,7 +54,11 @@ const mintClick = async (
     candyGuard: CandyGuard,
     ownedTokens: DigitalAssetWithToken[],
     toast: (options: Omit<UseToastOptions, "id">) => void,
-    setMintsCreated: Dispatch<SetStateAction<PublicKey[]>>,
+    mintsCreated: {
+        mint: PublicKey;
+        offChainMetadata: JsonMetadata | undefined;
+    }[] | undefined,
+    setMintsCreated: Dispatch<SetStateAction<{ mint: PublicKey; offChainMetadata: JsonMetadata | undefined; }[] | undefined>>,
     guardList: GuardReturn[],
     setGuardList: Dispatch<SetStateAction<GuardReturn[]>>,
     onOpen: () => void,
@@ -126,7 +150,7 @@ const mintClick = async (
         })
 
         //loop umi.rpc.getTransaction(lastSignature) until it does not return null. Sleep 1 second between each try.
-        let transaction: TransactionWithMeta | null =  null;
+        let transaction: TransactionWithMeta | null = null;
         for (let i = 0; i < 30; i++) {
             transaction = await umi.rpc.getTransaction(lastSignature);
             if (transaction) {
@@ -134,7 +158,7 @@ const mintClick = async (
             }
             await new Promise((resolve) => setTimeout(resolve, 1000));
         }
-        if (transaction === null){
+        if (transaction === null) {
             throw new Error(`no tx on chain for signature ${lastSignature}`)
         }
 
@@ -146,22 +170,18 @@ const mintClick = async (
         //wait for one second to make sure that the minted nft is in the wallet
         await new Promise((resolve) => setTimeout(resolve, 1000));
 
-        //setMintsCreated, add the minted nft to the list and make sure that the initial dummy value is removed
-        setMintsCreated((prev) => {
-            const newMintsCreated = [...prev];
-            const index = newMintsCreated.findIndex((el) => el === publicKey("11111111111111111111111111111111"));
-            if (index !== -1) {
-                newMintsCreated[index] = nftMint.publicKey;
-            } else {
-                newMintsCreated.push(nftMint.publicKey);
-            }
-            return newMintsCreated;
-        });
-        updateLoadingText("Fetching your NFT", guardList, guardToUse.label, setGuardList);
 
-        // load NFT before opening modal
-        updateLoadingText(undefined, guardList, guardToUse.label, setGuardList);
-        onOpen();
+        updateLoadingText("Fetching your NFT", guardList, guardToUse.label, setGuardList);
+        const fetchedNft = await fetchNft(umi, nftMint.publicKey, toast);
+        if (fetchedNft.digitalAsset && fetchedNft.jsonMetadata) {
+            if (mintsCreated === undefined) {
+                setMintsCreated([{ mint: nftMint.publicKey, offChainMetadata: fetchedNft.jsonMetadata }]);
+            }
+            else {
+                setMintsCreated([...mintsCreated, { mint: nftMint.publicKey, offChainMetadata: fetchedNft.jsonMetadata }]);
+            }
+            onOpen();
+        }
 
     } catch (e) {
         console.error(`minting failed because of ${e}`);
@@ -184,6 +204,7 @@ const mintClick = async (
         newGuardList[guardIndex].minting = false;
         setGuardList(newGuardList);
         setCheckEligibility(true)
+        updateLoadingText(undefined, guardList, guardToUse.label, setGuardList);
     }
 };
 // new component called timer that calculates the remaining Time based on the bigint solana time and the bigint toTime difference.
@@ -226,7 +247,11 @@ type Props = {
     ownedTokens: DigitalAssetWithToken[] | undefined;
     toast: (options: Omit<UseToastOptions, "id">) => void;
     setGuardList: Dispatch<SetStateAction<GuardReturn[]>>;
-    setMintsCreated: Dispatch<SetStateAction<PublicKey[]>>;
+    mintsCreated: {
+        mint: PublicKey;
+        offChainMetadata: JsonMetadata | undefined;
+    }[] | undefined;
+    setMintsCreated: Dispatch<SetStateAction<{ mint: PublicKey; offChainMetadata: JsonMetadata | undefined; }[] | undefined>>;
     onOpen: () => void;
     setCheckEligibility: Dispatch<SetStateAction<boolean>>;
 };
@@ -237,8 +262,9 @@ export function ButtonList({
     candyMachine,
     candyGuard,
     ownedTokens = [], // provide default empty array
-    setGuardList,
     toast,
+    setGuardList,
+    mintsCreated,
     setMintsCreated,
     onOpen,
     setCheckEligibility
@@ -255,6 +281,9 @@ export function ButtonList({
             t.label === elem.label
         ))
     )
+    if (filteredGuardlist.length === 0) {
+        return <></>;
+    }
     // Guard "default" can only be used to mint in case no other guard exists
     if (filteredGuardlist.length > 1) {
         filteredGuardlist = guardList.filter((elem) => elem.label != "default");
@@ -324,6 +353,7 @@ export function ButtonList({
                                 candyGuard,
                                 ownedTokens,
                                 toast,
+                                mintsCreated,
                                 setMintsCreated,
                                 guardList,
                                 setGuardList,

@@ -3,15 +3,14 @@ import {
   publicKey,
   Umi,
 } from "@metaplex-foundation/umi";
-import { DigitalAssetWithToken } from "@metaplex-foundation/mpl-token-metadata";
+import { DigitalAssetWithToken, JsonMetadata } from "@metaplex-foundation/mpl-token-metadata";
 import dynamic from "next/dynamic";
-import Head from "next/head";
 import { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react";
 import { useUmi } from "../utils/useUmi";
 import { fetchCandyMachine, safeFetchCandyGuard, CandyGuard, CandyMachine } from "@metaplex-foundation/mpl-candy-machine"
 import styles from "../styles/Home.module.css";
 import { guardChecker } from "../utils/checkAllowed";
-import { Center, Card, CardHeader, CardBody, StackDivider, Heading, Stack, useToast, Text, Skeleton, useDisclosure, Button, Modal, ModalBody, ModalCloseButton, ModalContent, Image, ModalHeader, ModalOverlay, Box, Divider, HStack, VStack, Flex } from '@chakra-ui/react';
+import { Center, Card, CardHeader, CardBody, StackDivider, Heading, Stack, useToast, Text, Skeleton, useDisclosure, Button, Modal, ModalBody, ModalCloseButton, ModalContent, Image, ModalHeader, ModalOverlay, Box, Divider, VStack, Flex } from '@chakra-ui/react';
 import { ButtonList } from "../components/mintButton";
 import { GuardReturn } from "../utils/checkerHelper";
 import { ShowNft } from "../components/showNft";
@@ -106,7 +105,7 @@ export default function Home() {
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { isOpen: isInitializerOpen, onOpen: onInitializerOpen, onClose: onInitializerClose } = useDisclosure();
-  const [mintsCreated, setMintsCreated] = useState<PublicKey[]>([publicKey("11111111111111111111111111111111")]);
+  const [mintsCreated, setMintsCreated] = useState<{ mint: PublicKey, offChainMetadata: JsonMetadata | undefined }[] | undefined>();
   const [isAllowed, setIsAllowed] = useState<boolean>(false);
   const [loading, setLoading] = useState(true);
   const [ownedTokens, setOwnedTokens] = useState<DigitalAssetWithToken[]>();
@@ -238,6 +237,7 @@ export default function Home() {
                   ownedTokens={ownedTokens}
                   toast={toast}
                   setGuardList={setGuards}
+                  mintsCreated={mintsCreated}
                   setMintsCreated={setMintsCreated}
                   onOpen={onOpen}
                   setCheckEligibility={setCheckEligibility}
