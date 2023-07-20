@@ -348,7 +348,6 @@ export const guardChecker = async (
         continue;
       }
     }
-    console.log(eachGuard.label, "allowed");
     guardReturn.push({ label: eachGuard.label, allowed: true });
   }
   return { guardReturn, ownedTokens };
