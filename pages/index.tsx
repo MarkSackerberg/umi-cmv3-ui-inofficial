@@ -103,7 +103,7 @@ export default function Home() {
   const umi = useUmi();
   const solanaTime = useSolanaTime();
   const toast = useToast();
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const { isOpen: isShowNftOpen, onOpen: onShowNftOpen, onClose: onShowNftClose } = useDisclosure();
   const { isOpen: isInitializerOpen, onOpen: onInitializerOpen, onClose: onInitializerClose } = useDisclosure();
   const [mintsCreated, setMintsCreated] = useState<{ mint: PublicKey, offChainMetadata: JsonMetadata | undefined }[] | undefined>();
   const [isAllowed, setIsAllowed] = useState<boolean>(false);
@@ -241,7 +241,7 @@ export default function Home() {
                   setGuardList={setGuards}
                   mintsCreated={mintsCreated}
                   setMintsCreated={setMintsCreated}
-                  onOpen={onOpen}
+                  onOpen={onShowNftOpen}
                   setCheckEligibility={setCheckEligibility}
                 />
               )}
@@ -269,7 +269,7 @@ export default function Home() {
           (<></>)
         }
 
-        <Modal isOpen={isOpen} onClose={onClose}>
+        <Modal isOpen={isShowNftOpen} onClose={onShowNftClose}>
           <ModalOverlay />
           <ModalContent>
             <ModalHeader>Your minted NFT:</ModalHeader>
