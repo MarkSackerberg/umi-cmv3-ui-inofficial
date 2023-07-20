@@ -125,7 +125,7 @@ export const guardChecker = async (
           allowed: false,
           reason: "Wallet not allowlisted",
         });
-        console.error(`Guard ${eachGuard.label} wallet not allowlisted!`);
+        console.info(`Guard ${eachGuard.label} wallet not allowlisted!`);
         continue;
       }
     }
@@ -138,7 +138,7 @@ export const guardChecker = async (
           allowed: false,
           reason: "Mint time is over!",
         });
-        console.error(`Guard ${eachGuard.label}; endDate reached!`);
+        console.info(`Guard ${eachGuard.label}; endDate reached!`);
         continue;
       }
     }
@@ -152,7 +152,7 @@ export const guardChecker = async (
           allowed: false,
           reason: "Not enough SOL",
         });
-        console.error(
+        console.info(
           `Guard ${eachGuard.label}; freezeSolPayment: not enough SOL`
         );
         continue;
@@ -166,7 +166,7 @@ export const guardChecker = async (
           allowed: false,
           reason: "Mint limit of this wallet reached",
         });
-        console.error(`Guard ${eachGuard.label}; mintLimit reached`);
+        console.info(`Guard ${eachGuard.label}; mintLimit reached`);
         continue;
       }
     }
@@ -186,7 +186,7 @@ export const guardChecker = async (
           allowed: false,
           reason: "Not enough tokens!",
         });
-        console.error(`${eachGuard.label}: Token Balance too low !`);
+        console.info(`${eachGuard.label}: Token Balance too low !`);
         continue;
       }
     }
@@ -199,7 +199,7 @@ export const guardChecker = async (
           allowed: false,
           reason: "No NFT to burn!",
         });
-        console.error(`${eachGuard.label}: No Nft to burn!`);
+        console.info(`${eachGuard.label}: No Nft to burn!`);
         continue;
       }
     }
@@ -212,7 +212,7 @@ export const guardChecker = async (
           allowed: false,
           reason: "No NFT of the requred held!",
         });
-        console.error(`${eachGuard.label}: NftGate no NFT held!`);
+        console.info(`${eachGuard.label}: NftGate no NFT held!`);
         continue;
       }
     }
@@ -225,7 +225,7 @@ export const guardChecker = async (
           allowed: false,
           reason: "No NFT to pay with!",
         });
-        console.error(`${eachGuard.label}: nftPayment no NFT to pay with`);
+        console.info(`${eachGuard.label}: nftPayment no NFT to pay with`);
         continue;
       }
     }
@@ -238,7 +238,7 @@ export const guardChecker = async (
           allowed: false,
           reason: "Too many NFTs redeemed!",
         });
-        console.error(
+        console.info(
           `${eachGuard.label}: redeemedAmount Too many NFTs redeemed!`
         );
         continue;
@@ -253,7 +253,7 @@ export const guardChecker = async (
           allowed: false,
           reason: "Not enough SOL!",
         });
-        console.error(`${eachGuard.label} SolPayment not enough SOL!`);
+        console.info(`${eachGuard.label} SolPayment not enough SOL!`);
         continue;
       }
     }
@@ -266,7 +266,7 @@ export const guardChecker = async (
           allowed: false,
           reason: "StartDate not reached!",
         });
-        console.error(`${eachGuard.label} StartDate not reached!`);
+        console.info(`${eachGuard.label} StartDate not reached!`);
 
         continue;
       }
@@ -286,7 +286,7 @@ export const guardChecker = async (
           allowed: false,
           reason: "Not enough tokens!",
         });
-        console.error(`${eachGuard.label} tokenBurn not enough tokens!`);
+        console.info(`${eachGuard.label} tokenBurn not enough tokens!`);
         continue;
       }
     }
@@ -305,7 +305,7 @@ export const guardChecker = async (
           allowed: false,
           reason: "Not enough tokens!",
         });
-        console.error(`${eachGuard.label} tokenGate not enough tokens!`);
+        console.info(`${eachGuard.label} tokenGate not enough tokens!`);
         continue;
       }
     }
@@ -324,7 +324,7 @@ export const guardChecker = async (
           allowed: false,
           reason: "Not enough tokens!",
         });
-        console.error(`${eachGuard.label} tokenPayment not enough tokens!`);
+        console.info(`${eachGuard.label} tokenPayment not enough tokens!`);
         continue;
       }
     }
@@ -344,11 +344,10 @@ export const guardChecker = async (
           allowed: false,
           reason: "Not enough tokens!",
         });
-        console.error(`${eachGuard.label} token2022Payment not enough tokens!`);
+        console.info(`${eachGuard.label} token2022Payment not enough tokens!`);
         continue;
       }
     }
-    console.log(eachGuard.label, "allowed");
     guardReturn.push({ label: eachGuard.label, allowed: true });
   }
   return { guardReturn, ownedTokens };

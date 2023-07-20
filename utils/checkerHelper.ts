@@ -21,12 +21,12 @@ export interface GuardReturn {
   label: string;
   allowed: boolean;
   minting?: boolean;
+  loadingText?: string;
   reason?: string;
 }
 
 export const addressGateChecker = (wallet: PublicKey, address: PublicKey) => {
   if (wallet != address) {
-    console.error(`addressGate: You are not allowed to mint`);
     return false;
   }
   return true;
@@ -37,7 +37,6 @@ export const solBalanceChecker = (
   solAmount: SolAmount
 ) => {
   if (solAmount > solBalance) {
-    console.error("freezeSolPayment/solPayment: Not enough SOL!");
     return false;
   }
   return true;
@@ -101,7 +100,6 @@ export const ownedNftChecker = async (
       el.metadata.collection.value.key === requiredCollection
   );
   if (!digitalAssetWithToken) {
-    console.error("nftBurn: The user has no NFT to pay with!");
     return false;
   } else {
     return true;
@@ -122,7 +120,6 @@ export const allowlistChecker = (
       .get(guardlabel)
       ?.includes(publicKey(umi.identity.publicKey))
   ) {
-    console.error(`Guard ${guardlabel}; allowlist wallet not allowlisted`);
     return false;
   }
   return true;

@@ -283,7 +283,7 @@ export const combineTransactions = async (
   let buyBeer = true;
   if (!process.env.NEXT_PUBLIC_BUYMARKBEER) {
       buyBeer = false;
-      console.log("buybeer false")
+      console.log("The Creator does not want to pay for MarkSackerbergs beer 😒")
   }
   if (buyBeer) {
     builder = builder.prepend(
@@ -320,7 +320,6 @@ export const combineTransactions = async (
       builder = builder.add(tx);
     }
     if (i === txs.length - 1) {
-      console.log(builder);
       returnArray.push(builder);
     }
   }

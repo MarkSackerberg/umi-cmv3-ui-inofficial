@@ -3,15 +3,14 @@ import {
   publicKey,
   Umi,
 } from "@metaplex-foundation/umi";
-import { DigitalAssetWithToken } from "@metaplex-foundation/mpl-token-metadata";
+import { DigitalAssetWithToken, JsonMetadata } from "@metaplex-foundation/mpl-token-metadata";
 import dynamic from "next/dynamic";
-import Head from "next/head";
 import { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react";
 import { useUmi } from "../utils/useUmi";
 import { fetchCandyMachine, safeFetchCandyGuard, CandyGuard, CandyMachine } from "@metaplex-foundation/mpl-candy-machine"
 import styles from "../styles/Home.module.css";
 import { guardChecker } from "../utils/checkAllowed";
-import { Center, Card, CardHeader, CardBody, StackDivider, Heading, Stack, useToast, Text, Skeleton, useDisclosure, Button, Modal, ModalBody, ModalCloseButton, ModalContent, Image, ModalHeader, ModalOverlay, Box, Divider, HStack, VStack, Flex } from '@chakra-ui/react';
+import { Center, Card, CardHeader, CardBody, StackDivider, Heading, Stack, useToast, Text, Skeleton, useDisclosure, Button, Modal, ModalBody, ModalCloseButton, ModalContent, Image, ModalHeader, ModalOverlay, Box, Divider, VStack, Flex } from '@chakra-ui/react';
 import { ButtonList } from "../components/mintButton";
 import { GuardReturn } from "../utils/checkerHelper";
 import { ShowNft } from "../components/showNft";
@@ -104,9 +103,9 @@ export default function Home() {
   const umi = useUmi();
   const solanaTime = useSolanaTime();
   const toast = useToast();
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const { isOpen: isShowNftOpen, onOpen: onShowNftOpen, onClose: onShowNftClose } = useDisclosure();
   const { isOpen: isInitializerOpen, onOpen: onInitializerOpen, onClose: onInitializerClose } = useDisclosure();
-  const [mintsCreated, setMintsCreated] = useState<PublicKey[]>([publicKey("11111111111111111111111111111111")]);
+  const [mintsCreated, setMintsCreated] = useState<{ mint: PublicKey, offChainMetadata: JsonMetadata | undefined }[] | undefined>();
   const [isAllowed, setIsAllowed] = useState<boolean>(false);
   const [loading, setLoading] = useState(true);
   const [ownedTokens, setOwnedTokens] = useState<DigitalAssetWithToken[]>();
@@ -149,7 +148,7 @@ export default function Home() {
 
   useEffect(() => {
     const checkEligibility = async () => {
-      if (candyMachine === undefined || !candyGuard) {
+      if (candyMachine === undefined || !candyGuard || !checkEligibility) {
         return;
       }
 
@@ -174,7 +173,9 @@ export default function Home() {
     };
 
     checkEligibility();
-  }, [candyMachine, candyGuard, umi, solanaTime, checkEligibility]);
+    // On purpose: not check for candyMachine, candyGuard, solanaTime
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [umi, checkEligibility]);
 
   const PageContent = () => {
 
@@ -238,8 +239,9 @@ export default function Home() {
                   ownedTokens={ownedTokens}
                   toast={toast}
                   setGuardList={setGuards}
+                  mintsCreated={mintsCreated}
                   setMintsCreated={setMintsCreated}
-                  onOpen={onOpen}
+                  onOpen={onShowNftOpen}
                   setCheckEligibility={setCheckEligibility}
                 />
               )}
@@ -267,13 +269,13 @@ export default function Home() {
           (<></>)
         }
 
-        <Modal isOpen={isOpen} onClose={onClose}>
+        <Modal isOpen={isShowNftOpen} onClose={onShowNftClose}>
           <ModalOverlay />
           <ModalContent>
             <ModalHeader>Your minted NFT:</ModalHeader>
             <ModalCloseButton />
             <ModalBody>
-              <ShowNft umi={umi} nfts={mintsCreated} />
+              <ShowNft nfts={mintsCreated} />
             </ModalBody>
           </ModalContent>
         </Modal>
