@@ -173,7 +173,9 @@ export default function Home() {
     };
 
     checkEligibility();
-  }, [candyMachine, candyGuard, umi, solanaTime, checkEligibility]);
+    // On purpose: not check for candyMachine, candyGuard, solanaTime
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [umi, checkEligibility]);
 
   const PageContent = () => {
 
