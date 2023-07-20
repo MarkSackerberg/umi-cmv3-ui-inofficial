@@ -20,6 +20,13 @@ const updateLoadingText = (loadingText: string | undefined, guardList: GuardRetu
     setGuardList(newGuardList);
 }
 
+const detectBotTax = (logs: string[]) => {
+    if (logs.find((l) => l.includes("Candy Guard Botting"))) {
+        throw new Error(`Candy Guard Bot Tax triggered. Check transaction`);
+    }
+    return false;
+}
+
 const mintClick = async (
     umi: Umi,
     guard: GuardReturn,
@@ -131,7 +138,8 @@ const mintClick = async (
             throw new Error(`no tx on chain for signature ${lastSignature}`)
         }
 
-
+        const logs: string[] = transaction.meta.logs;
+        detectBotTax(logs);
 
         updateLoadingText(`waiting for confirmation`, guardList, guardToUse.label, setGuardList);
 
