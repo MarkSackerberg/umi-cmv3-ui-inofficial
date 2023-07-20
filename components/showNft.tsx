@@ -1,5 +1,5 @@
 import { JsonMetadata } from "@metaplex-foundation/mpl-token-metadata";
-import { PublicKey, Umi } from "@metaplex-foundation/umi";
+import { PublicKey } from "@metaplex-foundation/umi";
 import { Box, Text, Divider, SimpleGrid, VStack } from "@chakra-ui/react";
 import React from 'react';
 
@@ -27,6 +27,7 @@ const Traits = ({ metadata }: TraitsProps) => {
     if (metadata === undefined || metadata.attributes === undefined) {
         return <></>
     }
+    console.log("traits")
 
 
     //find all attributes with trait_type and value
@@ -39,24 +40,12 @@ const Traits = ({ metadata }: TraitsProps) => {
 };
 
 
-//https://chakra-templates.dev/page-sections/carousels
-const settings = {
-    dots: false,
-    arrows: false,
-    fade: true,
-    infinite: true,
-    autoplay: false,
-    speed: 500,
-    autoplaySpeed: 5000,
-    slidesToShow: 1,
-    slidesToScroll: 1,
-};
 
 export default function Card({ metadata }: { metadata: JsonMetadata }) {
 
     // Get the images from the metadata if animation_url is present use this
     const image = metadata.animation_url ?? metadata.image;
-
+    console.log("image: " + image)
     return (
         <Box
             position={'relative'}
@@ -75,7 +64,7 @@ export default function Card({ metadata }: { metadata: JsonMetadata }) {
             />
             <Text fontWeight={"semibold"} marginTop={"15px"}>{metadata.name}</Text>
             <Text>{metadata.description}</Text>
-            <Traits metadata={metadata}></Traits>
+            <Traits metadata={metadata} />
         </Box>
     );
 }
@@ -84,7 +73,6 @@ type Props = {
     nfts: { mint: PublicKey, offChainMetadata: JsonMetadata | undefined }[] | undefined;
 };
 
-//create a async  function that takes in a umi and a nftAdress and returns a JSX element. It should fetch the digital asset from the nftAdress and then return a JSX element with the image and name of the nft
 export const ShowNft = ({ nfts }: Props) => {
     if (nfts === undefined) {
         return <></>
@@ -96,6 +84,6 @@ export const ShowNft = ({ nfts }: Props) => {
         return <></>
     }
     return (
-        <Card metadata={offChainMetadata} key={mint}></Card>
+        <Card metadata={offChainMetadata} key={mint} />
     );
 }
