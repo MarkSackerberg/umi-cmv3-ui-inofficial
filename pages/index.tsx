@@ -275,7 +275,7 @@ export default function Home() {
             <ModalHeader>Your minted NFT:</ModalHeader>
             <ModalCloseButton />
             <ModalBody>
-              <ShowNft umi={umi} nfts={mintsCreated} />
+              <ShowNft nfts={mintsCreated} />
             </ModalBody>
           </ModalContent>
         </Modal>

@@ -81,12 +81,11 @@ export default function Card({ metadata }: { metadata: JsonMetadata }) {
 }
 
 type Props = {
-    umi: Umi;
     nfts: { mint: PublicKey, offChainMetadata: JsonMetadata | undefined }[] | undefined;
 };
 
 //create a async  function that takes in a umi and a nftAdress and returns a JSX element. It should fetch the digital asset from the nftAdress and then return a JSX element with the image and name of the nft
-export const ShowNft = ({ umi, nfts }: Props) => {
+export const ShowNft = ({ nfts }: Props) => {
     if (nfts === undefined) {
         return <></>
     }
