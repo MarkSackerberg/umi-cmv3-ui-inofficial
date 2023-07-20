@@ -21,6 +21,7 @@ export interface GuardReturn {
   label: string;
   allowed: boolean;
   minting?: boolean;
+  loadingText?: string;
   reason?: string;
 }
 
