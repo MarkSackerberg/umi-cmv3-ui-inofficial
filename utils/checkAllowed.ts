@@ -279,7 +279,7 @@ export const guardChecker = async (
       );
       if (
         !digitalAssetWithToken ||
-        digitalAssetWithToken.token.amount >= tokenBurn.value.amount
+        digitalAssetWithToken.token.amount < tokenBurn.value.amount
       ) {
         guardReturn.push({
           label: eachGuard.label,
@@ -298,7 +298,7 @@ export const guardChecker = async (
       );
       if (
         !digitalAssetWithToken ||
-        digitalAssetWithToken.token.amount >= tokenGate.value.amount
+        digitalAssetWithToken.token.amount < tokenGate.value.amount
       ) {
         guardReturn.push({
           label: eachGuard.label,
@@ -317,7 +317,7 @@ export const guardChecker = async (
       );
       if (
         !digitalAssetWithToken ||
-        digitalAssetWithToken.token.amount >= tokenPayment.value.amount
+        digitalAssetWithToken.token.amount < tokenPayment.value.amount
       ) {
         guardReturn.push({
           label: eachGuard.label,
@@ -337,7 +337,7 @@ export const guardChecker = async (
       );
       if (
         !digitalAssetWithToken ||
-        digitalAssetWithToken.token.amount >= token2022Payment.value.amount
+        digitalAssetWithToken.token.amount < token2022Payment.value.amount
       ) {
         guardReturn.push({
           label: eachGuard.label,
