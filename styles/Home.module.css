@@ -1,14 +1,14 @@
-.wallet { 
+.wallet {
   display: flex;
-  padding: 3rem;
+  padding: 1rem;
   flex-direction: row-reverse;
+  background-color: 0x000000;
+  border: none;
 }
 
 .center {
   position: relative;
-  padding: 3rem;
   width: 100%;
-  max-width: 600px;
   margin: 0 auto;
 }
 
