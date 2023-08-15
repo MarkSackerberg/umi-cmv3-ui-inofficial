@@ -11,6 +11,7 @@
   "dependencies": {
     "@chakra-ui/next-js": "^2.1.4",
     "@chakra-ui/react": "^2.7.1",
+    "@coinflowlabs/react": "^2.3.1",
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
     "@metaplex-foundation/mpl-candy-machine": "6.0.0-alpha.16",
@@ -22,6 +23,8 @@
     "@metaplex-foundation/umi-signer-wallet-adapters": "^0.8.4",
     "@metaplex-foundation/umi-uploader-nft-storage": "^0.8.4",
     "@next/font": "13.1.6",
+    "@solana-mobile/wallet-adapter-mobile": "^2.0.0",
+    "@solana/spl-token": "^0.3.7",
     "@solana/wallet-adapter-base": "^0.9.22",
     "@solana/wallet-adapter-react": "^0.15.32",
     "@solana/wallet-adapter-react-ui": "^0.9.31",

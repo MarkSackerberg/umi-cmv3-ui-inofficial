@@ -7,7 +7,6 @@ import {
 import { DigitalAssetWithToken, JsonMetadata } from "@metaplex-foundation/mpl-token-metadata";
 import { useEffect, useMemo, useState } from "react";
 import { useUmi } from "../utils/useUmi";
-import styles from "../styles/Home.module.css";
 import { guardChecker } from "../utils/checkAllowed";
 import { Center, Card, CardHeader, CardBody, StackDivider, Heading, Stack, useToast, Text, Skeleton, useDisclosure, Button, Modal, ModalBody, ModalCloseButton, ModalContent, Image, ModalHeader, ModalOverlay, Box, Divider, VStack, Flex, Input } from '@chakra-ui/react';
 import { ButtonList } from "../components/mintButton";
@@ -20,6 +19,7 @@ import { useCandyMachine } from "@/hooks";
 import { MainContainer } from "@/components/containers";
 
 import { PrimaryButton } from "@/components/buttons";
+import { CoinflowModal } from "@/components/coinflow";
 
 export interface IsMinting {
   label: string;
@@ -50,6 +50,10 @@ export default function Home() {
     { label: "startDefault", allowed: false },
   ]);
   const [checkEligibility, setCheckEligibility] = useState<boolean>(true);
+
+  const useCoinflow =
+    !!process.env.NEXT_PUBLIC_COINFLOW_MERCHANT_ID &&
+    !!process.env.NEXT_PUBLIC_COINFLOW_ENV;
 
   if (!process.env.NEXT_PUBLIC_CANDY_MACHINE_ID) {
     console.error("No candy machine in .env!");
@@ -158,27 +162,47 @@ export default function Home() {
         <MainContainer justifyContent="space-between" w="600px" h="600px">
           <Text textAlign="center">Welcome to Kyogen Clash mint</Text>
 
-          <PrimaryButton disabled={isAllowed} onClick={onMintPaymentOpen}>Mint</PrimaryButton>
+          <PrimaryButton
+            disabled={isAllowed}
+            onClick={useCoinflow ? onMintPaymentOpen : handleMint}
+          >
+            Mint
+          </PrimaryButton>
         </MainContainer>
 
-        <Modal isOpen={isMintPaymentOpen} onClose={onMintPaymentClose}>
-          <ModalOverlay/>
-          <ModalContent pt="20" maxW="900px" bg="transparent">
-            <Flex justifyContent="space-around" gap="2px" alignItems="center">
-              <MainContainer justifyContent="space-between" w="410px" h="520px">
-                <Text>Your wallet</Text>
-                <PrimaryButton onClick={onMintPaymentOpen}>Mint</PrimaryButton>
-              </MainContainer>
-              <MainContainer justifyContent="space-between" w="410px" h="520px">
-                <Text>Coinflow</Text>
-                <PrimaryButton onClick={onMintPaymentOpen}>Proceed to checkout</PrimaryButton>
-              </MainContainer>
-            </Flex>
-          </ModalContent>
-        </Modal>
+        {useCoinflow && (
+          <Modal isOpen={isMintPaymentOpen} onClose={onMintPaymentClose}>
+            <ModalOverlay />
+            <ModalContent pt="20" maxW="900px" bg="transparent">
+              <Flex justifyContent="space-around" gap="2px" alignItems="center">
+                <MainContainer
+                  justifyContent="space-between"
+                  w="410px"
+                  h="520px"
+                >
+                  <Text>Your wallet</Text>
+                  <PrimaryButton onClick={onMintPaymentOpen}>
+                    Mint
+                  </PrimaryButton>
+                </MainContainer>
+                <MainContainer
+                  justifyContent="space-between"
+                  w="410px"
+                  h="520px"
+                >
+                  <Text>Coinflow</Text>
 
+                  <CoinflowModal />
+
+                  <PrimaryButton onClick={onMintPaymentOpen}>
+                    Proceed to checkout
+                  </PrimaryButton>
+                </MainContainer>
+              </Flex>
+            </ModalContent>
+          </Modal>
+        )}
       </Box>
-
     </>
   );
 }
