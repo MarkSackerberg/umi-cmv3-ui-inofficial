@@ -26,7 +26,7 @@ const StyledButton = styled(Button)`
   &:disabled,
   &.loading {
     background-color: ${colors.main.kyogenPrimaryDisabled};
-    color: ${colors.main.kyogenPrimaryDisabled};
+    color: ${colors.main.kyogenTextDisabled};
   }
 
   &:hover {

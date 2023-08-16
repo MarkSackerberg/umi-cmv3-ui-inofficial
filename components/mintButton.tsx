@@ -3,7 +3,7 @@ import { GuardReturn } from "../utils/checkerHelper";
 import { PublicKey, TransactionWithMeta, Umi, createBigInt, generateSigner, none, some, transactionBuilder } from "@metaplex-foundation/umi";
 import { DigitalAsset, DigitalAssetWithToken, JsonMetadata, fetchDigitalAsset, fetchJsonMetadata } from "@metaplex-foundation/mpl-token-metadata";
 import { mintText } from "../settings";
-import { Box, Button, Flex, HStack, Heading, SimpleGrid, Text, Tooltip, UseToastOptions } from "@chakra-ui/react";
+import { Box, Button, Flex, HStack, Heading, SimpleGrid, Text, Tooltip, UseToastOptions, filter } from "@chakra-ui/react";
 import { setComputeUnitLimit } from "@metaplex-foundation/mpl-toolbox";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { chooseGuardToUse, routeBuilder, mintArgsBuilder, combineTransactions, GuardButtonList } from "../utils/mintHelper";
@@ -184,7 +184,7 @@ const mintClick = async (
             title: 'Your mint failed!',
             description: "Please try again.",
             status: 'error',
-            duration: 9000,
+            duration: 6000,
             isClosable: true,
         })
     } finally {
@@ -268,6 +268,7 @@ export function ButtonList({
     if (!candyMachine || !candyGuard) {
         return <></>;
     }
+
     // remove duplicates from guardList
     //fucked up bugfix
     let filteredGuardlist = guardList.filter((elem, index, self) =>
@@ -282,6 +283,7 @@ export function ButtonList({
     if (filteredGuardlist.length > 1) {
         filteredGuardlist = guardList.filter((elem) => elem.label != "default");
     }
+
     let buttonGuardList = [];
     for (const guard of filteredGuardlist) {
         const text = mintText.find((elem) => elem.label === guard.label);

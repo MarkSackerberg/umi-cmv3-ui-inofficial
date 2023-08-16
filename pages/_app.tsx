@@ -12,7 +12,7 @@ import { UmiProvider } from "../utils/UmiProvider";
 import "@/styles/globals.css";
 import "@solana/wallet-adapter-react-ui/styles.css";
 import { ChakraProvider } from '@chakra-ui/react'
-import { image, headerText } from 'settings'
+import { headerText, logo_png } from 'settings'
 import { SolanaTimeProvider } from "@/utils/SolanaTimeContext";
 
 
@@ -21,10 +21,12 @@ export default function App({ Component, pageProps }: AppProps) {
   if (process.env.NEXT_PUBLIC_ENVIRONMENT === "mainnet-beta" || process.env.NEXT_PUBLIC_ENVIRONMENT === "mainnet") {
     network = WalletAdapterNetwork.Mainnet;
   }
+
   let endpoint = "https://api.devnet.solana.com";
   if (process.env.NEXT_PUBLIC_RPC) {
     endpoint = process.env.NEXT_PUBLIC_RPC;
   }
+
   const wallets = useMemo(
     () => [
       new SolflareWalletAdapter({ network }),
@@ -32,6 +34,7 @@ export default function App({ Component, pageProps }: AppProps) {
     ],
     [network]
   );
+
   return (
     <>
       <Head>
@@ -45,12 +48,13 @@ export default function App({ Component, pageProps }: AppProps) {
 
         <meta
           property="og:image"
-          content={image}
+          content={logo_png}
         />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title>{headerText}</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
+
       <ChakraProvider>
         <WalletProvider wallets={wallets}>
           <UmiProvider endpoint={endpoint}>

@@ -12,8 +12,8 @@ export const NavBar = () => {
   return (
     <Flex backgroundColor={'black'} justifyContent="space-between" alignItems="center" py="1" px="1rem">
       <Link href="/">
-        <Text fontWeight="400" letterSpacing="1px" fontSize="2.5rem">
-          Kyogen
+        <Text fontWeight="400" letterSpacing="1px" fontSize="2.5rem" color="white">
+          Kyogen Clash
         </Text>
       </Link>
       <WalletMultiButtonDynamic />

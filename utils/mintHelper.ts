@@ -40,6 +40,10 @@ export interface GuardButtonList extends GuardReturn {
   tooltip?: string;
 }
 
+/*
+ * Finds and returns `guard` group in CandyGuard groups.
+ * Returns default guards or error.
+ */
 export const chooseGuardToUse = (
   guard: GuardReturn,
   candyGuard: CandyGuard
@@ -306,12 +310,15 @@ export const combineTransactions = async (
       tables = [fetchedLut]
       builder = builder.setAddressLookupTables(tables);
     } else {
+
+      /* TODO: not sure how to leverage ALTs right now and it throws nasty toast - skip.
       toast({
         title: "Stop! you should really set a lookup table!",
         status: "error",
-        duration: 90000,
+        duration: 6000,
         isClosable: true,
       });
+      */
     }
     if (!builder.fitsInOneTransaction(umi)) {
       oldBuilder = oldBuilder.setAddressLookupTables(tables)

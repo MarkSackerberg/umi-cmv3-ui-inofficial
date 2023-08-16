@@ -13,13 +13,14 @@ import { ButtonList } from "../components/mintButton";
 import { GuardReturn } from "../utils/checkerHelper";
 import { ShowNft } from "../components/showNft";
 import { InitializeModal } from "../components/initializeModal";
-import { image, headerText } from "../settings";
+import { headerText, logo_svg } from "../settings";
 import { useSolanaTime } from "@/utils/SolanaTimeContext";
 import { useCandyMachine } from "@/hooks";
 import { MainContainer } from "@/components/containers";
 
 import { PrimaryButton } from "@/components/buttons";
 import { CoinflowModal } from "@/components/coinflow";
+import { MintButton } from "@/components/buttons/MintButton.component";
 
 export interface IsMinting {
   label: string;
@@ -31,6 +32,12 @@ export default function Home() {
   const umi = useUmi();
   const solanaTime = useSolanaTime();
   const toast = useToast();
+
+  const {
+    isOpen: isShowNftOpen,
+    onOpen: onShowNftOpen,
+    onClose: onShowNftClose,
+  } = useDisclosure();
 
   const {
     isOpen: isMintPaymentOpen,
@@ -45,6 +52,7 @@ export default function Home() {
 
   const [isAllowed, setIsAllowed] = useState<boolean>(false);
   const [loading, setLoading] = useState(true);
+
   const [ownedTokens, setOwnedTokens] = useState<DigitalAssetWithToken[]>();
   const [guards, setGuards] = useState<GuardReturn[]>([
     { label: "startDefault", allowed: false },
@@ -160,14 +168,73 @@ export default function Home() {
         justifyContent="center"
       >
         <MainContainer justifyContent="space-between" w="600px" h="600px">
-          <Text textAlign="center">Welcome to Kyogen Clash mint</Text>
+          {/* WTF ??? Can't center this image - TODO */}
+          <Box
+            flexDirection="column"
+            alignContent="center"
+            justifyContent="center"
+          >
+            <Image
+              rounded={"lg"}
+              height={230}
+              objectFit={"cover"}
+              alt={"project Image"}
+              src={logo_svg}
+            />
+          </Box>
 
-          <PrimaryButton
+          {loading ? (
+            <></>
+          ) : (
+            <Flex>
+              <Box
+                border='1px'
+                borderRadius={"5px"}
+                w='full'
+                p={2}
+              >
+                <VStack>
+                  <Text fontSize={"sm"}>Available NFTs:</Text>
+                  <Text fontWeight={"semibold"}>
+                    {Number(candyMachine?.itemsLoaded) -
+                      Number(candyMachine?.itemsRedeemed)}
+                    /{candyMachine?.itemsLoaded}
+                  </Text>
+                </VStack>
+              </Box>
+            </Flex>
+          )}
+
+          <Stack spacing="8">
+             {loading ? (
+               <div>
+                 <Skeleton height="40px" my="10px" />
+                 <Skeleton height="40px" my="10px" />
+                 <Skeleton height="40px" my="10px" />
+               </div>
+             ) : (
+               <MintButton
+                 guardList={guards}
+                 candyMachine={candyMachine}
+                 candyGuard={candyGuard}
+                 umi={umi}
+                 ownedTokens={ownedTokens}
+                 toast={toast}
+                 setGuardList={setGuards}
+                 mintsCreated={mintsCreated}
+                 setMintsCreated={setMintsCreated}
+                 onOpen={onShowNftOpen}
+                 setCheckEligibility={setCheckEligibility}
+               />
+             )}
+           </Stack>
+
+          {/* <PrimaryButton
             disabled={isAllowed}
             onClick={useCoinflow ? onMintPaymentOpen : handleMint}
           >
             Mint
-          </PrimaryButton>
+          </PrimaryButton> */}
         </MainContainer>
 
         {useCoinflow && (
