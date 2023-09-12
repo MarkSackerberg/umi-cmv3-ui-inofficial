@@ -62,7 +62,7 @@ export const guardChecker = async (
   const dummyPublicKey = publicKey("11111111111111111111111111111111");
   if (
     umi.identity.publicKey === dummyPublicKey ||
-    candyMachine.itemsLoaded - Number(candyMachine.itemsRedeemed) === 0
+    Number(candyMachine.data.itemsAvailable) - Number(candyMachine.itemsRedeemed) === 0
   ) {
     for (const eachGuard of guardsToCheck) {
       guardReturn.push({
