@@ -178,7 +178,6 @@ export default function Home() {
   }, [umi, checkEligibility]);
 
   const PageContent = () => {
-
     return (
       <>
         <style jsx global>
@@ -199,7 +198,7 @@ export default function Home() {
                   <Box background={"teal.100"} borderRadius={"5px"} minWidth={"50px"} minHeight={"50px"} p={2} >
                     <VStack >
                       <Text fontSize={"sm"}>Available NFTs:</Text>
-                      <Text fontWeight={"semibold"}>{Number(candyMachine?.itemsLoaded) - Number(candyMachine?.itemsRedeemed)}/{candyMachine?.itemsLoaded}</Text>
+                      <Text fontWeight={"semibold"}>{Number(candyMachine?.data.itemsAvailable) - Number(candyMachine?.itemsRedeemed)}/{Number(candyMachine?.data.itemsAvailable)}</Text>
                     </VStack>
                   </Box>
                 </Flex>
