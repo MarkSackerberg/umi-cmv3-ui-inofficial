@@ -3,9 +3,16 @@ import { GuardReturn } from "../utils/checkerHelper";
 import { PublicKey, TransactionWithMeta, Umi, createBigInt, generateSigner, none, some, transactionBuilder } from "@metaplex-foundation/umi";
 import { DigitalAsset, DigitalAssetWithToken, JsonMetadata, fetchDigitalAsset, fetchJsonMetadata } from "@metaplex-foundation/mpl-token-metadata";
 import { mintText } from "../settings";
-import { Box, Button, Flex, HStack, Heading, SimpleGrid, Text, Tooltip, UseToastOptions } from "@chakra-ui/react";
+import {
+    Box, Button, Flex, HStack, Heading, SimpleGrid, Text, Tooltip, UseToastOptions, NumberInput,
+    NumberInputField,
+    NumberInputStepper,
+    NumberIncrementStepper,
+    NumberDecrementStepper,
+    VStack,
+} from "@chakra-ui/react";
 import { setComputeUnitLimit } from "@metaplex-foundation/mpl-toolbox";
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { chooseGuardToUse, routeBuilder, mintArgsBuilder, combineTransactions, GuardButtonList } from "../utils/mintHelper";
 import { useSolanaTime } from "@/utils/SolanaTimeContext";
 
@@ -53,6 +60,7 @@ const mintClick = async (
     candyMachine: CandyMachine,
     candyGuard: CandyGuard,
     ownedTokens: DigitalAssetWithToken[],
+    mintAmount: number,
     toast: (options: Omit<UseToastOptions, "id">) => void,
     mintsCreated: {
         mint: PublicKey;
@@ -264,10 +272,16 @@ export function ButtonList({
     setCheckEligibility
 }: Props): JSX.Element {
     const solanaTime = useSolanaTime();
+    const [mintAmount, setMintAmount] = React.useState(1);
 
     if (!candyMachine || !candyGuard) {
         return <></>;
     }
+    const handleValueChange = (valueAsString: String, valueAsNumber: number) => {
+        setMintAmount(valueAsNumber);
+        console.log(valueAsNumber)
+      };
+
     // remove duplicates from guardList
     //fucked up bugfix
     let filteredGuardlist = guardList.filter((elem, index, self) =>
@@ -336,40 +350,52 @@ export function ButtonList({
                 <Text pt='2' fontSize='sm'>
                     {buttonGuard.mintText}
                 </Text>
-                <Tooltip label={buttonGuard.tooltip} aria-label="Mint button">
+                <VStack>
+                    {process.env.NEXT_PUBLIC_CANDY_MACHINE_ID ?
+                        <NumberInput defaultValue={1} min={1} max={20} size="sm" isDisabled={!buttonGuard.allowed} onChange={handleValueChange}>
+                            <NumberInputField />
+                            <NumberInputStepper>
+                                <NumberIncrementStepper />
+                                <NumberDecrementStepper />
+                            </NumberInputStepper>
+                        </NumberInput>
+                        : null
+                    }
 
-                    <Button
-                        onClick={() =>
-                            mintClick(
-                                umi,
-                                buttonGuard,
-                                candyMachine,
-                                candyGuard,
-                                ownedTokens,
-                                toast,
-                                mintsCreated,
-                                setMintsCreated,
-                                guardList,
-                                setGuardList,
-                                onOpen,
-                                setCheckEligibility
-                            )
-                        }
-                        key={buttonGuard.label}
-                        size="sm"
-                        backgroundColor="teal.100"
-                        isDisabled={!buttonGuard.allowed}
-                        isLoading={
-                            guardList.find((elem) => elem.label === buttonGuard.label)?.minting
-                        }
-                        loadingText={
-                            guardList.find((elem) => elem.label === buttonGuard.label)?.loadingText
-                        }
-                    >
-                        {buttonGuard.buttonLabel}
-                    </Button>
-                </Tooltip>
-
+                    <Tooltip label={buttonGuard.tooltip} aria-label="Mint button">
+                        <Button
+                            onClick={() =>
+                                mintClick(
+                                    umi,
+                                    buttonGuard,
+                                    candyMachine,
+                                    candyGuard,
+                                    ownedTokens,
+                                    mintAmount,
+                                    toast,
+                                    mintsCreated,
+                                    setMintsCreated,
+                                    guardList,
+                                    setGuardList,
+                                    onOpen,
+                                    setCheckEligibility
+                                )
+                            }
+                            key={buttonGuard.label}
+                            size="sm"
+                            backgroundColor="teal.100"
+                            isDisabled={!buttonGuard.allowed}
+                            isLoading={
+                                guardList.find((elem) => elem.label === buttonGuard.label)?.minting
+                            }
+                            loadingText={
+                                guardList.find((elem) => elem.label === buttonGuard.label)?.loadingText
+                            }
+                        >
+                            {buttonGuard.buttonLabel}
+                        </Button>
+                    </Tooltip>
+                </VStack>
             </SimpleGrid>
         </Box>
     ));
