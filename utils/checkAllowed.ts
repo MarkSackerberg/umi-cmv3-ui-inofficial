@@ -1,5 +1,6 @@
 import {
   AddressGate,
+  Allocation,
   CandyGuard,
   CandyMachine,
   EndDate,
@@ -33,6 +34,7 @@ import {
   mintLimitChecker,
   ownedNftChecker,
   GuardReturn,
+  allocationChecker,
 } from "./checkerHelper";
 import { allowLists } from "./../allowlist";
 import {
@@ -114,6 +116,18 @@ export const guardChecker = async (
           allowed: false,
           reason: "AddressGate: Wrong Address",
         });
+        continue;
+      }
+    }
+
+    if (singleGuard.allocation.__option === "Some") {
+      if (!(await allocationChecker(umi, candyMachine, eachGuard))) {
+        guardReturn.push({
+          label: eachGuard.label,
+          allowed: false,
+          reason: "Allocation of this guard reached",
+        });
+        console.info(`Guard ${eachGuard.label}; allocation reached`);
         continue;
       }
     }
