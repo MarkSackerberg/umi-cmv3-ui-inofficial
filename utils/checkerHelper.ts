@@ -1,7 +1,9 @@
 import {
+  Allocation,
   CandyMachine,
   GuardSet,
   MintLimit,
+  safeFetchAllocationTrackerFromSeeds,
   safeFetchMintCounterFromSeeds,
 } from "@metaplex-foundation/mpl-candy-machine";
 import {
@@ -30,6 +32,34 @@ export const addressGateChecker = (wallet: PublicKey, address: PublicKey) => {
     return false;
   }
   return true;
+};
+
+export const allocationChecker = async (
+  umi: Umi,
+  candyMachine: CandyMachine,
+  guard: {
+    label: string;
+    guards: GuardSet;
+}
+) => {
+  const allocation = guard.guards.allocation as Some<Allocation>;
+
+  try {
+    const mintCounter = await safeFetchAllocationTrackerFromSeeds(umi, {
+      id: allocation.value.id,
+      candyMachine: candyMachine.publicKey,
+      candyGuard: candyMachine.mintAuthority,
+    });
+
+    if (mintCounter && mintCounter.count >= allocation.value.limit) {
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error(`AllocationChecker: ${error}`);
+    return false;
+  }
 };
 
 export const solBalanceChecker = (
