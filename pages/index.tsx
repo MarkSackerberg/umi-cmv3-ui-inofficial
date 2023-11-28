@@ -113,6 +113,12 @@ export default function Home() {
     { label: "startDefault", allowed: false },
   ]);
   const [checkEligibility, setCheckEligibility] = useState<boolean>(true);
+  const [mintAmount, setMintAmount] = useState<number>(1);
+
+  const handleValueChange = (valueAsString: string, valueAsNumber: number) => {
+    setMintAmount(valueAsNumber);
+    console.log(valueAsNumber);
+  };
 
   if (!process.env.NEXT_PUBLIC_CANDY_MACHINE_ID) {
     console.error("No candy machine in .env!")
@@ -242,6 +248,8 @@ export default function Home() {
                   setMintsCreated={setMintsCreated}
                   onOpen={onShowNftOpen}
                   setCheckEligibility={setCheckEligibility}
+                  mintAmount={mintAmount}
+                  handleValueChange={handleValueChange}
                 />
               )}
             </Stack>
