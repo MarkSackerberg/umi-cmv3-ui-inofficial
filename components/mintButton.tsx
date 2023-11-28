@@ -426,7 +426,7 @@ export function ButtonList({
                     {buttonGuard.mintText}
                 </Text>
                 <VStack>
-                    {process.env.NEXT_PUBLIC_CANDY_MACHINE_ID ?
+                    {process.env.NEXT_PUBLIC_MULTIMINT ?
                         <NumberInput value={mintAmount.toString()} min={1} max={20} size="sm" isDisabled={!buttonGuard.allowed} onChange={handleValueChange}>
                             <NumberInputField />
                             <NumberInputStepper>
