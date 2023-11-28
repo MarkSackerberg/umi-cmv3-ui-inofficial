@@ -10,6 +10,7 @@ import {
     NumberIncrementStepper,
     NumberDecrementStepper,
     VStack,
+    Divider,
 } from "@chakra-ui/react";
 import { fetchAddressLookupTable, setComputeUnitLimit, transferSol } from "@metaplex-foundation/mpl-toolbox";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
@@ -331,8 +332,6 @@ type Props = {
     setMintsCreated: Dispatch<SetStateAction<{ mint: PublicKey; offChainMetadata: JsonMetadata | undefined; }[] | undefined>>;
     onOpen: () => void;
     setCheckEligibility: Dispatch<SetStateAction<boolean>>;
-    mintAmount: number;
-    handleValueChange: (valueAsString: string, valueAsNumber: number) => void;
 };
 
 export function ButtonList({
@@ -347,14 +346,16 @@ export function ButtonList({
     setMintsCreated,
     onOpen,
     setCheckEligibility,
-    mintAmount,
-    handleValueChange
 }: Props): JSX.Element {
     const solanaTime = useSolanaTime();
-
+    const [numberInputValues, setNumberInputValues] = useState<{ [label: string]: number }>({});
     if (!candyMachine || !candyGuard) {
         return <></>;
     }
+
+    const handleNumberInputChange = (label: string, value: number) => {
+        setNumberInputValues(prev => ({ ...prev, [label]: value }));
+      };
 
     // remove duplicates from guardList
     //fucked up bugfix
@@ -391,21 +392,22 @@ export function ButtonList({
             allowed: guard.allowed,
             header: text
                 ? text.header
-                : "header missing in mintText.tsx",
-            mintText: text ? text.mintText : "mintText missing in mintText.tsx",
+                : "header missing in settings.tsx",
+            mintText: text ? text.mintText : "mintText missing in settings.tsx",
             buttonLabel: text
                 ? text.buttonLabel
-                : "buttonLabel missing in mintText.tsx",
+                : "buttonLabel missing in settings.tsx",
             startTime,
             endTime,
             tooltip: guard.reason,
-            amount: guard.amount
+            maxAmount: guard.maxAmount
         };
         buttonGuardList.push(buttonElement);
     }
 
     const listItems = buttonGuardList.map((buttonGuard, index) => (
         <Box key={index} marginTop={"20px"}>
+            <Divider my="10px" />
             <HStack>
                 <Heading size='xs' textTransform='uppercase'>
                     {buttonGuard.header}
@@ -427,7 +429,7 @@ export function ButtonList({
                 </Text>
                 <VStack>
                     {process.env.NEXT_PUBLIC_MULTIMINT && buttonGuard.allowed ?
-                        <NumberInput value={mintAmount.toString()} min={1} max={buttonGuard.amount < 1 ? 1 : buttonGuard.amount} size="sm" isDisabled={!buttonGuard.allowed} onChange={handleValueChange}>
+                        <NumberInput value={numberInputValues[buttonGuard.label] || 1} min={1} max={buttonGuard.maxAmount < 1 ? 1 : buttonGuard.maxAmount} size="sm" isDisabled={!buttonGuard.allowed} onChange={(valueAsString, valueAsNumber) => handleNumberInputChange(buttonGuard.label, valueAsNumber)}>
                             <NumberInputField />
                             <NumberInputStepper>
                                 <NumberIncrementStepper />
@@ -446,7 +448,7 @@ export function ButtonList({
                                     candyMachine,
                                     candyGuard,
                                     ownedTokens,
-                                    mintAmount,
+                                    numberInputValues[buttonGuard.label] || 1,
                                     toast,
                                     mintsCreated,
                                     setMintsCreated,

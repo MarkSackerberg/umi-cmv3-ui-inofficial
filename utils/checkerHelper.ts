@@ -25,7 +25,8 @@ export interface GuardReturn {
   minting?: boolean;
   loadingText?: string;
   reason?: string;
-  amount: number;
+  maxAmount: number;
+  mintAmount?: number;
 }
 
 export const addressGateChecker = (wallet: PublicKey, address: PublicKey) => {

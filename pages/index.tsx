@@ -106,14 +106,10 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [ownedTokens, setOwnedTokens] = useState<DigitalAssetWithToken[]>();
   const [guards, setGuards] = useState<GuardReturn[]>([
-    { label: "startDefault", allowed: false, amount: 0 },
+    { label: "startDefault", allowed: false, maxAmount: 0 },
   ]);
   const [checkEligibility, setCheckEligibility] = useState<boolean>(true);
-  const [mintAmount, setMintAmount] = useState<number>(1);
 
-  const handleValueChange = (valueAsString: string, valueAsNumber: number) => {
-    setMintAmount(valueAsNumber);
-  };
 
   if (!process.env.NEXT_PUBLIC_CANDY_MACHINE_ID) {
     console.error("No candy machine in .env!")
@@ -222,10 +218,10 @@ export default function Home() {
                 />
               </Box>
             </Center>
-            <Divider my="10px" />
             <Stack divider={<StackDivider />} spacing='8'>
               {loading ? (
                 <div>
+                  <Divider my="10px" />
                   <Skeleton height="30px" my="10px" />
                   <Skeleton height="30px" my="10px" />
                   <Skeleton height="30px" my="10px" />
@@ -243,8 +239,6 @@ export default function Home() {
                   setMintsCreated={setMintsCreated}
                   onOpen={onShowNftOpen}
                   setCheckEligibility={setCheckEligibility}
-                  mintAmount={mintAmount}
-                  handleValueChange={handleValueChange}
                 />
               )}
             </Stack>
