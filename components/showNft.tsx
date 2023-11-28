@@ -27,7 +27,6 @@ const Traits = ({ metadata }: TraitsProps) => {
     if (metadata === undefined || metadata.attributes === undefined) {
         return <></>
     }
-    console.log("traits")
 
 
     //find all attributes with trait_type and value
@@ -45,7 +44,6 @@ export default function Card({ metadata }: { metadata: JsonMetadata }) {
 
     // Get the images from the metadata if animation_url is present use this
     const image = metadata.animation_url ?? metadata.image;
-    console.log("image: " + image)
     return (
         <Box
             position={'relative'}

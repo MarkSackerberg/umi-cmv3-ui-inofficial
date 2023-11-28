@@ -159,7 +159,6 @@ const mintClick = async (
             tx.prepend(setComputeUnitLimit(umi, { units: 800_000 }));
             tx = tx.setAddressLookupTables(tables);
             tx = tx.setBlockhash(latestBlockhash);
-            console.log("fail before build")
             const transaction = tx.build(umi);
             mintTxs.push(transaction);
         }
@@ -400,6 +399,7 @@ export function ButtonList({
             startTime,
             endTime,
             tooltip: guard.reason,
+            amount: guard.amount
         };
         buttonGuardList.push(buttonElement);
     }
@@ -426,8 +426,8 @@ export function ButtonList({
                     {buttonGuard.mintText}
                 </Text>
                 <VStack>
-                    {process.env.NEXT_PUBLIC_MULTIMINT ?
-                        <NumberInput value={mintAmount.toString()} min={1} max={20} size="sm" isDisabled={!buttonGuard.allowed} onChange={handleValueChange}>
+                    {process.env.NEXT_PUBLIC_MULTIMINT && buttonGuard.allowed ?
+                        <NumberInput value={mintAmount.toString()} min={1} max={buttonGuard.amount < 1 ? 1 : buttonGuard.amount} size="sm" isDisabled={!buttonGuard.allowed} onChange={handleValueChange}>
                             <NumberInputField />
                             <NumberInputStepper>
                                 <NumberIncrementStepper />

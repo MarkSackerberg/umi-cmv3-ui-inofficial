@@ -94,10 +94,6 @@ const useCandyMachine = (umi: Umi, candyMachineId: string, checkEligibility: boo
 
 };
 
-export interface IsMinting {
-  label: string;
-  minting: boolean;
-}
 
 export default function Home() {
   const umi = useUmi();
@@ -110,14 +106,13 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [ownedTokens, setOwnedTokens] = useState<DigitalAssetWithToken[]>();
   const [guards, setGuards] = useState<GuardReturn[]>([
-    { label: "startDefault", allowed: false },
+    { label: "startDefault", allowed: false, amount: 0 },
   ]);
   const [checkEligibility, setCheckEligibility] = useState<boolean>(true);
   const [mintAmount, setMintAmount] = useState<number>(1);
 
   const handleValueChange = (valueAsString: string, valueAsNumber: number) => {
     setMintAmount(valueAsNumber);
-    console.log(valueAsNumber);
   };
 
   if (!process.env.NEXT_PUBLIC_CANDY_MACHINE_ID) {
