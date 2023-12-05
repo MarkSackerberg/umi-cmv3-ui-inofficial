@@ -24,6 +24,7 @@ You can use this repo to deploy your own candy machine UI.
 - For larger allowlists this UI will automatically split the mint into two transactions to avoid hitting the transaction size limit
 - It supports most of the existing guards:
   - `addressGate`
+  - `allocation`
   - `allowlist`
   - `endDate`
   - `freezeSolPayment`
@@ -32,12 +33,21 @@ You can use this repo to deploy your own candy machine UI.
   - `nftBurn`
   - `nftGate`
   - `nftPayment`
+  - `redeemedAmount`
   - `solPayment`
   - `startDate`
   - `token2022Payment`
   - `tokenBurn`
   - `tokenGate`
   - `tokenPayment`
+## Multimint
+There is also a branch which allwows the user to mint multiple NFTs at the same time:
+![image](https://github.com/MarkSackerberg/umi-cmv3-ui-inofficial/assets/93528482/0deada11-73c5-4b81-967d-6313b78739a5)
+
+This branch also allows to deactivate that functionality when setting `NEXT_PUBLIC_MULTIMINT=false` in .env.
+
+Feel free to use and test it - it's just not merged into main since I am waiting for more feedback.
+
 
 # How to use
 ## Prerequisites
