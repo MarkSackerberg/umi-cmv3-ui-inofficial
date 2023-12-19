@@ -1,7 +1,9 @@
 import {
+  Allocation,
   CandyMachine,
   GuardSet,
   MintLimit,
+  safeFetchAllocationTrackerFromSeeds,
   safeFetchMintCounterFromSeeds,
 } from "@metaplex-foundation/mpl-candy-machine";
 import {
@@ -23,6 +25,8 @@ export interface GuardReturn {
   minting?: boolean;
   loadingText?: string;
   reason?: string;
+  maxAmount: number;
+  mintAmount?: number;
 }
 
 export const addressGateChecker = (wallet: PublicKey, address: PublicKey) => {
@@ -30,6 +34,36 @@ export const addressGateChecker = (wallet: PublicKey, address: PublicKey) => {
     return false;
   }
   return true;
+};
+
+export const allocationChecker = async (
+  umi: Umi,
+  candyMachine: CandyMachine,
+  guard: {
+    label: string;
+    guards: GuardSet;
+}
+) => {
+  const allocation = guard.guards.allocation as Some<Allocation>;
+
+  try {
+    const mintCounter = await safeFetchAllocationTrackerFromSeeds(umi, {
+      id: allocation.value.id,
+      candyMachine: candyMachine.publicKey,
+      candyGuard: candyMachine.mintAuthority,
+    });
+
+    if (mintCounter) {
+      return allocation.value.limit - mintCounter.count;
+    } else {
+      // no allocation mint Counter found - not created yet
+      return allocation.value.limit;
+    }
+
+  } catch (error) {
+    console.error(`AllocationChecker: ${error}`);
+    return 0;
+  }
 };
 
 export const solBalanceChecker = (
@@ -79,14 +113,15 @@ export const mintLimitChecker = async (
       candyGuard: candyMachine.mintAuthority,
     });
 
-    if (mintCounter && mintCounter.count >= mintLimit.value.limit) {
-      return false;
+    if (mintCounter) {
+      return mintLimit.value.limit - mintCounter.count;
+    } else {
+      // no mintlimit counter found. Possibly the first mint
+      return mintLimit.value.limit;
     }
-
-    return true;
   } catch (error) {
     console.error(`mintLimitChecker: ${error}`);
-    return false;
+    return 0;
   }
 };
 
@@ -94,16 +129,12 @@ export const ownedNftChecker = async (
   ownedNfts: DigitalAssetWithToken[],
   requiredCollection: PublicKey
 ) => {
-  const digitalAssetWithToken = ownedNfts.find(
+  const count = ownedNfts.filter(
     (el) =>
       el.metadata.collection.__option === "Some" &&
       el.metadata.collection.value.key === requiredCollection
-  );
-  if (!digitalAssetWithToken) {
-    return false;
-  } else {
-    return true;
-  }
+  ).length;
+  return count;
 };
 
 export const allowlistChecker = (
@@ -174,4 +205,15 @@ export const checkTokensRequired = (
   });
 
   return nftBalanceRequired;
+};
+
+export const calculateMintable = (
+  mintableAmount: number,
+  newAmount: number
+) => {
+  if (mintableAmount > newAmount){
+    mintableAmount = newAmount;
+  }
+
+  return mintableAmount;
 };

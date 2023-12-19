@@ -27,7 +27,6 @@ const Traits = ({ metadata }: TraitsProps) => {
     if (metadata === undefined || metadata.attributes === undefined) {
         return <></>
     }
-    console.log("traits")
 
 
     //find all attributes with trait_type and value
@@ -36,7 +35,7 @@ const Traits = ({ metadata }: TraitsProps) => {
     const traitList = traits.map((t) => <Trait key={t.trait_type} heading={t.trait_type} description={t.value} />);
 
     return (
-        <><Divider marginTop={"15px"} /><SimpleGrid marginTop={"15px"}>{traitList}</SimpleGrid></>);
+        <><Divider marginTop={"15px"} /><SimpleGrid marginTop={"15px"} columns={3} spacing={5}>{traitList}</SimpleGrid></>);
 };
 
 
@@ -45,7 +44,6 @@ export default function Card({ metadata }: { metadata: JsonMetadata }) {
 
     // Get the images from the metadata if animation_url is present use this
     const image = metadata.animation_url ?? metadata.image;
-    console.log("image: " + image)
     return (
         <Box
             position={'relative'}

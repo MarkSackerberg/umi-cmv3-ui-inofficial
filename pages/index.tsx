@@ -94,10 +94,6 @@ const useCandyMachine = (umi: Umi, candyMachineId: string, checkEligibility: boo
 
 };
 
-export interface IsMinting {
-  label: string;
-  minting: boolean;
-}
 
 export default function Home() {
   const umi = useUmi();
@@ -110,9 +106,10 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [ownedTokens, setOwnedTokens] = useState<DigitalAssetWithToken[]>();
   const [guards, setGuards] = useState<GuardReturn[]>([
-    { label: "startDefault", allowed: false },
+    { label: "startDefault", allowed: false, maxAmount: 0 },
   ]);
   const [checkEligibility, setCheckEligibility] = useState<boolean>(true);
+
 
   if (!process.env.NEXT_PUBLIC_CANDY_MACHINE_ID) {
     console.error("No candy machine in .env!")
@@ -221,10 +218,10 @@ export default function Home() {
                 />
               </Box>
             </Center>
-            <Divider my="10px" />
             <Stack divider={<StackDivider />} spacing='8'>
               {loading ? (
                 <div>
+                  <Divider my="10px" />
                   <Skeleton height="30px" my="10px" />
                   <Skeleton height="30px" my="10px" />
                   <Skeleton height="30px" my="10px" />

@@ -1,5 +1,6 @@
 import {
   AddressGate,
+  Allocation,
   CandyGuard,
   CandyMachine,
   EndDate,
@@ -33,6 +34,8 @@ import {
   mintLimitChecker,
   ownedNftChecker,
   GuardReturn,
+  allocationChecker,
+  calculateMintable,
 } from "./checkerHelper";
 import { allowLists } from "./../allowlist";
 import {
@@ -69,10 +72,12 @@ export const guardChecker = async (
         label: eachGuard.label,
         allowed: false,
         reason: "Please connect your wallet to mint",
+        maxAmount: 0
       });
     }
     return { guardReturn, ownedNfts: ownedTokens };
   }
+
 
   let solBalance: SolAmount = sol(0);
   if (checkSolBalanceRequired(guardsToCheck)) {
@@ -86,6 +91,7 @@ export const guardChecker = async (
           label: eachGuard.label,
           allowed: false,
           reason: "Wallet does not exist. Do you have SOL?",
+          maxAmount: 0
         });
       }
       return { guardReturn, ownedNfts: ownedTokens };
@@ -101,6 +107,8 @@ export const guardChecker = async (
 
   for (const eachGuard of guardsToCheck) {
     const singleGuard = eachGuard.guards;
+    let mintableAmount = Number(candyMachine.data.itemsAvailable) - Number(candyMachine.itemsRedeemed);
+
     if (singleGuard.addressGate.__option === "Some") {
       const addressGate = singleGuard.addressGate as Some<AddressGate>;
       if (
@@ -113,7 +121,24 @@ export const guardChecker = async (
           label: eachGuard.label,
           allowed: false,
           reason: "AddressGate: Wrong Address",
+          maxAmount: 0
         });
+        continue;
+      }
+    }
+
+    if (singleGuard.allocation.__option === "Some") {
+      const allocatedAmount = await allocationChecker(umi, candyMachine, eachGuard);
+      mintableAmount = calculateMintable(mintableAmount, allocatedAmount);
+
+      if (allocatedAmount < 1) {
+        guardReturn.push({
+          label: eachGuard.label,
+          allowed: false,
+          reason: "Allocation of this guard reached",
+          maxAmount: 0
+        });
+        console.info(`Guard ${eachGuard.label}; allocation reached`);
         continue;
       }
     }
@@ -124,6 +149,7 @@ export const guardChecker = async (
           label: eachGuard.label,
           allowed: false,
           reason: "Wallet not allowlisted",
+          maxAmount: 0
         });
         console.info(`Guard ${eachGuard.label} wallet not allowlisted!`);
         continue;
@@ -137,6 +163,7 @@ export const guardChecker = async (
           label: eachGuard.label,
           allowed: false,
           reason: "Mint time is over!",
+          maxAmount: 0
         });
         console.info(`Guard ${eachGuard.label}; endDate reached!`);
         continue;
@@ -146,11 +173,15 @@ export const guardChecker = async (
     if (singleGuard.freezeSolPayment.__option === "Some") {
       const freezeSolPayment =
         singleGuard.freezeSolPayment as Some<FreezeSolPayment>;
+      const payableAmount = solBalance.basisPoints / freezeSolPayment.value.lamports.basisPoints;
+      mintableAmount = calculateMintable(mintableAmount, Number(payableAmount));
+
       if (freezeSolPayment.value.lamports.basisPoints > solBalance.basisPoints) {
         guardReturn.push({
           label: eachGuard.label,
           allowed: false,
           reason: "Not enough SOL",
+          maxAmount: 0
         });
         console.info(
           `Guard ${eachGuard.label}; freezeSolPayment: not enough SOL`
@@ -160,11 +191,14 @@ export const guardChecker = async (
     }
 
     if (singleGuard.mintLimit.__option === "Some") {
-      if (!(await mintLimitChecker(umi, candyMachine, eachGuard))) {
+      const amount = await mintLimitChecker(umi, candyMachine, eachGuard);
+      mintableAmount = calculateMintable(mintableAmount, amount);
+      if (amount < 1) {
         guardReturn.push({
           label: eachGuard.label,
           allowed: false,
           reason: "Mint limit of this wallet reached",
+          maxAmount: 0
         });
         console.info(`Guard ${eachGuard.label}; mintLimit reached`);
         continue;
@@ -185,19 +219,26 @@ export const guardChecker = async (
           label: eachGuard.label,
           allowed: false,
           reason: "Not enough tokens!",
+          maxAmount: 0
         });
         console.info(`${eachGuard.label}: Token Balance too low !`);
         continue;
+      } else {
+        const payableAmount = freezeTokenPayment.value.amount / digitalAssetWithToken.token.amount;
+        mintableAmount = calculateMintable(mintableAmount, Number(payableAmount));
       }
     }
 
     if (singleGuard.nftBurn.__option === "Some") {
       const nftBurn = singleGuard.nftBurn as Some<NftBurn>;
-      if (!ownedNftChecker(ownedTokens, nftBurn.value.requiredCollection)) {
+      const payableAmount = await ownedNftChecker(ownedTokens, nftBurn.value.requiredCollection);
+      mintableAmount = calculateMintable(mintableAmount, payableAmount);
+      if (payableAmount === 0) {
         guardReturn.push({
           label: eachGuard.label,
           allowed: false,
           reason: "No NFT to burn!",
+          maxAmount: 0
         });
         console.info(`${eachGuard.label}: No Nft to burn!`);
         continue;
@@ -211,6 +252,7 @@ export const guardChecker = async (
           label: eachGuard.label,
           allowed: false,
           reason: "No NFT of the requred held!",
+          maxAmount: 0
         });
         console.info(`${eachGuard.label}: NftGate no NFT held!`);
         continue;
@@ -219,11 +261,14 @@ export const guardChecker = async (
 
     if (singleGuard.nftPayment.__option === "Some") {
       const nftPayment = singleGuard.nftPayment as Some<NftPayment>;
-      if (!ownedNftChecker(ownedTokens, nftPayment.value.requiredCollection)) {
+      const payableAmount = await ownedNftChecker(ownedTokens, nftPayment.value.requiredCollection);
+      mintableAmount = calculateMintable(mintableAmount, payableAmount);
+      if (payableAmount === 0) {
         guardReturn.push({
           label: eachGuard.label,
           allowed: false,
           reason: "No NFT to pay with!",
+          maxAmount: 0
         });
         console.info(`${eachGuard.label}: nftPayment no NFT to pay with`);
         continue;
@@ -232,11 +277,15 @@ export const guardChecker = async (
 
     if (singleGuard.redeemedAmount.__option === "Some") {
       const redeemedAmount = singleGuard.redeemedAmount as Some<RedeemedAmount>;
+      const payableAmount = redeemedAmount.value.maximum - candyMachine.itemsRedeemed;
+
+      mintableAmount = calculateMintable(mintableAmount, Number(payableAmount));
       if (redeemedAmount.value.maximum >= candyMachine.itemsRedeemed) {
         guardReturn.push({
           label: eachGuard.label,
           allowed: false,
           reason: "Too many NFTs redeemed!",
+          maxAmount: 0
         });
         console.info(
           `${eachGuard.label}: redeemedAmount Too many NFTs redeemed!`
@@ -247,11 +296,15 @@ export const guardChecker = async (
 
     if (singleGuard.solPayment.__option === "Some") {
       const solPayment = singleGuard.solPayment as Some<SolPayment>;
+      const payableAmount = solBalance.basisPoints / solPayment.value.lamports.basisPoints;
+      mintableAmount = calculateMintable(mintableAmount, Number(payableAmount));
+
       if (solPayment.value.lamports.basisPoints > solBalance.basisPoints) {
         guardReturn.push({
           label: eachGuard.label,
           allowed: false,
           reason: "Not enough SOL!",
+          maxAmount: 0
         });
         console.info(`${eachGuard.label} SolPayment not enough SOL!`);
         continue;
@@ -265,6 +318,7 @@ export const guardChecker = async (
           label: eachGuard.label,
           allowed: false,
           reason: "StartDate not reached!",
+          maxAmount: 0
         });
         console.info(`${eachGuard.label} StartDate not reached!`);
 
@@ -285,10 +339,13 @@ export const guardChecker = async (
           label: eachGuard.label,
           allowed: false,
           reason: "Not enough tokens!",
+          maxAmount: 0
         });
         console.info(`${eachGuard.label} tokenBurn not enough tokens!`);
         continue;
       }
+      const payableAmount = tokenBurn.value.amount / digitalAssetWithToken.token.amount;
+      mintableAmount = calculateMintable(mintableAmount, Number(payableAmount));
     }
 
     if (singleGuard.tokenGate.__option === "Some") {
@@ -304,6 +361,7 @@ export const guardChecker = async (
           label: eachGuard.label,
           allowed: false,
           reason: "Not enough tokens!",
+          maxAmount: 0
         });
         console.info(`${eachGuard.label} tokenGate not enough tokens!`);
         continue;
@@ -323,10 +381,14 @@ export const guardChecker = async (
           label: eachGuard.label,
           allowed: false,
           reason: "Not enough tokens!",
+          maxAmount: 0
         });
         console.info(`${eachGuard.label} tokenPayment not enough tokens!`);
         continue;
       }
+      const payableAmount = tokenPayment.value.amount / digitalAssetWithToken.token.amount;
+      mintableAmount = calculateMintable(mintableAmount, Number(payableAmount));
+
     }
 
     if (singleGuard.token2022Payment.__option === "Some") {
@@ -343,12 +405,16 @@ export const guardChecker = async (
           label: eachGuard.label,
           allowed: false,
           reason: "Not enough tokens!",
+          maxAmount: 0
         });
         console.info(`${eachGuard.label} token2022Payment not enough tokens!`);
         continue;
       }
+      const payableAmount = token2022Payment.value.amount / digitalAssetWithToken.token.amount;
+      mintableAmount = calculateMintable(mintableAmount, Number(payableAmount));
+
     }
-    guardReturn.push({ label: eachGuard.label, allowed: true });
+    guardReturn.push({ label: eachGuard.label, allowed: true, maxAmount: mintableAmount });
   }
   return { guardReturn, ownedTokens };
 };

@@ -22,14 +22,8 @@ import {
   TransactionBuilder,
   none,
   AddressLookupTableInput,
-  sol,
 } from "@metaplex-foundation/umi";
 import { GuardReturn } from "./checkerHelper";
-import {
-  fetchAddressLookupTable,
-  transferSol,
-} from "@metaplex-foundation/mpl-toolbox";
-import { UseToastOptions } from "@chakra-ui/react";
 
 export interface GuardButtonList extends GuardReturn {
   header: string;
@@ -273,46 +267,20 @@ export const routeBuilder = async (
 };
 
 // combine transactions. return TransactionBuilder[]
-export const combineTransactions = async (
+export const combineTransactions = (
   umi: Umi,
   txs: TransactionBuilder[],
-  toast: (options: Omit<UseToastOptions, "id">) => void
+  tables: AddressLookupTableInput[]
 ) => {
   const returnArray: TransactionBuilder[] = [];
   let builder = transactionBuilder();
-  let buyBeer = true;
-  if (!process.env.NEXT_PUBLIC_BUYMARKBEER) {
-      buyBeer = false;
-      console.log("The Creator does not want to pay for MarkSackerbergs beer 😒")
-  }
-  if (buyBeer) {
-    builder = builder.prepend(
-      transferSol(umi, {
-        destination: publicKey("BeeryDvghgcKPTUw3N3bdFDFFWhTWdWHnsLuVebgsGSD"),
-        amount: sol(Number(0.005)),
-      })
-    );
-  }
+
   // combine as many transactions as possible into one
   for (let i = 0; i <= txs.length - 1; i++) {
     const tx = txs[i];
     let oldBuilder = builder;
     builder = builder.add(tx);
-    let tables: AddressLookupTableInput[] = [];
-    const lut = process.env.NEXT_PUBLIC_LUT;
-    if (lut) {
-      const lutPubKey = publicKey(lut);
-      const fetchedLut = await fetchAddressLookupTable(umi, lutPubKey);
-      tables = [fetchedLut]
-      builder = builder.setAddressLookupTables(tables);
-    } else {
-      toast({
-        title: "Stop! you should really set a lookup table!",
-        status: "error",
-        duration: 90000,
-        isClosable: true,
-      });
-    }
+
     if (!builder.fitsInOneTransaction(umi)) {
       oldBuilder = oldBuilder.setAddressLookupTables(tables)
       returnArray.push(oldBuilder);
