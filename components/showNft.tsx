@@ -35,7 +35,7 @@ const Traits = ({ metadata }: TraitsProps) => {
     const traitList = traits.map((t) => <Trait key={t.trait_type} heading={t.trait_type} description={t.value} />);
 
     return (
-        <><Divider marginTop={"15px"} /><SimpleGrid marginTop={"15px"}>{traitList}</SimpleGrid></>);
+        <><Divider marginTop={"15px"} /><SimpleGrid marginTop={"15px"} columns={3} spacing={5}>{traitList}</SimpleGrid></>);
 };
 
 
