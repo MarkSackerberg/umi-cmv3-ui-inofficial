@@ -7,7 +7,7 @@ import { DigitalAssetWithToken, JsonMetadata } from "@metaplex-foundation/mpl-to
 import dynamic from "next/dynamic";
 import { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react";
 import { useUmi } from "../utils/useUmi";
-import { fetchCandyMachine, safeFetchCandyGuard, CandyGuard, CandyMachine } from "@metaplex-foundation/mpl-candy-machine"
+import { fetchCandyMachine, safeFetchCandyGuard, CandyGuard, CandyMachine, AccountVersion } from "@metaplex-foundation/mpl-candy-machine"
 import styles from "../styles/Home.module.css";
 import { guardChecker } from "../utils/checkAllowed";
 import { Center, Card, CardHeader, CardBody, StackDivider, Heading, Stack, useToast, Text, Skeleton, useDisclosure, Button, Modal, ModalBody, ModalCloseButton, ModalContent, Image, ModalHeader, ModalOverlay, Box, Divider, VStack, Flex } from '@chakra-ui/react';
@@ -51,6 +51,18 @@ const useCandyMachine = (umi: Umi, candyMachineId: string, checkEligibility: boo
         let candyMachine;
         try {
           candyMachine = await fetchCandyMachine(umi, publicKey(candyMachineId));
+          //verify CM Version
+          if (candyMachine.version != AccountVersion.V2){
+            toast({
+              id: "wrong-account-version",
+              title: "Wrong candy machine account version!",
+              description: "Please use latest sugar to create your candy machine. Need Account Version 2!",
+              status: "error",
+              duration: 999999,
+              isClosable: true,
+            });
+            return;
+          }
         } catch (e) {
           console.error(e);
           toast({
