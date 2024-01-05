@@ -42,6 +42,7 @@ import {
   DigitalAssetWithToken,
   fetchAllDigitalAssetWithTokenByOwner,
 } from "@metaplex-foundation/mpl-token-metadata";
+import { checkAtaValid } from "./validateConfig";
 
 export const guardChecker = async (
   umi: Umi,
@@ -76,6 +77,10 @@ export const guardChecker = async (
       });
     }
     return { guardReturn, ownedNfts: ownedTokens };
+  }
+
+  if (candyMachine.authority === umi.identity.publicKey){
+    checkAtaValid(umi, guardsToCheck);
   }
 
 
