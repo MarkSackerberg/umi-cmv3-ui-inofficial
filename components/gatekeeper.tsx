@@ -22,7 +22,7 @@ const Gatekeeper = ({
       cluster={network}
       connection={new Connection(endpoint)}
       gatekeeperNetwork={new PublicKey(gatekeeperNetwork)}
-      broadcastTransaction={false}
+      broadcastTransaction={true}
       gatekeeperSendsTransaction={false}
     >
       {children}
