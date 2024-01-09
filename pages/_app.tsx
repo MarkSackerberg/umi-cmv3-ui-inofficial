@@ -10,6 +10,7 @@ import "@solana/wallet-adapter-react-ui/styles.css";
 import { ChakraProvider } from '@chakra-ui/react'
 import { image, headerText } from 'settings'
 import { SolanaTimeProvider } from "@/utils/SolanaTimeContext";
+import Gatekeeper from "../components/gatekeeper";
 
 
 export default function App({ Component, pageProps }: AppProps) {
@@ -50,7 +51,9 @@ export default function App({ Component, pageProps }: AppProps) {
           <UmiProvider endpoint={endpoint}>
             <WalletModalProvider>
               <SolanaTimeProvider>
-                <Component {...pageProps} />
+                <Gatekeeper network={network} endpoint={endpoint}>
+                  <Component {...pageProps} />
+                </Gatekeeper>
               </SolanaTimeProvider>
             </WalletModalProvider>
           </UmiProvider>

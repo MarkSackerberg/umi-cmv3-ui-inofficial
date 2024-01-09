@@ -16,6 +16,7 @@ import { fetchAddressLookupTable, setComputeUnitLimit, transferSol } from "@meta
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { chooseGuardToUse, routeBuilder, mintArgsBuilder, combineTransactions, GuardButtonList } from "../utils/mintHelper";
 import { useSolanaTime } from "@/utils/SolanaTimeContext";
+import { useGateway } from "@civic/solana-gateway-react";
 
 const updateLoadingText = (loadingText: string | undefined, guardList: GuardReturn[], label: string, setGuardList: Dispatch<SetStateAction<GuardReturn[]>>,) => {
     const guardIndex = guardList.findIndex((g) => g.label === label);
@@ -71,11 +72,18 @@ const mintClick = async (
     guardList: GuardReturn[],
     setGuardList: Dispatch<SetStateAction<GuardReturn[]>>,
     onOpen: () => void,
-    setCheckEligibility: Dispatch<SetStateAction<boolean>>
+    setCheckEligibility: Dispatch<SetStateAction<boolean>>,
+    requestGatewayToken: () => Promise<void>,
+    gatewayTokenTx: Transaction | undefined
 ) => {
     const guardToUse = chooseGuardToUse(guard, candyGuard);
     if (!guardToUse.guards) {
         console.error("no guard defined!");
+        return;
+    }
+
+    if (guardToUse.guards.gatekeeper.__option === "Some" && !gatewayTokenTx) {
+        requestGatewayToken();
         return;
     }
 
@@ -147,7 +155,8 @@ const mintClick = async (
                     mintArgs,
                     tokenStandard: candyMachine.tokenStandard
                 }))
-
+            
+            
 
             if (buyBeer) {
                 tx = tx.prepend(
@@ -161,6 +170,10 @@ const mintClick = async (
             tx = tx.setAddressLookupTables(tables);
             tx = tx.setBlockhash(latestBlockhash);
             const transaction = tx.build(umi);
+            console.log(gatewayTokenTx);
+            if (guardToUse.guards.gatekeeper.__option === "Some" && gatewayTokenTx) {
+                mintTxs.push(gatewayTokenTx);
+            }
             mintTxs.push(transaction);
         }
         if (!mintTxs.length) {
@@ -348,6 +361,7 @@ export function ButtonList({
     setCheckEligibility,
 }: Props): JSX.Element {
     const solanaTime = useSolanaTime();
+    const { requestGatewayToken, gatewayTokenTransaction } = useGateway();
     const [numberInputValues, setNumberInputValues] = useState<{ [label: string]: number }>({});
     if (!candyMachine || !candyGuard) {
         return <></>;
@@ -455,7 +469,9 @@ export function ButtonList({
                                     guardList,
                                     setGuardList,
                                     onOpen,
-                                    setCheckEligibility
+                                    setCheckEligibility,
+                                    requestGatewayToken,
+                                    gatewayTokenTransaction
                                 )
                             }
                             key={buttonGuard.label}
