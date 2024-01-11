@@ -121,18 +121,26 @@ export const mintArgsBuilder = (
       console.error("no nft to burn found!");
     } else {
       let tokenStandard = TokenStandard.NonFungible;
+      let ruleSet = undefined;
       if (nft.metadata.tokenStandard.__option === "Some") {
         if (
           nft.metadata.tokenStandard.value ===
           TokenStandard.ProgrammableNonFungible
         ) {
           tokenStandard = TokenStandard.ProgrammableNonFungible;
+          if (
+            nft.metadata.programmableConfig.__option === "Some" &&
+            nft.metadata.programmableConfig.value.ruleSet.__option === "Some"
+          ) {
+            ruleSet = nft.metadata.programmableConfig.value.ruleSet.value
+          }
         }
       }
       mintArgs.nftBurn = some({
         mint: nft.publicKey,
         requiredCollection,
         tokenStandard,
+        ruleSet
       });
     }
   }
@@ -148,18 +156,26 @@ export const mintArgsBuilder = (
       console.error("no nft for tokenGate found!");
     } else {
       let tokenStandard = TokenStandard.NonFungible;
+      let ruleSet = undefined;
       if (nft.metadata.tokenStandard.__option === "Some") {
         if (
           nft.metadata.tokenStandard.value ===
           TokenStandard.ProgrammableNonFungible
         ) {
           tokenStandard = TokenStandard.ProgrammableNonFungible;
+          if (
+            nft.metadata.programmableConfig.__option === "Some" &&
+            nft.metadata.programmableConfig.value.ruleSet.__option === "Some"
+          ) {
+            ruleSet = nft.metadata.programmableConfig.value.ruleSet.value
+          }
         }
       }
       mintArgs.nftGate = some({
         mint: nft.publicKey,
         requiredCollection,
         tokenStandard,
+        ruleSet
       });
     }
   }
@@ -175,12 +191,19 @@ export const mintArgsBuilder = (
       console.error("no nft for tokenGate found!");
     } else {
       let tokenStandard = TokenStandard.NonFungible;
+      let ruleSet = undefined;
       if (nft.metadata.tokenStandard.__option === "Some") {
         if (
           nft.metadata.tokenStandard.value ===
           TokenStandard.ProgrammableNonFungible
         ) {
           tokenStandard = TokenStandard.ProgrammableNonFungible;
+          if (
+            nft.metadata.programmableConfig.__option === "Some" &&
+            nft.metadata.programmableConfig.value.ruleSet.__option === "Some"
+          ) {
+            ruleSet = nft.metadata.programmableConfig.value.ruleSet.value
+          }
         }
       }
       mintArgs.nftPayment = some({
@@ -188,6 +211,7 @@ export const mintArgsBuilder = (
         mint: nft.publicKey,
         requiredCollection,
         tokenStandard,
+        ruleSet
       });
     }
   }
@@ -282,7 +306,7 @@ export const combineTransactions = (
     builder = builder.add(tx);
 
     if (!builder.fitsInOneTransaction(umi)) {
-      oldBuilder = oldBuilder.setAddressLookupTables(tables)
+      oldBuilder = oldBuilder.setAddressLookupTables(tables);
       returnArray.push(oldBuilder);
       builder = new TransactionBuilder();
       builder = builder.add(tx);
