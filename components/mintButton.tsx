@@ -191,7 +191,7 @@ const mintClick = async (
         let randSignature: Uint8Array;
         let amountSent = 0;
         const sendPromises = signedTransactions.map((tx, index) => {
-            return umi.rpc.sendTransaction(tx)
+            return umi.rpc.sendTransaction(tx, { preflightCommitment: "confirmed"  })
                 .then((signature) => {
                     console.log(`Transaction ${index + 1} resolved with signature: ${signature}`);
                     amountSent = amountSent + 1;
