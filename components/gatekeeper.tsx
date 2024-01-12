@@ -2,30 +2,30 @@
 
 import { GatewayProvider } from "@civic/solana-gateway-react";
 import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
-import { useWallet } from "@solana/wallet-adapter-react";
-import { Connection, PublicKey } from "@solana/web3.js";
+import { useConnection, useWallet } from "@solana/wallet-adapter-react";
+import { Connection, PublicKey, clusterApiUrl } from "@solana/web3.js";
+import React from "react";
 
 const Gatekeeper = ({ 
   children,
   network,
-  endpoint
 }: { 
   children: React.ReactNode;
   network: WalletAdapterNetwork;
-  endpoint: string;
 }) => {
   const wallet = useWallet();
+  const { connection } = useConnection();
   const gatekeeperNetwork = process.env.NEXT_GATEKEEPER_NETWORK || "ignREusXmGrscGNUesoU9mxfds9AiYTezUKex2PsZV6";
+
   return (
     <GatewayProvider
-      wallet={wallet}
-      cluster={network}
-      connection={new Connection(endpoint)}
-      gatekeeperNetwork={new PublicKey(gatekeeperNetwork)}
-      broadcastTransaction={false}
-      gatekeeperSendsTransaction={false}
-    >
-      {children}
+        wallet={wallet}
+        cluster={network}
+        connection={connection}
+        gatekeeperNetwork={new PublicKey(gatekeeperNetwork)}
+        options={{ autoShowModal: false }}
+      >
+        {children}
     </GatewayProvider>
   )
 };

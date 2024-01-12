@@ -1,4 +1,4 @@
-import { CandyGuard, CandyMachine, mintV2 } from "@metaplex-foundation/mpl-candy-machine";
+import { CandyGuard, CandyMachine, Gatekeeper, mintV2 } from "@metaplex-foundation/mpl-candy-machine";
 import { GuardReturn } from "../utils/checkerHelper";
 import { AddressLookupTableInput, KeypairSigner, PublicKey, Transaction, TransactionBuilder, TransactionWithMeta, Umi, createBigInt, generateSigner, none, publicKey, signAllTransactions, sol, some, transactionBuilder } from "@metaplex-foundation/umi";
 import { DigitalAsset, DigitalAssetWithToken, JsonMetadata, fetchDigitalAsset, fetchJsonMetadata } from "@metaplex-foundation/mpl-token-metadata";
@@ -13,10 +13,11 @@ import {
     Divider,
 } from "@chakra-ui/react";
 import { fetchAddressLookupTable, setComputeUnitLimit, transferSol } from "@metaplex-foundation/mpl-toolbox";
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { chooseGuardToUse, routeBuilder, mintArgsBuilder, combineTransactions, GuardButtonList } from "../utils/mintHelper";
 import { useSolanaTime } from "@/utils/SolanaTimeContext";
 import { useGateway } from "@civic/solana-gateway-react";
+import { SolanaGatewayToken } from "@civic/solana-gateway-react/dist/esm/types";
 
 const updateLoadingText = (loadingText: string | undefined, guardList: GuardReturn[], label: string, setGuardList: Dispatch<SetStateAction<GuardReturn[]>>,) => {
     const guardIndex = guardList.findIndex((g) => g.label === label);
@@ -73,17 +74,11 @@ const mintClick = async (
     setGuardList: Dispatch<SetStateAction<GuardReturn[]>>,
     onOpen: () => void,
     setCheckEligibility: Dispatch<SetStateAction<boolean>>,
-    requestGatewayToken: () => Promise<void>,
-    gatewayTokenTx: Transaction | undefined
+    gatewayToken: SolanaGatewayToken | undefined,
 ) => {
     const guardToUse = chooseGuardToUse(guard, candyGuard);
     if (!guardToUse.guards) {
         console.error("no guard defined!");
-        return;
-    }
-
-    if (guardToUse.guards.gatekeeper.__option === "Some" && !gatewayTokenTx) {
-        requestGatewayToken();
         return;
     }
 
@@ -170,10 +165,6 @@ const mintClick = async (
             tx = tx.setAddressLookupTables(tables);
             tx = tx.setBlockhash(latestBlockhash);
             const transaction = tx.build(umi);
-            console.log(gatewayTokenTx);
-            if (guardToUse.guards.gatekeeper.__option === "Some" && gatewayTokenTx) {
-                mintTxs.push(gatewayTokenTx);
-            }
             mintTxs.push(transaction);
         }
         if (!mintTxs.length) {
@@ -347,6 +338,60 @@ type Props = {
     setCheckEligibility: Dispatch<SetStateAction<boolean>>;
 };
 
+const Mint = ({
+    mintClick,
+    label,
+    isLoading,
+    isDisabled,
+    loadingText,
+    gatekeeper,
+}: {
+    isLoading: boolean;
+    loadingText: string | undefined;
+    isDisabled: boolean;
+    label: string;
+    mintClick: (gatewayToken: SolanaGatewayToken | undefined) => void;
+    gatekeeper: Gatekeeper | undefined;
+}) => {
+    const [requestedGatewayToken, setRequestedGatewayToken] = useState(false);
+    const { requestGatewayToken, gatewayToken } = useGateway();
+    
+    const onClick = async () => {
+        if (!gatekeeper) {
+            mintClick(undefined);
+            return;
+        }
+
+        // if the user has not requested a gateway token yet, request one
+        if (!requestedGatewayToken) {
+            setRequestedGatewayToken(true);
+            requestGatewayToken();
+            return;
+        }
+    };
+
+    useEffect(() => {
+        if (gatewayToken && gatekeeper && requestedGatewayToken) {
+            mintClick(gatewayToken);
+            setRequestedGatewayToken(false);
+        }
+    }, [gatewayToken, gatekeeper, mintClick, requestedGatewayToken]);
+
+    return (
+        <Button
+            onClick={onClick}
+            key={label}
+            size="sm"
+            backgroundColor="teal.100"
+            isDisabled={isDisabled}
+            isLoading={isLoading}
+            loadingText={loadingText}
+        >
+            {label}
+        </Button>
+    );
+};
+
 export function ButtonList({
     umi,
     guardList,
@@ -454,39 +499,42 @@ export function ButtonList({
                     }
 
                     <Tooltip label={buttonGuard.tooltip} aria-label="Mint button">
-                        <Button
-                            onClick={() =>
-                                mintClick(
-                                    umi,
-                                    buttonGuard,
-                                    candyMachine,
-                                    candyGuard,
-                                    ownedTokens,
-                                    numberInputValues[buttonGuard.label] || 1,
-                                    toast,
-                                    mintsCreated,
-                                    setMintsCreated,
-                                    guardList,
-                                    setGuardList,
-                                    onOpen,
-                                    setCheckEligibility,
-                                    requestGatewayToken,
-                                    gatewayTokenTransaction
-                                )
-                            }
-                            key={buttonGuard.label}
-                            size="sm"
-                            backgroundColor="teal.100"
-                            isDisabled={!buttonGuard.allowed}
-                            isLoading={
-                                guardList.find((elem) => elem.label === buttonGuard.label)?.minting
-                            }
-                            loadingText={
-                                guardList.find((elem) => elem.label === buttonGuard.label)?.loadingText
-                            }
-                        >
-                            {buttonGuard.buttonLabel}
-                        </Button>
+                        
+                            <Mint
+                                mintClick={(gatewayToken: SolanaGatewayToken | undefined) => {
+                                        mintClick(
+                                            umi,
+                                            buttonGuard,
+                                            candyMachine,
+                                            candyGuard,
+                                            ownedTokens,
+                                            numberInputValues[buttonGuard.label] || 1,
+                                            toast,
+                                            mintsCreated,
+                                            setMintsCreated,
+                                            guardList,
+                                            setGuardList,
+                                            onOpen,
+                                            setCheckEligibility,
+                                            gatewayToken
+                                        )
+                                    }
+                                }
+                                label={buttonGuard.label}
+                                isDisabled={!buttonGuard.allowed}
+                                isLoading={
+                                    !!guardList.find((elem) => elem.label === buttonGuard.label)?.minting
+                                }
+                                loadingText={
+                                    guardList.find((elem) => elem.label === buttonGuard.label)?.loadingText
+                                }
+                                gatekeeper={
+                                    candyGuard.guards.gatekeeper.__option === "Some" 
+                                        ? candyGuard.guards.gatekeeper.value 
+                                        : undefined
+                                }
+                            />
+                        
                     </Tooltip>
                 </VStack>
             </SimpleGrid>

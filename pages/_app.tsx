@@ -1,5 +1,5 @@
 import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
-import { WalletProvider } from "@solana/wallet-adapter-react";
+import { ConnectionProvider, WalletProvider } from "@solana/wallet-adapter-react";
 import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
 import type { AppProps } from "next/app";
 import Head from "next/head";
@@ -47,17 +47,19 @@ export default function App({ Component, pageProps }: AppProps) {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <ChakraProvider>
-        <WalletProvider wallets={wallets}>
-          <UmiProvider endpoint={endpoint}>
-            <WalletModalProvider>
-              <SolanaTimeProvider>
-                <Gatekeeper network={network} endpoint={endpoint}>
-                  <Component {...pageProps} />
-                </Gatekeeper>
-              </SolanaTimeProvider>
-            </WalletModalProvider>
-          </UmiProvider>
-        </WalletProvider>
+        <ConnectionProvider endpoint={endpoint}>
+          <WalletProvider wallets={wallets}>
+            <UmiProvider endpoint={endpoint}>
+              <WalletModalProvider>
+                <SolanaTimeProvider>
+                  <Gatekeeper network={network}>
+                    <Component {...pageProps} />
+                  </Gatekeeper>
+                </SolanaTimeProvider>
+              </WalletModalProvider>
+            </UmiProvider>
+          </WalletProvider>
+        </ConnectionProvider>
       </ChakraProvider>
     </>
   );
