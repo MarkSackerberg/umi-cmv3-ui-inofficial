@@ -341,11 +341,13 @@ type Props = {
 const Mint = ({
     mintClick,
     label,
+    key,
     isLoading,
     isDisabled,
     loadingText,
     gatekeeper,
 }: {
+    key: string
     isLoading: boolean;
     loadingText: string | undefined;
     isDisabled: boolean;
@@ -380,7 +382,7 @@ const Mint = ({
     return (
         <Button
             onClick={onClick}
-            key={label}
+            key={key}
             size="sm"
             backgroundColor="teal.100"
             isDisabled={isDisabled}
@@ -520,7 +522,8 @@ export function ButtonList({
                                         )
                                     }
                                 }
-                                label={buttonGuard.label}
+                                key={buttonGuard.label}
+                                label={buttonGuard.buttonLabel}
                                 isDisabled={!buttonGuard.allowed}
                                 isLoading={
                                     !!guardList.find((elem) => elem.label === buttonGuard.label)?.minting
