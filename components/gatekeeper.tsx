@@ -1,5 +1,3 @@
-// create a react component that uses SolanaGatewayProvider
-
 import { GatewayProvider } from "@civic/solana-gateway-react";
 import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
