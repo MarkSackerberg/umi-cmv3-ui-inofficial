@@ -40,14 +40,8 @@ You can use this repo to deploy your own candy machine UI.
   - `tokenBurn`
   - `tokenGate`
   - `tokenPayment`
-## Multimint
-There is also a branch which allwows the user to mint multiple NFTs at the same time:
+- Multimint (can be deactivated by adding `NEXT_PUBLIC_MULTIMINT=false` to `.env`)
 ![image](https://github.com/MarkSackerberg/umi-cmv3-ui-inofficial/assets/93528482/0deada11-73c5-4b81-967d-6313b78739a5)
-
-This branch also allows to deactivate that functionality when setting `NEXT_PUBLIC_MULTIMINT=false` in .env.
-
-Feel free to use and test it - it's just not merged into main since I am waiting for more feedback.
-
 
 # How to use
 ## Prerequisites
