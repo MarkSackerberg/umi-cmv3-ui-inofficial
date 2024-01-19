@@ -157,7 +157,7 @@ export default function Home() {
 
   useEffect(() => {
     const checkEligibility = async () => {
-      if (candyMachine === undefined || !candyGuard || !checkEligibility) {
+      if (!candyMachine || !candyGuard || !checkEligibility || isShowNftOpen) {
         return;
       }
 

@@ -145,8 +145,9 @@ type Props = {
 export const InitializeModal = ({ umi, candyMachine, candyGuard, toast }: Props) => {
     const [recentSlot, setRecentSlot] = useState<number>(0);
     const [amount, setAmount] = useState<string>("5")
-
-
+    console.log(`modal ${candyMachine}`)
+    console.log(`candyGuard ${candyGuard}`)
+    console.log(`umi ${umi}`)
     useEffect(() => {
         (async () => {
             setRecentSlot(await umi.rpc.getSlot())

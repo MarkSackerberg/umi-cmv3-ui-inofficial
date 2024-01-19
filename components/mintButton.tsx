@@ -1,6 +1,6 @@
 import { CandyGuard, CandyMachine, mintV2 } from "@metaplex-foundation/mpl-candy-machine";
 import { GuardReturn } from "../utils/checkerHelper";
-import { AddressLookupTableInput, KeypairSigner, PublicKey, Transaction, TransactionBuilder, TransactionWithMeta, Umi, createBigInt, generateSigner, none, publicKey, signAllTransactions, sol, some, transactionBuilder } from "@metaplex-foundation/umi";
+import { AddressLookupTableInput, KeypairSigner, PublicKey, Transaction, TransactionBuilder, TransactionWithMeta, Umi, base58, createBigInt, generateSigner, none, publicKey, signAllTransactions, sol, some, transactionBuilder } from "@metaplex-foundation/umi";
 import { DigitalAsset, DigitalAssetWithToken, JsonMetadata, fetchDigitalAsset, fetchJsonMetadata } from "@metaplex-foundation/mpl-token-metadata";
 import { mintText } from "../settings";
 import {
@@ -16,6 +16,7 @@ import { fetchAddressLookupTable, setComputeUnitLimit, transferSol } from "@meta
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { chooseGuardToUse, routeBuilder, mintArgsBuilder, combineTransactions, GuardButtonList } from "../utils/mintHelper";
 import { useSolanaTime } from "@/utils/SolanaTimeContext";
+import { verifyTx } from "@/utils/verifyTx";
 
 const updateLoadingText = (loadingText: string | undefined, guardList: GuardReturn[], label: string, setGuardList: Dispatch<SetStateAction<GuardReturn[]>>,) => {
     const guardIndex = guardList.findIndex((g) => g.label === label);
@@ -26,13 +27,6 @@ const updateLoadingText = (loadingText: string | undefined, guardList: GuardRetu
     const newGuardList = [...guardList];
     newGuardList[guardIndex].loadingText = loadingText;
     setGuardList(newGuardList);
-}
-
-const detectBotTax = (logs: string[]) => {
-    if (logs.find((l) => l.includes("Candy Guard Botting"))) {
-        throw new Error(`Candy Guard Bot Tax triggered. Check transaction`);
-    }
-    return false;
 }
 
 const fetchNft = async (umi: Umi, nftAdress: PublicKey, toast: (options: Omit<UseToastOptions, "id">) => void) => {
@@ -168,14 +162,6 @@ const mintClick = async (
             return;
         }
 
-        // Try to combine route + first mint to reduce amount of transactions
-        //const firstTx = mintTxs.shift() as TransactionBuilder;
-        // const groupedTx = combineTransactions(umi, [routeBuild, firstTx], tables);
-        // if (!groupedTx || groupedTx.length === 0) {
-        //     console.error("no transaction to send");
-        //     return;
-        // }
-
         updateLoadingText(`Please sign`, guardList, guardToUse.label, setGuardList);
         const signedTransactions = await signAllTransactions(
             mintTxs.map((transaction, index) => ({
@@ -184,14 +170,14 @@ const mintClick = async (
             }))
         );
 
-        let randSignature: Uint8Array;
+        let signatures: Uint8Array[] = [];
         let amountSent = 0;
         const sendPromises = signedTransactions.map((tx, index) => {
             return umi.rpc.sendTransaction(tx)
                 .then((signature) => {
-                    console.log(`Transaction ${index + 1} resolved with signature: ${signature}`);
+                    console.log(`Transaction ${index + 1} resolved with signature: ${base58.deserialize(signature)[0]}`);
                     amountSent = amountSent + 1;
-                    randSignature = signature;
+                    signatures.push(signature);
                     return { status: 'fulfilled', value: signature };
                 })
                 .catch(error => {
@@ -200,21 +186,7 @@ const mintClick = async (
                 });
         });
 
-        await Promise.allSettled(sendPromises).then(results => {
-            let fulfilledCount = 0;
-            let rejectedCount = 0;
-
-            results.forEach(result => {
-                if (result.status === 'fulfilled') {
-                    fulfilledCount++;
-                } else if (result.status === 'rejected') {
-                    rejectedCount++;
-                }
-            });
-            updateLoadingText(`Sent tx ${fulfilledCount} tx`, guardList, guardToUse.label, setGuardList);
-            console.log(`Fulfilled transactions: ${fulfilledCount}`);
-            console.log(`Rejected transactions: ${rejectedCount}`);
-        });
+        await Promise.allSettled(sendPromises)
 
         if (!(await sendPromises[0]).status === true) {
             // throw error that no tx was created
@@ -222,32 +194,8 @@ const mintClick = async (
         }
         updateLoadingText(`finalizing transaction(s)`, guardList, guardToUse.label, setGuardList);
 
-        toast({
-            title: 'Mint successful!',
-            description: `You can find your NFTs in your wallet.`,
-            status: 'success',
-            duration: 90000,
-            isClosable: true,
-        })
-
+        await verifyTx(umi, signatures)
         //loop umi.rpc.getTransaction(lastSignature) until it does not return null. Sleep 1 second between each try.
-        let transaction: TransactionWithMeta | null = null;
-        for (let i = 0; i < 60; i++) {
-            if (randSignature! === undefined) {
-                throw new Error(`no tx on chain for signature`);
-            }
-            transaction = await umi.rpc.getTransaction(randSignature);
-            if (transaction) {
-                break;
-            }
-            await new Promise((resolve) => setTimeout(resolve, 1000));
-        }
-        if (transaction === null) {
-            throw new Error(`no tx on chain for test tx`)
-        }
-
-        const logs: string[] = transaction.meta.logs;
-        detectBotTax(logs);
 
         updateLoadingText("Fetching your NFT", guardList, guardToUse.label, setGuardList);
         const fetchedNft = await fetchNft(umi, nftsigners[0].publicKey, toast);
