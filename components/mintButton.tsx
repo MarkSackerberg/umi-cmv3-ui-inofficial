@@ -1,4 +1,4 @@
-import { CandyGuard, CandyMachine, mintV2 } from "@metaplex-foundation/mpl-candy-machine";
+import { CandyGuard, CandyMachine, Gatekeeper, mintV2 } from "@metaplex-foundation/mpl-candy-machine";
 import { GuardReturn } from "../utils/checkerHelper";
 import { AddressLookupTableInput, KeypairSigner, PublicKey, Transaction, TransactionBuilder, TransactionWithMeta, Umi, createBigInt, generateSigner, none, publicKey, signAllTransactions, sol, some, transactionBuilder } from "@metaplex-foundation/umi";
 import { DigitalAsset, DigitalAssetWithToken, JsonMetadata, fetchDigitalAsset, fetchJsonMetadata } from "@metaplex-foundation/mpl-token-metadata";
@@ -13,9 +13,11 @@ import {
     Divider,
 } from "@chakra-ui/react";
 import { fetchAddressLookupTable, setComputeUnitLimit, transferSol } from "@metaplex-foundation/mpl-toolbox";
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { chooseGuardToUse, routeBuilder, mintArgsBuilder, combineTransactions, GuardButtonList } from "../utils/mintHelper";
 import { useSolanaTime } from "@/utils/SolanaTimeContext";
+import { useGateway } from "@civic/solana-gateway-react";
+import { SolanaGatewayToken } from "@civic/solana-gateway-react/dist/esm/types";
 
 const updateLoadingText = (loadingText: string | undefined, guardList: GuardReturn[], label: string, setGuardList: Dispatch<SetStateAction<GuardReturn[]>>,) => {
     const guardIndex = guardList.findIndex((g) => g.label === label);
@@ -71,7 +73,8 @@ const mintClick = async (
     guardList: GuardReturn[],
     setGuardList: Dispatch<SetStateAction<GuardReturn[]>>,
     onOpen: () => void,
-    setCheckEligibility: Dispatch<SetStateAction<boolean>>
+    setCheckEligibility: Dispatch<SetStateAction<boolean>>,
+    gatewayToken: SolanaGatewayToken | undefined,
 ) => {
     const guardToUse = chooseGuardToUse(guard, candyGuard);
     if (!guardToUse.guards) {
@@ -147,7 +150,8 @@ const mintClick = async (
                     mintArgs,
                     tokenStandard: candyMachine.tokenStandard
                 }))
-
+            
+            
 
             if (buyBeer) {
                 tx = tx.prepend(
@@ -187,7 +191,7 @@ const mintClick = async (
         let randSignature: Uint8Array;
         let amountSent = 0;
         const sendPromises = signedTransactions.map((tx, index) => {
-            return umi.rpc.sendTransaction(tx)
+            return umi.rpc.sendTransaction(tx, { preflightCommitment: "confirmed"  })
                 .then((signature) => {
                     console.log(`Transaction ${index + 1} resolved with signature: ${signature}`);
                     amountSent = amountSent + 1;
@@ -334,6 +338,62 @@ type Props = {
     setCheckEligibility: Dispatch<SetStateAction<boolean>>;
 };
 
+const Mint = ({
+    mintClick,
+    label,
+    key,
+    isLoading,
+    isDisabled,
+    loadingText,
+    gatekeeper,
+}: {
+    key: string
+    isLoading: boolean;
+    loadingText: string | undefined;
+    isDisabled: boolean;
+    label: string;
+    mintClick: (gatewayToken: SolanaGatewayToken | undefined) => void;
+    gatekeeper: Gatekeeper | undefined;
+}) => {
+    const [requestedGatewayToken, setRequestedGatewayToken] = useState(false);
+    const { requestGatewayToken, gatewayToken } = useGateway();
+    
+    const onClick = async () => {
+        if (!gatekeeper) {
+            mintClick(undefined);
+            return;
+        }
+
+        // if the user has not requested a gateway token yet, request one
+        if (!requestedGatewayToken) {
+            setRequestedGatewayToken(true);
+            requestGatewayToken();
+            return;
+        }
+    };
+
+    useEffect(() => {
+        if (gatewayToken && gatekeeper && requestedGatewayToken) {
+            mintClick(gatewayToken);
+            setRequestedGatewayToken(false);
+        }
+    }, [gatewayToken, gatekeeper, mintClick, requestedGatewayToken]);
+
+    return (
+        <Button
+            onClick={onClick}
+            key={key}
+            size="sm"
+            backgroundColor="teal.100"
+            isDisabled={isDisabled}
+            isLoading={isLoading}
+            loadingText={loadingText}
+        >
+            {label}
+        </Button>
+    );
+};
+
 export function ButtonList({
     umi,
     guardList,
@@ -348,6 +408,7 @@ export function ButtonList({
     setCheckEligibility,
 }: Props): JSX.Element {
     const solanaTime = useSolanaTime();
+    const { requestGatewayToken, gatewayTokenTransaction } = useGateway();
     const [numberInputValues, setNumberInputValues] = useState<{ [label: string]: number }>({});
     if (!candyMachine || !candyGuard) {
         return <></>;
@@ -440,37 +501,43 @@ export function ButtonList({
                     }
 
                     <Tooltip label={buttonGuard.tooltip} aria-label="Mint button">
-                        <Button
-                            onClick={() =>
-                                mintClick(
-                                    umi,
-                                    buttonGuard,
-                                    candyMachine,
-                                    candyGuard,
-                                    ownedTokens,
-                                    numberInputValues[buttonGuard.label] || 1,
-                                    toast,
-                                    mintsCreated,
-                                    setMintsCreated,
-                                    guardList,
-                                    setGuardList,
-                                    onOpen,
-                                    setCheckEligibility
-                                )
-                            }
-                            key={buttonGuard.label}
-                            size="sm"
-                            backgroundColor="teal.100"
-                            isDisabled={!buttonGuard.allowed}
-                            isLoading={
-                                guardList.find((elem) => elem.label === buttonGuard.label)?.minting
-                            }
-                            loadingText={
-                                guardList.find((elem) => elem.label === buttonGuard.label)?.loadingText
-                            }
-                        >
-                            {buttonGuard.buttonLabel}
-                        </Button>
+                        
+                            <Mint
+                                mintClick={(gatewayToken: SolanaGatewayToken | undefined) => {
+                                        mintClick(
+                                            umi,
+                                            buttonGuard,
+                                            candyMachine,
+                                            candyGuard,
+                                            ownedTokens,
+                                            numberInputValues[buttonGuard.label] || 1,
+                                            toast,
+                                            mintsCreated,
+                                            setMintsCreated,
+                                            guardList,
+                                            setGuardList,
+                                            onOpen,
+                                            setCheckEligibility,
+                                            gatewayToken
+                                        )
+                                    }
+                                }
+                                key={buttonGuard.label}
+                                label={buttonGuard.buttonLabel}
+                                isDisabled={!buttonGuard.allowed}
+                                isLoading={
+                                    !!guardList.find((elem) => elem.label === buttonGuard.label)?.minting
+                                }
+                                loadingText={
+                                    guardList.find((elem) => elem.label === buttonGuard.label)?.loadingText
+                                }
+                                gatekeeper={
+                                    candyGuard.guards.gatekeeper.__option === "Some" 
+                                        ? candyGuard.guards.gatekeeper.value 
+                                        : undefined
+                                }
+                            />
+                        
                     </Tooltip>
                 </VStack>
             </SimpleGrid>
