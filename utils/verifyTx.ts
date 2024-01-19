@@ -74,5 +74,5 @@ export const verifyTx = async (umi: Umi, signatures: Uint8Array[]) => {
     });
   }
 
-  return;
+  return successful;
 };
