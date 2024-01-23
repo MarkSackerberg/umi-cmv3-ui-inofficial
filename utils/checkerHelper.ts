@@ -215,5 +215,17 @@ export const calculateMintable = (
     mintableAmount = newAmount;
   }
 
+  if (!process.env.NEXT_PUBLIC_MAXMINTAMOUNT) return mintableAmount;
+  let maxmintamount = 0;
+  try {
+    maxmintamount = Number(process.env.NEXT_PUBLIC_MAXMINTAMOUNT)
+  } catch (e){
+    console.error('process.env.NEXT_PUBLIC_MAXMINTAMOUNT is not a number!', e)
+    return mintableAmount;
+  }
+  if (mintableAmount > maxmintamount){
+    mintableAmount = maxmintamount;
+  }
+
   return mintableAmount;
 };
