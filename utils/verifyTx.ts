@@ -1,11 +1,5 @@
-import {
-  FreezeTokenPayment,
-  GuardSet,
-  TokenPayment,
-} from "@metaplex-foundation/mpl-candy-machine";
-import { fetchToken } from "@metaplex-foundation/mpl-toolbox";
 import { PublicKey, Some, Umi } from "@metaplex-foundation/umi";
-import { createStandaloneToast, useToast } from "@chakra-ui/react";
+import { createStandaloneToast } from "@chakra-ui/react";
 import { base58 } from "@metaplex-foundation/umi/serializers";
 
 const detectBotTax = (logs: string[]) => {

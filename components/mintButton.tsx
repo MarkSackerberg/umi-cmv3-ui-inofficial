@@ -9,10 +9,7 @@ import {
   KeypairSigner,
   PublicKey,
   Transaction,
-  TransactionBuilder,
-  TransactionWithMeta,
   Umi,
-  base58,
   createBigInt,
   generateSigner,
   none,
@@ -39,7 +36,6 @@ import {
   SimpleGrid,
   Text,
   Tooltip,
-  UseToastOptions,
   NumberInput,
   NumberInputField,
   NumberInputStepper,
@@ -47,6 +43,7 @@ import {
   NumberDecrementStepper,
   VStack,
   Divider,
+  createStandaloneToast,
 } from "@chakra-ui/react";
 import {
   fetchAddressLookupTable,
@@ -58,11 +55,11 @@ import {
   chooseGuardToUse,
   routeBuilder,
   mintArgsBuilder,
-  combineTransactions,
   GuardButtonList,
 } from "../utils/mintHelper";
 import { useSolanaTime } from "@/utils/SolanaTimeContext";
 import { verifyTx } from "@/utils/verifyTx";
+import { base58 } from "@metaplex-foundation/umi/serializers";
 
 const updateLoadingText = (
   loadingText: string | undefined,
@@ -83,7 +80,6 @@ const updateLoadingText = (
 const fetchNft = async (
   umi: Umi,
   nftAdress: PublicKey,
-  toast: (options: Omit<UseToastOptions, "id">) => void
 ) => {
   let digitalAsset: DigitalAsset | undefined;
   let jsonMetadata: JsonMetadata | undefined;
@@ -92,11 +88,11 @@ const fetchNft = async (
     jsonMetadata = await fetchJsonMetadata(umi, digitalAsset.metadata.uri);
   } catch (e) {
     console.error(e);
-    toast({
+    createStandaloneToast().toast({
       title: "Nft could not be fetched!",
       description: "Please check your Wallet instead.",
-      status: "error",
-      duration: 9000,
+      status: "info",
+      duration: 900,
       isClosable: true,
     });
   }
@@ -111,7 +107,6 @@ const mintClick = async (
   candyGuard: CandyGuard,
   ownedTokens: DigitalAssetWithToken[],
   mintAmount: number,
-  toast: (options: Omit<UseToastOptions, "id">) => void,
   mintsCreated:
     | {
         mint: PublicKey;
@@ -154,7 +149,7 @@ const mintClick = async (
 
     let routeBuild = await routeBuilder(umi, guardToUse, candyMachine);
     if (routeBuild) {
-      toast({
+      createStandaloneToast().toast({
         title: "Allowlist detected. Please sign to be approved to mint.",
         status: "info",
         duration: 900,
@@ -176,10 +171,10 @@ const mintClick = async (
       const fetchedLut = await fetchAddressLookupTable(umi, lutPubKey);
       tables = [fetchedLut];
     } else {
-      toast({
+      createStandaloneToast().toast({
         title: "The developer should really set a lookup table!",
-        status: "error",
-        duration: 90000,
+        status: "warning",
+        duration: 900,
         isClosable: true,
       });
     }
@@ -282,7 +277,7 @@ const mintClick = async (
 
     // Filter out successful mints and map to fetch promises
     const fetchNftPromises = successfulMints.map((mintResult) =>
-      fetchNft(umi, mintResult, toast).then((nftData) => ({
+      fetchNft(umi, mintResult).then((nftData) => ({
         mint: mintResult,
         nftData,
       }))
@@ -310,12 +305,11 @@ const mintClick = async (
     }
   } catch (e) {
     console.error(`minting failed because of ${e}`);
-
-    toast({
+    createStandaloneToast().toast({
       title: "Your mint failed!",
       description: "Please try again.",
       status: "error",
-      duration: 9000,
+      duration: 900,
       isClosable: true,
     });
   } finally {
@@ -434,7 +428,6 @@ type Props = {
   candyMachine: CandyMachine | undefined;
   candyGuard: CandyGuard | undefined;
   ownedTokens: DigitalAssetWithToken[] | undefined;
-  toast: (options: Omit<UseToastOptions, "id">) => void;
   setGuardList: Dispatch<SetStateAction<GuardReturn[]>>;
   mintsCreated:
     | {
@@ -458,7 +451,6 @@ export function ButtonList({
   candyMachine,
   candyGuard,
   ownedTokens = [], // provide default empty array
-  toast,
   setGuardList,
   mintsCreated,
   setMintsCreated,
@@ -596,7 +588,6 @@ export function ButtonList({
                   candyGuard,
                   ownedTokens,
                   numberInputValues[buttonGuard.label] || 1,
-                  toast,
                   mintsCreated,
                   setMintsCreated,
                   guardList,

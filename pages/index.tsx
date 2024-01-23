@@ -245,7 +245,6 @@ export default function Home() {
                   candyGuard={candyGuard}
                   umi={umi}
                   ownedTokens={ownedTokens}
-                  toast={toast}
                   setGuardList={setGuards}
                   mintsCreated={mintsCreated}
                   setMintsCreated={setMintsCreated}
@@ -267,7 +266,7 @@ export default function Home() {
                 <ModalHeader>Initializer</ModalHeader>
                 <ModalCloseButton />
                 <ModalBody>
-                  < InitializeModal umi={umi} candyMachine={candyMachine} candyGuard={candyGuard} toast={toast} />
+                  < InitializeModal umi={umi} candyMachine={candyMachine} candyGuard={candyGuard} />
                 </ModalBody>
               </ModalContent>
             </Modal>
