@@ -115,7 +115,7 @@ const initializeGuards =
           },
         });
         createStandaloneToast().toast({
-          title: "The routes were created!",
+          title: `The routes for ${group.label} were created!`,
           status: "success",
           duration: 9000,
           isClosable: true,
