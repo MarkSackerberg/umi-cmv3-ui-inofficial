@@ -122,7 +122,7 @@ const initializeGuards =
         });
       } else {
         createStandaloneToast().toast({
-          title: "Nothing to create here",
+          title: `Nothing to create here for group ${group.label}`,
           status: "info",
           duration: 9000,
           isClosable: true,
