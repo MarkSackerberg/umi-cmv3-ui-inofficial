@@ -18,6 +18,7 @@ import {
   publicKey,
 } from "@metaplex-foundation/umi";
 import { DigitalAssetWithToken } from "@metaplex-foundation/mpl-token-metadata";
+import { createStandaloneToast } from "@chakra-ui/react";
 
 export interface GuardReturn {
   label: string;
@@ -57,6 +58,13 @@ export const allocationChecker = async (
       return allocation.value.limit - mintCounter.count;
     } else {
       // no allocation mint Counter found - not created yet
+      createStandaloneToast().toast({
+        title: "Allocation Guard not Initialized!",
+        description: "Minting will fail!",
+        status: "error",
+        duration: 900,
+        isClosable: true,
+      });
       return allocation.value.limit;
     }
 
