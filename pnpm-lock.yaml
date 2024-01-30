@@ -18,11 +18,11 @@ dependencies:
     specifier: ^11.11.0
     version: 11.11.0(@emotion/react@11.11.1)(@types/react@18.0.27)(react@18.2.0)
   '@metaplex-foundation/mpl-candy-machine':
-    specifier: 6.0.0-alpha.16
-    version: 6.0.0-alpha.16(@metaplex-foundation/umi@0.8.4)
+    specifier: 6.0.0
+    version: 6.0.0(@metaplex-foundation/umi@0.8.4)
   '@metaplex-foundation/mpl-token-metadata':
-    specifier: 3.0.0-alpha.24
-    version: 3.0.0-alpha.24(@metaplex-foundation/umi@0.8.4)
+    specifier: ^3.0.0
+    version: ^3.0.0(@metaplex-foundation/umi@0.8.4)
   '@metaplex-foundation/mpl-toolbox':
     specifier: ^0.8.0
     version: 0.8.0(@metaplex-foundation/umi@0.8.4)
