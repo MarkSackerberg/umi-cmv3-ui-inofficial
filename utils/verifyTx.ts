@@ -40,7 +40,7 @@ export const verifyTx = async (umi: Umi, signatures: Uint8Array[]) => {
 
   const stati = await Promise.all(signatures.map(verifySignature));
   let successful: PublicKey[] = [];
-  let failed: string[] = [""]
+  let failed: string[] = []
   stati.forEach((status) => {
     if ((status.success = true)) {
       successful.push(status.mint);
@@ -49,7 +49,7 @@ export const verifyTx = async (umi: Umi, signatures: Uint8Array[]) => {
     }
   });
 
-  if (failed && failed.length > 1){
+  if (failed && failed.length > 0){
     createStandaloneToast().toast({
       title: `${failed.length} Mints failed!`,
       status: "error",
