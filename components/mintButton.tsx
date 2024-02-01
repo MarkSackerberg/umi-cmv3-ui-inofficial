@@ -266,6 +266,12 @@ const mintClick = async (
       setGuardList
     );
 
+    createStandaloneToast().toast({
+      title: `${signedTransactions.length} Transaction(s) sent!`,
+      status: "success",
+      duration: 3000,
+    });
+    
     const successfulMints = await verifyTx(umi, signatures);
 
     updateLoadingText(
