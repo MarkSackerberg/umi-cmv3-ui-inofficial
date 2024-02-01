@@ -24,8 +24,14 @@ const WalletMultiButtonDynamic = dynamic(
   { ssr: false }
 );
 
-const useCandyMachine = (umi: Umi, candyMachineId: string, checkEligibility: boolean, setCheckEligibility: Dispatch<SetStateAction<boolean>>) => {
-  const [candyMachine, setCandyMachine] = useState<CandyMachine>();
+const useCandyMachine = (
+  umi: Umi,
+  candyMachineId: string,
+  checkEligibility: boolean,
+  setCheckEligibility: Dispatch<SetStateAction<boolean>>,
+  firstRun: boolean,
+  setfirstRun: Dispatch<SetStateAction<boolean>>
+) => {
   const [candyGuard, setCandyGuard] = useState<CandyGuard>();
   const toast = useToast();
 
@@ -96,7 +102,9 @@ const useCandyMachine = (umi: Umi, candyMachineId: string, checkEligibility: boo
           return;
         }
         setCandyGuard(candyGuard);
-        setCheckEligibility(false)
+        if (firstRun){
+          setfirstRun(false)
+        }
       }
     })();
   }, [umi, checkEligibility]);
@@ -120,6 +128,7 @@ export default function Home() {
   const [guards, setGuards] = useState<GuardReturn[]>([
     { label: "startDefault", allowed: false, maxAmount: 0 },
   ]);
+  const [firstRun, setFirstRun] = useState(true);
   const [checkEligibility, setCheckEligibility] = useState<boolean>(true);
 
 
@@ -153,14 +162,15 @@ export default function Home() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  const { candyMachine, candyGuard } = useCandyMachine(umi, candyMachineId, checkEligibility, setCheckEligibility);
+  const { candyMachine, candyGuard } = useCandyMachine(umi, candyMachineId, checkEligibility, setCheckEligibility, firstRun, setFirstRun);
 
   useEffect(() => {
-    const checkEligibility = async () => {
+    const checkEligibilityFunc = async () => {
       if (!candyMachine || !candyGuard || !checkEligibility || isShowNftOpen) {
         return;
       }
-
+      setFirstRun(false);
+      
       const { guardReturn, ownedTokens } = await guardChecker(
         umi, candyGuard, candyMachine, solanaTime
       );
@@ -181,10 +191,10 @@ export default function Home() {
       setLoading(false);
     };
 
-    checkEligibility();
+    checkEligibilityFunc();
     // On purpose: not check for candyMachine, candyGuard, solanaTime
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [umi, checkEligibility]);
+  }, [umi, checkEligibility, firstRun]);
 
   const PageContent = () => {
     return (
