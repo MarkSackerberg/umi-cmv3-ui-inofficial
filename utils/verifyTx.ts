@@ -42,7 +42,7 @@ export const verifyTx = async (umi: Umi, signatures: Uint8Array[]) => {
   let successful: PublicKey[] = [];
   let failed: string[] = []
   stati.forEach((status) => {
-    if ((status.success = true)) {
+    if ((status.success === true)) {
       successful.push(status.mint);
     } else {
       failed.push(status.reason)
