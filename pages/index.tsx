@@ -32,6 +32,7 @@ const useCandyMachine = (
   firstRun: boolean,
   setfirstRun: Dispatch<SetStateAction<boolean>>
 ) => {
+  const [candyMachine, setCandyMachine] = useState<CandyMachine>();
   const [candyGuard, setCandyGuard] = useState<CandyGuard>();
   const toast = useToast();
 
