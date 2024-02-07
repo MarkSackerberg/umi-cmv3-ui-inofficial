@@ -213,7 +213,7 @@ const mintClick = async (
           })
         );
       }
-      tx.prepend(setComputeUnitLimit(umi, { units: 800_000 }));
+      tx = tx.prepend(setComputeUnitLimit(umi, { units: 800_000 }));
       tx = tx.setAddressLookupTables(tables);
       tx = tx.setBlockhash(latestBlockhash);
       const transaction = tx.build(umi);
