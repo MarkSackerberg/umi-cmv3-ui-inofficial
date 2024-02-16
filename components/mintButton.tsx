@@ -48,7 +48,6 @@ import {
 import {
   fetchAddressLookupTable,
   setComputeUnitLimit,
-  transferSol,
 } from "@metaplex-foundation/mpl-toolbox";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import {
@@ -77,10 +76,7 @@ const updateLoadingText = (
   setGuardList(newGuardList);
 };
 
-const fetchNft = async (
-  umi: Umi,
-  nftAdress: PublicKey,
-) => {
+const fetchNft = async (umi: Umi, nftAdress: PublicKey) => {
   let digitalAsset: DigitalAsset | undefined;
   let jsonMetadata: JsonMetadata | undefined;
   try {
@@ -92,7 +88,7 @@ const fetchNft = async (
       title: "Nft could not be fetched!",
       description: "Please check your Wallet instead.",
       status: "info",
-      duration: 900,
+      duration: 2000,
       isClosable: true,
     });
   }
@@ -130,12 +126,6 @@ const mintClick = async (
     return;
   }
 
-  let buyBeer = true;
-  if (!process.env.NEXT_PUBLIC_BUYMARKBEER) {
-    buyBeer = false;
-    console.log("The Creator does not want to pay for MarkSackerbergs beer 😒");
-  }
-
   try {
     //find the guard by guardToUse.label and set minting to true
     const guardIndex = guardList.findIndex((g) => g.label === guardToUse.label);
@@ -152,7 +142,7 @@ const mintClick = async (
       createStandaloneToast().toast({
         title: "Allowlist detected. Please sign to be approved to mint.",
         status: "info",
-        duration: 900,
+        duration: 2000,
         isClosable: true,
       });
       await routeBuild.sendAndConfirm(umi, {
@@ -174,7 +164,7 @@ const mintClick = async (
       createStandaloneToast().toast({
         title: "The developer should really set a lookup table!",
         status: "warning",
-        duration: 900,
+        duration: 2000,
         isClosable: true,
       });
     }
@@ -203,16 +193,6 @@ const mintClick = async (
         })
       );
 
-      if (buyBeer) {
-        tx = tx.prepend(
-          transferSol(umi, {
-            destination: publicKey(
-              "BeeryDvghgcKPTUw3N3bdFDFFWhTWdWHnsLuVebgsGSD"
-            ),
-            amount: sol(Number(0.005)),
-          })
-        );
-      }
       tx = tx.prepend(setComputeUnitLimit(umi, { units: 800_000 }));
       tx = tx.setAddressLookupTables(tables);
       tx = tx.setBlockhash(latestBlockhash);
@@ -271,7 +251,7 @@ const mintClick = async (
       status: "success",
       duration: 3000,
     });
-    
+
     const successfulMints = await verifyTx(umi, signatures);
 
     updateLoadingText(
@@ -306,8 +286,8 @@ const mintClick = async (
 
     // Update mintsCreated only if there are new mints
     if (newMintsCreated.length > 0) {
-        setMintsCreated(newMintsCreated);
-        onOpen();
+      setMintsCreated(newMintsCreated);
+      onOpen();
     }
   } catch (e) {
     console.error(`minting failed because of ${e}`);
@@ -315,7 +295,7 @@ const mintClick = async (
       title: "Your mint failed!",
       description: "Please try again.",
       status: "error",
-      duration: 900,
+      duration: 2000,
       isClosable: true,
     });
   } finally {

@@ -43,7 +43,7 @@ export const allocationChecker = async (
   guard: {
     label: string;
     guards: GuardSet;
-}
+  }
 ) => {
   const allocation = guard.guards.allocation as Some<Allocation>;
 
@@ -62,12 +62,11 @@ export const allocationChecker = async (
         title: "Allocation Guard not Initialized!",
         description: "Minting will fail!",
         status: "error",
-        duration: 900,
+        duration: 2000,
         isClosable: true,
       });
       return allocation.value.limit;
     }
-
   } catch (error) {
     console.error(`AllocationChecker: ${error}`);
     return 0;
@@ -108,7 +107,7 @@ export const mintLimitChecker = async (
   guard: {
     label: string;
     guards: GuardSet;
-}
+  }
 ) => {
   const mintLimit = guard.guards.mintLimit as Some<MintLimit>;
 
@@ -155,9 +154,7 @@ export const allowlistChecker = (
     return false;
   }
   if (
-    !allowLists
-      .get(guardlabel)
-      ?.includes(publicKey(umi.identity.publicKey))
+    !allowLists.get(guardlabel)?.includes(publicKey(umi.identity.publicKey))
   ) {
     return false;
   }
@@ -219,19 +216,19 @@ export const calculateMintable = (
   mintableAmount: number,
   newAmount: number
 ) => {
-  if (mintableAmount > newAmount){
+  if (mintableAmount > newAmount) {
     mintableAmount = newAmount;
   }
 
   if (!process.env.NEXT_PUBLIC_MAXMINTAMOUNT) return mintableAmount;
   let maxmintamount = 0;
   try {
-    maxmintamount = Number(process.env.NEXT_PUBLIC_MAXMINTAMOUNT)
-  } catch (e){
-    console.error('process.env.NEXT_PUBLIC_MAXMINTAMOUNT is not a number!', e)
+    maxmintamount = Number(process.env.NEXT_PUBLIC_MAXMINTAMOUNT);
+  } catch (e) {
+    console.error("process.env.NEXT_PUBLIC_MAXMINTAMOUNT is not a number!", e);
     return mintableAmount;
   }
-  if (mintableAmount > maxmintamount){
+  if (mintableAmount > maxmintamount) {
     mintableAmount = maxmintamount;
   }
 
