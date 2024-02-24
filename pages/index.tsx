@@ -1,28 +1,55 @@
+import { PublicKey, publicKey, Umi } from "@metaplex-foundation/umi";
 import {
-  PublicKey,
-  publicKey,
-  Umi,
-} from "@metaplex-foundation/umi";
-import { DigitalAssetWithToken, JsonMetadata } from "@metaplex-foundation/mpl-token-metadata";
+  DigitalAssetWithToken,
+  JsonMetadata,
+} from "@metaplex-foundation/mpl-token-metadata";
 import dynamic from "next/dynamic";
 import { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react";
 import { useUmi } from "../utils/useUmi";
-import { fetchCandyMachine, safeFetchCandyGuard, CandyGuard, CandyMachine, AccountVersion } from "@metaplex-foundation/mpl-candy-machine"
+import {
+  fetchCandyMachine,
+  safeFetchCandyGuard,
+  CandyGuard,
+  CandyMachine,
+  AccountVersion,
+} from "@metaplex-foundation/mpl-candy-machine";
 import styles from "../styles/Home.module.css";
 import { guardChecker } from "../utils/checkAllowed";
-import { Center, Card, CardHeader, CardBody, StackDivider, Heading, Stack, useToast, Text, Skeleton, useDisclosure, Button, Modal, ModalBody, ModalCloseButton, ModalContent, Image, ModalHeader, ModalOverlay, Box, Divider, VStack, Flex } from '@chakra-ui/react';
+import {
+  Center,
+  Card,
+  CardHeader,
+  CardBody,
+  StackDivider,
+  Heading,
+  Stack,
+  useToast,
+  Text,
+  Skeleton,
+  useDisclosure,
+  Button,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  // Image,
+  ModalHeader,
+  ModalOverlay,
+  Box,
+  Divider,
+  VStack,
+  Flex,
+  Badge,
+} from "@chakra-ui/react";
 import { ButtonList } from "../components/mintButton";
 import { GuardReturn } from "../utils/checkerHelper";
 import { ShowNft } from "../components/showNft";
 import { InitializeModal } from "../components/initializeModal";
 import { image, headerText } from "../settings";
 import { useSolanaTime } from "@/utils/SolanaTimeContext";
-
-const WalletMultiButtonDynamic = dynamic(
-  async () =>
-    (await import("@solana/wallet-adapter-react-ui")).WalletMultiButton,
-  { ssr: false }
-);
+import Image from "next/image";
+import BG from "@/public/assets/background.png";
+import Nft from "@/public/assets/Nft.png";
 
 const useCandyMachine = (
   umi: Umi,
@@ -35,7 +62,6 @@ const useCandyMachine = (
   const [candyMachine, setCandyMachine] = useState<CandyMachine>();
   const [candyGuard, setCandyGuard] = useState<CandyGuard>();
   const toast = useToast();
-
 
   useEffect(() => {
     (async () => {
@@ -57,13 +83,17 @@ const useCandyMachine = (
 
         let candyMachine;
         try {
-          candyMachine = await fetchCandyMachine(umi, publicKey(candyMachineId));
+          candyMachine = await fetchCandyMachine(
+            umi,
+            publicKey(candyMachineId)
+          );
           //verify CM Version
-          if (candyMachine.version != AccountVersion.V2){
+          if (candyMachine.version != AccountVersion.V2) {
             toast({
               id: "wrong-account-version",
               title: "Wrong candy machine account version!",
-              description: "Please use latest sugar to create your candy machine. Need Account Version 2!",
+              description:
+                "Please use latest sugar to create your candy machine. Need Account Version 2!",
               status: "error",
               duration: 999999,
               isClosable: true,
@@ -87,7 +117,10 @@ const useCandyMachine = (
         }
         let candyGuard;
         try {
-          candyGuard = await safeFetchCandyGuard(umi, candyMachine.mintAuthority);
+          candyGuard = await safeFetchCandyGuard(
+            umi,
+            candyMachine.mintAuthority
+          );
         } catch (e) {
           console.error(e);
           toast({
@@ -103,26 +136,34 @@ const useCandyMachine = (
           return;
         }
         setCandyGuard(candyGuard);
-        if (firstRun){
-          setfirstRun(false)
+        if (firstRun) {
+          setfirstRun(false);
         }
       }
     })();
   }, [umi, checkEligibility]);
 
   return { candyMachine, candyGuard };
-
-
 };
-
 
 export default function Home() {
   const umi = useUmi();
   const solanaTime = useSolanaTime();
   const toast = useToast();
-  const { isOpen: isShowNftOpen, onOpen: onShowNftOpen, onClose: onShowNftClose } = useDisclosure();
-  const { isOpen: isInitializerOpen, onOpen: onInitializerOpen, onClose: onInitializerClose } = useDisclosure();
-  const [mintsCreated, setMintsCreated] = useState<{ mint: PublicKey, offChainMetadata: JsonMetadata | undefined }[] | undefined>();
+  const {
+    isOpen: isShowNftOpen,
+    onOpen: onShowNftOpen,
+    onClose: onShowNftClose,
+  } = useDisclosure();
+  const {
+    isOpen: isInitializerOpen,
+    onOpen: onInitializerOpen,
+    onClose: onInitializerClose,
+  } = useDisclosure();
+  const [mintsCreated, setMintsCreated] = useState<
+    | { mint: PublicKey; offChainMetadata: JsonMetadata | undefined }[]
+    | undefined
+  >();
   const [isAllowed, setIsAllowed] = useState<boolean>(false);
   const [loading, setLoading] = useState(true);
   const [ownedTokens, setOwnedTokens] = useState<DigitalAssetWithToken[]>();
@@ -132,18 +173,17 @@ export default function Home() {
   const [firstRun, setFirstRun] = useState(true);
   const [checkEligibility, setCheckEligibility] = useState<boolean>(true);
 
-
   if (!process.env.NEXT_PUBLIC_CANDY_MACHINE_ID) {
-    console.error("No candy machine in .env!")
-    if (!toast.isActive('no-cm')) {
+    console.error("No candy machine in .env!");
+    if (!toast.isActive("no-cm")) {
       toast({
-        id: 'no-cm',
-        title: 'No candy machine in .env!',
+        id: "no-cm",
+        title: "No candy machine in .env!",
         description: "Add your candy machine address to the .env file!",
-        status: 'error',
+        status: "error",
         duration: 999999,
         isClosable: true,
-      })
+      });
     }
   }
   const candyMachineId: PublicKey = useMemo(() => {
@@ -152,18 +192,25 @@ export default function Home() {
     } else {
       console.error(`NO CANDY MACHINE IN .env FILE DEFINED!`);
       toast({
-        id: 'no-cm',
-        title: 'No candy machine in .env!',
+        id: "no-cm",
+        title: "No candy machine in .env!",
         description: "Add your candy machine address to the .env file!",
-        status: 'error',
+        status: "error",
         duration: 999999,
         isClosable: true,
-      })
+      });
       return publicKey("11111111111111111111111111111111");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  const { candyMachine, candyGuard } = useCandyMachine(umi, candyMachineId, checkEligibility, setCheckEligibility, firstRun, setFirstRun);
+  const { candyMachine, candyGuard } = useCandyMachine(
+    umi,
+    candyMachineId,
+    checkEligibility,
+    setCheckEligibility,
+    firstRun,
+    setFirstRun
+  );
 
   useEffect(() => {
     const checkEligibilityFunc = async () => {
@@ -171,9 +218,12 @@ export default function Home() {
         return;
       }
       setFirstRun(false);
-      
+
       const { guardReturn, ownedTokens } = await guardChecker(
-        umi, candyGuard, candyMachine, solanaTime
+        umi,
+        candyGuard,
+        candyMachine,
+        solanaTime
       );
 
       setOwnedTokens(ownedTokens);
@@ -200,48 +250,68 @@ export default function Home() {
   const PageContent = () => {
     return (
       <>
-        <style jsx global>
-          {`
-      body {
-          background: #2d3748; 
-       }
-   `}
-        </style>
-        <Card>
+        <Card backgroundColor="#5175e2" border="1px" borderColor="black.200">
           <CardHeader>
-            <Flex minWidth='max-content' alignItems='center' gap='2'>
-              <Box>
-                <Heading size='md'>{headerText}</Heading>
+            <Flex
+              minWidth="max-content"
+              alignItems="center"
+              justifyContent="center"
+              gap="2"
+            >
+              <Box marginTop="5" marginBottom="5">
+                <Heading size="lg" textAlign="center" color="#F8F8B4">
+                  {headerText}
+                </Heading>
               </Box>
-              {loading ? (<></>) : (
-                <Flex justifyContent="flex-end" marginLeft="auto">
-                  <Box background={"teal.100"} borderRadius={"5px"} minWidth={"50px"} minHeight={"50px"} p={2} >
-                    <VStack >
-                      <Text fontSize={"sm"}>Available NFTs:</Text>
-                      <Text fontWeight={"semibold"}>{Number(candyMachine?.data.itemsAvailable) - Number(candyMachine?.itemsRedeemed)}/{Number(candyMachine?.data.itemsAvailable)}</Text>
-                    </VStack>
-                  </Box>
-                </Flex>
-              )}
             </Flex>
           </CardHeader>
 
           <CardBody>
             <Center>
-              <Box
-                rounded={'lg'}
-                mt={-12}
-                pos={'relative'}>
+              <Box rounded={"lg"} mt={-12} pos={"relative"}>
                 <Image
-                  rounded={'lg'}
-                  height={230}
-                  objectFit={'cover'}
+                  rounded={"full"}
+                  layout={"fit"}
+                  objectFit={"cover"}
                   alt={"project Image"}
-                  src={image}
+                  src={Nft}
                 />
+                <Badge
+                  pos={"absolute"}
+                  top="5"
+                  left="5"
+                  backgroundColor="gray.500"
+                  color="white"
+                  paddingX="3"
+                  paddingY="0.2"
+                  borderRadius="lg"
+                >
+                  0.1 $SOL
+                </Badge>
               </Box>
             </Center>
-            <Stack divider={<StackDivider />} spacing='8'>
+            <Center>
+              {loading ? (
+                <></>
+              ) : (
+                <Flex
+                  alignItems="center"
+                  justifyContent="center"
+                  color="white"
+                  className="font-roboto"
+                >
+                  <Text fontSize={"md"} className="tracking-wide">
+                    Available NFTs :{" "}
+                  </Text>
+                  <Text fontWeight={"semibold"} className="tracking-wider">
+                    {Number(candyMachine?.data.itemsAvailable) -
+                      Number(candyMachine?.itemsRedeemed)}
+                    /{Number(candyMachine?.data.itemsAvailable)}
+                  </Text>
+                </Flex>
+              )}
+            </Center>
+            <Stack divider={<StackDivider />} spacing="8">
               {loading ? (
                 <div>
                   <Divider my="10px" />
@@ -265,11 +335,17 @@ export default function Home() {
               )}
             </Stack>
           </CardBody>
-        </Card >
+        </Card>
         {umi.identity.publicKey === candyMachine?.authority ? (
           <>
             <Center>
-              <Button backgroundColor={"red.200"} marginTop={"10"} onClick={onInitializerOpen}>Initialize Everything!</Button>
+              <Button
+                backgroundColor={"red.200"}
+                marginTop={"10"}
+                onClick={onInitializerOpen}
+              >
+                Initialize Everything!
+              </Button>
             </Center>
             <Modal isOpen={isInitializerOpen} onClose={onInitializerClose}>
               <ModalOverlay />
@@ -277,15 +353,18 @@ export default function Home() {
                 <ModalHeader>Initializer</ModalHeader>
                 <ModalCloseButton />
                 <ModalBody>
-                  < InitializeModal umi={umi} candyMachine={candyMachine} candyGuard={candyGuard} />
+                  <InitializeModal
+                    umi={umi}
+                    candyMachine={candyMachine}
+                    candyGuard={candyGuard}
+                  />
                 </ModalBody>
               </ModalContent>
             </Modal>
-
-          </>)
-          :
-          (<></>)
-        }
+          </>
+        ) : (
+          <></>
+        )}
 
         <Modal isOpen={isShowNftOpen} onClose={onShowNftClose}>
           <ModalOverlay />
@@ -303,12 +382,18 @@ export default function Home() {
 
   return (
     <main>
-      <div className={styles.wallet}>
-        <WalletMultiButtonDynamic />
-      </div>
-
-      <div className={styles.center}>
-        <PageContent key="content" />
+      <div className="w-full h-auto flex flex-col relative z-[50]">
+        <div className={styles.center}>
+          <PageContent key="content" />
+        </div>
+        <div className="absolute top-[20vh] left-0 w-full h-full z-[-1]">
+          <Image
+            src={BG}
+            alt={"Background"}
+            layout={"fill"}
+            objectFit={"cover"}
+          />
+        </div>
       </div>
     </main>
   );

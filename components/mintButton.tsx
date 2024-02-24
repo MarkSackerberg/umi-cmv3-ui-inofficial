@@ -41,6 +41,7 @@ import {
   NumberInputStepper,
   NumberIncrementStepper,
   NumberDecrementStepper,
+  useNumberInput,
   VStack,
   Divider,
   createStandaloneToast,
@@ -59,6 +60,7 @@ import {
 import { useSolanaTime } from "@/utils/SolanaTimeContext";
 import { verifyTx } from "@/utils/verifyTx";
 import { base58 } from "@metaplex-foundation/umi/serializers";
+import { FaArrowRightLong } from "react-icons/fa6";
 
 const updateLoadingText = (
   loadingText: string | undefined,
@@ -499,12 +501,31 @@ export function ButtonList({
     };
     buttonGuardList.push(buttonElement);
   }
+  const { getInputProps, getIncrementButtonProps, getDecrementButtonProps } =
+    useNumberInput({
+      step: 0.01,
+      defaultValue: 1.53,
+      min: 1,
+      max: 6,
+      precision: 2,
+    });
+
+  const inc = getIncrementButtonProps();
+  const dec = getDecrementButtonProps();
+  const input = getInputProps();
 
   const listItems = buttonGuardList.map((buttonGuard, index) => (
-    <Box key={index} marginTop={"20px"}>
+    <Box key={index} marginTop={"15px"} marginBottom={"15px"}>
       <Divider my="10px" />
-      <HStack>
-        <Heading size="xs" textTransform="uppercase">
+      <HStack
+        w="100%"
+        marginTop="5"
+        marginBottom=""
+        fontFamily="Inter"
+        paddingLeft="3"
+        paddingRight="3"
+      >
+        <Heading size="xs" textTransform="uppercase" color="white" className="font-inter">
           {buttonGuard.header}
         </Heading>
         <Flex justifyContent="flex-end" marginLeft="auto">
@@ -540,12 +561,13 @@ export function ButtonList({
             )}
         </Flex>
       </HStack>
-      <SimpleGrid columns={2} spacing={5}>
-        <Text pt="2" fontSize="sm">
+      <HStack paddingLeft="3" paddingRight="3" marginBottom="" >
+        <Text pt="2" fontSize="sm" color="white" className="font-inter">
           {buttonGuard.mintText}
         </Text>
-        <VStack>
-          {process.env.NEXT_PUBLIC_MULTIMINT && buttonGuard.allowed ? (
+        <Flex justifyContent="flex-end" marginLeft="auto">
+          <VStack>
+            {process.env.NEXT_PUBLIC_MULTIMINT && buttonGuard.allowed ? (
             <NumberInput
               value={numberInputValues[buttonGuard.label] || 1}
               min={1}
@@ -555,51 +577,73 @@ export function ButtonList({
               onChange={(valueAsString, valueAsNumber) =>
                 handleNumberInputChange(buttonGuard.label, valueAsNumber)
               }
+              pos={"relative"}
+              backgroundColor="white"
+              color="black"
+              borderRadius="md"
+              className="font-roboto"
             >
               <NumberInputField />
-              <NumberInputStepper>
-                <NumberIncrementStepper />
-                <NumberDecrementStepper />
-              </NumberInputStepper>
+              <div className="absolute right-5 top-1">
+                <NumberInputStepper>
+                  <Flex
+                    alignItem="center"
+                    justifyContent="center"
+                    backgroundColor=""
+                    gap="1"
+                  >
+                    <Button {...inc} size="xs" fontWeight="bold">
+                      +
+                    </Button>
+                    <Button {...dec} size="xs" fontWeight="bold">
+                      -
+                    </Button>
+                  </Flex>
+                </NumberInputStepper>
+              </div>
             </NumberInput>
-          ) : null}
-
-          <Tooltip label={buttonGuard.tooltip} aria-label="Mint button">
-            <Button
-              onClick={() =>
-                mintClick(
-                  umi,
-                  buttonGuard,
-                  candyMachine,
-                  candyGuard,
-                  ownedTokens,
-                  numberInputValues[buttonGuard.label] || 1,
-                  mintsCreated,
-                  setMintsCreated,
-                  guardList,
-                  setGuardList,
-                  onOpen,
-                  setCheckEligibility
-                )
-              }
-              key={buttonGuard.label}
-              size="sm"
-              backgroundColor="teal.100"
-              isDisabled={!buttonGuard.allowed}
-              isLoading={
-                guardList.find((elem) => elem.label === buttonGuard.label)
-                  ?.minting
-              }
-              loadingText={
-                guardList.find((elem) => elem.label === buttonGuard.label)
-                  ?.loadingText
-              }
-            >
-              {buttonGuard.buttonLabel}
-            </Button>
-          </Tooltip>
-        </VStack>
-      </SimpleGrid>
+            ): null} 
+            <Tooltip label={buttonGuard.tooltip} aria-label="Mint button">
+              <Button
+                onClick={() =>
+                  mintClick(
+                    umi,
+                    buttonGuard,
+                    candyMachine,
+                    candyGuard,
+                    ownedTokens,
+                    numberInputValues[buttonGuard.label] || 1,
+                    mintsCreated,
+                    setMintsCreated,
+                    guardList,
+                    setGuardList,
+                    onOpen,
+                    setCheckEligibility
+                  )
+                }
+                key={buttonGuard.label}
+                fontWeight="bold"
+                size="sm"
+                backgroundColor="#f8f8b4"
+                isDisabled={!buttonGuard.allowed}
+                isLoading={
+                  guardList.find((elem) => elem.label === buttonGuard.label)
+                    ?.minting
+                }
+                loadingText={
+                  guardList.find((elem) => elem.label === buttonGuard.label)
+                    ?.loadingText
+                }
+                gap="2"
+                width="150px"
+              >
+                {buttonGuard.buttonLabel}
+                <FaArrowRightLong />
+              </Button>
+            </Tooltip>
+          </VStack>
+        </Flex>
+      </HStack>
     </Box>
   ));
 

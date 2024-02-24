@@ -3,20 +3,20 @@
 export const mintText = [
   {
     label: "WL",
-    mintText: "Mint of whitelisted users",
-    buttonLabel: "Mint now!",
-    header: "WL Mint",
+    mintText: "1 mint per wallet",
+    buttonLabel: "Mint",
+    header: "WL Mint (0.05 $SOL)",
   },
   {
     label: "Public",
-    mintText: "Mint of public users",
-    buttonLabel: "Mint now!",
-    header: "Public Mint",
+    mintText: "Available 04/5000",
+    buttonLabel: "Mint",
+    header: "Public Mint (0.01 $SOL)",
   },
   {
     label: "default",
     mintText: "default mintText",
-    buttonLabel: "Mint now!",
+    buttonLabel: "Mint",
     header: "Default",
   },
 ];
@@ -25,4 +25,4 @@ export const mintText = [
 export const image = "https://avatars.githubusercontent.com/u/93528482?v=4";
 
 //website title
-export const headerText = "MarkSackerberg's mint UI";
+export const headerText = "$CBTM NFT";
