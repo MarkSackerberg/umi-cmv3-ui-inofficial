@@ -394,7 +394,7 @@ export const guardChecker = async (
         console.info(`${eachGuard.label} tokenPayment not enough tokens!`);
         continue;
       }
-      const payableAmount = tokenPayment.value.amount / digitalAssetWithToken.token.amount;
+      const payableAmount = digitalAssetWithToken.token.amount / tokenPayment.value.amount;
       mintableAmount = calculateMintable(mintableAmount, Number(payableAmount));
 
     }
