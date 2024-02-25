@@ -518,14 +518,17 @@ export function ButtonList({
     <Box key={index} marginTop={"15px"} marginBottom={"15px"}>
       <Divider my="10px" />
       <HStack
-        w="100%"
         marginTop="5"
         marginBottom=""
-        fontFamily="Inter"
         paddingLeft="3"
         paddingRight="3"
       >
-        <Heading size="xs" textTransform="uppercase" color="white" className="font-inter">
+        <Heading
+          size="xs"
+          textTransform="uppercase"
+          color="white"
+          className="font-inter"
+        >
           {buttonGuard.header}
         </Heading>
         <Flex justifyContent="flex-end" marginLeft="auto">
@@ -561,13 +564,14 @@ export function ButtonList({
             )}
         </Flex>
       </HStack>
-      <HStack paddingLeft="3" paddingRight="3" marginBottom="" >
+      {/* <HStack paddingLeft="3" paddingRight="3" marginBottom="" > */}
+      <SimpleGrid columns={2} spacing={10} paddingLeft="3" paddingRight="3">
         <Text pt="2" fontSize="sm" color="white" className="font-inter">
           {buttonGuard.mintText}
         </Text>
-        <Flex justifyContent="flex-end" marginLeft="auto">
-          <VStack>
-            {process.env.NEXT_PUBLIC_MULTIMINT && buttonGuard.allowed ? (
+        {/* <Flex justifyContent="flex-end" marginLeft="auto"> */}
+        <VStack>
+          {process.env.NEXT_PUBLIC_MULTIMINT && buttonGuard.allowed ? (
             <NumberInput
               value={numberInputValues[buttonGuard.label] || 1}
               min={1}
@@ -584,66 +588,66 @@ export function ButtonList({
               className="font-roboto"
             >
               <NumberInputField />
-              <div className="absolute right-5 top-1">
+              <div className="absolute right-5 top-[0.2rem]">
                 <NumberInputStepper>
                   <Flex
-                    alignItem="center"
+                    alignItems="center"
                     justifyContent="center"
-                    backgroundColor=""
                     gap="1"
                   >
-                    <Button {...inc} size="xs" fontWeight="bold">
+                    <Button {...inc} size="xs" fontWeight="bold" backgroundColor={"gray.300"}>
                       +
                     </Button>
-                    <Button {...dec} size="xs" fontWeight="bold">
+                    <Button {...dec} size="xs" fontWeight="bold" backgroundColor={"gray.300"}>
                       -
                     </Button>
                   </Flex>
                 </NumberInputStepper>
               </div>
             </NumberInput>
-            ): null} 
-            <Tooltip label={buttonGuard.tooltip} aria-label="Mint button">
-              <Button
-                onClick={() =>
-                  mintClick(
-                    umi,
-                    buttonGuard,
-                    candyMachine,
-                    candyGuard,
-                    ownedTokens,
-                    numberInputValues[buttonGuard.label] || 1,
-                    mintsCreated,
-                    setMintsCreated,
-                    guardList,
-                    setGuardList,
-                    onOpen,
-                    setCheckEligibility
-                  )
-                }
-                key={buttonGuard.label}
-                fontWeight="bold"
-                size="sm"
-                backgroundColor="#f8f8b4"
-                isDisabled={!buttonGuard.allowed}
-                isLoading={
-                  guardList.find((elem) => elem.label === buttonGuard.label)
-                    ?.minting
-                }
-                loadingText={
-                  guardList.find((elem) => elem.label === buttonGuard.label)
-                    ?.loadingText
-                }
-                gap="2"
-                width="150px"
-              >
-                {buttonGuard.buttonLabel}
-                <FaArrowRightLong />
-              </Button>
-            </Tooltip>
-          </VStack>
-        </Flex>
-      </HStack>
+          ) : null}
+          <Tooltip label={buttonGuard.tooltip} aria-label="Mint button">
+            <Button
+              onClick={() =>
+                mintClick(
+                  umi,
+                  buttonGuard,
+                  candyMachine,
+                  candyGuard,
+                  ownedTokens,
+                  numberInputValues[buttonGuard.label] || 1,
+                  mintsCreated,
+                  setMintsCreated,
+                  guardList,
+                  setGuardList,
+                  onOpen,
+                  setCheckEligibility
+                )
+              }
+              key={buttonGuard.label}
+              fontWeight="bold"
+              size="sm"
+              backgroundColor="#f8f8b4"
+              isDisabled={!buttonGuard.allowed}
+              isLoading={
+                guardList.find((elem) => elem.label === buttonGuard.label)
+                  ?.minting
+              }
+              loadingText={
+                guardList.find((elem) => elem.label === buttonGuard.label)
+                  ?.loadingText
+              }
+              gap="2"
+              className="font-roboto lg:w-[150px] sm:w-[100px] w-[80px]"
+            >
+              {buttonGuard.buttonLabel}
+              <FaArrowRightLong />
+            </Button>
+          </Tooltip>
+        </VStack>
+        {/* </Flex> */}
+      </SimpleGrid>
+      {/* </HStack> */}
     </Box>
   ));
 

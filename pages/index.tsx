@@ -270,8 +270,7 @@ export default function Home() {
             <Center>
               <Box rounded={"lg"} mt={-12} pos={"relative"}>
                 <Image
-                  rounded={"full"}
-                  layout={"fit"}
+                  layout="fit"
                   objectFit={"cover"}
                   alt={"project Image"}
                   src={Nft}
@@ -390,7 +389,7 @@ export default function Home() {
           <Image
             src={BG}
             alt={"Background"}
-            layout={"fill"}
+            fill
             objectFit={"cover"}
           />
         </div>
