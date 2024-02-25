@@ -84,3 +84,7 @@ button.wallet-adapter-button-trigger:hover {
 button.wallet-adapter-button-trigger i {
   display: none;
 }
+
+.nobar::-webkit-scrollbar {
+  display: none !important;
+}

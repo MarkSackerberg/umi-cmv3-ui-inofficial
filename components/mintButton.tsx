@@ -501,13 +501,12 @@ export function ButtonList({
     };
     buttonGuardList.push(buttonElement);
   }
+
   const { getInputProps, getIncrementButtonProps, getDecrementButtonProps } =
     useNumberInput({
-      step: 0.01,
-      defaultValue: 1.53,
+      step: 1,
+      defaultValue: 1,
       min: 1,
-      max: 6,
-      precision: 2,
     });
 
   const inc = getIncrementButtonProps();
@@ -573,7 +572,7 @@ export function ButtonList({
         <VStack>
           {process.env.NEXT_PUBLIC_MULTIMINT && buttonGuard.allowed ? (
             <NumberInput
-              value={numberInputValues[buttonGuard.label] || 1}
+              value={numberInputValues[buttonGuard.label] || {...input}.value}
               min={1}
               max={buttonGuard.maxAmount < 1 ? 1 : buttonGuard.maxAmount}
               size="sm"
@@ -585,7 +584,7 @@ export function ButtonList({
               backgroundColor="white"
               color="black"
               borderRadius="md"
-              className="font-roboto"
+              className="font-roboto lg:w-[150px] md:w-[120px] sm:w-[100px] w-[80px]"
             >
               <NumberInputField />
               <div className="absolute right-5 top-[0.2rem]">
@@ -638,7 +637,7 @@ export function ButtonList({
                   ?.loadingText
               }
               gap="2"
-              className="font-roboto lg:w-[150px] sm:w-[100px] w-[80px]"
+              className="font-roboto lg:w-[150px] md:w-[120px] sm:w-[100px] w-[80px]"
             >
               {buttonGuard.buttonLabel}
               <FaArrowRightLong />

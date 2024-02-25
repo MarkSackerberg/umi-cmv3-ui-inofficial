@@ -50,7 +50,7 @@ export default function App({ Component, pageProps }: AppProps) {
             <WalletModalProvider>
               <SolanaTimeProvider>
                 <div
-                  className={`w-[100vw] h-[100vh] bg-[#97aded] overflow-y-hidden flex flex-col`}
+                  className={`w-[100vw] h-[100vh] bg-[#97aded] overflow-y-auto flex flex-col nobar`}
                 >
                   <Component {...pageProps} />
                 </div>
