@@ -50,6 +50,15 @@ import { useSolanaTime } from "@/utils/SolanaTimeContext";
 import Image from "next/image";
 import BG from "@/public/assets/background.png";
 import Nft from "@/public/assets/Nft.png";
+import Round from "@/public/assets/Round.svg";
+import Twitter from "@/public/assets/Twitter.svg";
+import Telegram from "@/public/assets/Telegram.svg";
+
+const WalletMultiButtonDynamic = dynamic(
+  async () =>
+    (await import("@solana/wallet-adapter-react-ui")).WalletMultiButton,
+  { ssr: false }
+);
 
 const useCandyMachine = (
   umi: Umi,
@@ -381,17 +390,28 @@ export default function Home() {
 
   return (
     <main>
+      <div className="w-full flex items-center justify-end pt-5 md:pt-8 bg-[#97aded]">
+        <div className="bg-transparent hidden sm:flex items-center justify-center gap-5">
+          <span className="mx-1">
+            <Image src={Round} alt="" width={22} />
+          </span>
+          <span className="mx-1">
+            <Image src={Twitter} alt="" width={22} />
+          </span>
+          <span className="mx-1">
+            <Image src={Telegram} alt="" width={22} />
+          </span>
+          <div className="px-0 sm:px-2 xl:px-4 mx-3">
+            <WalletMultiButtonDynamic />
+          </div>
+        </div>
+      </div>
       <div className="w-full h-auto flex flex-col relative z-[50]">
         <div className={styles.center}>
           <PageContent key="content" />
         </div>
         <div className="absolute top-[20vh] left-0 w-full h-full z-[-1]">
-          <Image
-            src={BG}
-            alt={"Background"}
-            fill
-            objectFit={"cover"}
-          />
+          <Image src={BG} alt={"Background"} fill objectFit={"cover"} />
         </div>
       </div>
     </main>
