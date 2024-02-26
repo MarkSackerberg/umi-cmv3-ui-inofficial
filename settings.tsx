@@ -9,7 +9,7 @@ export const mintText = [
   },
   {
     label: "Public",
-    mintText: "Available 04/5000",
+    mintText: "5 mint per wallet",
     buttonLabel: "Mint",
     header: "Public Mint (0.01 $SOL)",
   },

@@ -341,9 +341,9 @@ const Timer = ({
   const hours = (remainingTime % BigInt(86400)) / BigInt(3600);
   const minutes = (remainingTime % BigInt(3600)) / BigInt(60);
   const seconds = remainingTime % BigInt(60);
-  if (days > BigInt(0)) {
+  if (remainingTime !== BigInt(0)) {
     return (
-      <Text fontSize="sm" fontWeight="bold">
+      <Text fontSize="sm" fontWeight="bold" className="text-white">
         {days.toLocaleString("en-US", {
           minimumIntegerDigits: 2,
           useGrouping: false,
@@ -366,45 +366,7 @@ const Timer = ({
         s
       </Text>
     );
-  }
-  if (hours > BigInt(0)) {
-    return (
-      <Text fontSize="sm" fontWeight="bold">
-        {hours.toLocaleString("en-US", {
-          minimumIntegerDigits: 2,
-          useGrouping: false,
-        })}
-        h{" "}
-        {minutes.toLocaleString("en-US", {
-          minimumIntegerDigits: 2,
-          useGrouping: false,
-        })}
-        m{" "}
-        {seconds.toLocaleString("en-US", {
-          minimumIntegerDigits: 2,
-          useGrouping: false,
-        })}
-        s
-      </Text>
-    );
-  }
-  if (minutes > BigInt(0) || seconds > BigInt(0)) {
-    return (
-      <Text fontSize="sm" fontWeight="bold">
-        {minutes.toLocaleString("en-US", {
-          minimumIntegerDigits: 2,
-          useGrouping: false,
-        })}
-        m{" "}
-        {seconds.toLocaleString("en-US", {
-          minimumIntegerDigits: 2,
-          useGrouping: false,
-        })}
-        s
-      </Text>
-    );
-  }
-  if (remainingTime === BigInt(0)) {
+  } else {
     setCheckEligibility(true);
   }
   return <Text></Text>;
@@ -516,12 +478,7 @@ export function ButtonList({
   const listItems = buttonGuardList.map((buttonGuard, index) => (
     <Box key={index} marginTop={"15px"} marginBottom={"15px"}>
       <Divider my="10px" />
-      <HStack
-        marginTop="5"
-        marginBottom=""
-        paddingLeft="3"
-        paddingRight="3"
-      >
+      <HStack marginTop="5" marginBottom="" paddingLeft="3" paddingRight="3">
         <Heading
           size="xs"
           textTransform="uppercase"
@@ -551,7 +508,7 @@ export function ButtonList({
             (!buttonGuard.endTime ||
               solanaTime - buttonGuard.endTime <= createBigInt(0)) && (
               <>
-                <Text fontSize="sm" marginRight={"2"}>
+                <Text fontSize="sm" marginRight={"2"} className="text-white">
                   Starting in:{" "}
                 </Text>
                 <Timer
@@ -572,7 +529,7 @@ export function ButtonList({
         <VStack>
           {process.env.NEXT_PUBLIC_MULTIMINT && buttonGuard.allowed ? (
             <NumberInput
-              value={numberInputValues[buttonGuard.label] || {...input}.value}
+              value={numberInputValues[buttonGuard.label] || { ...input }.value}
               min={1}
               max={buttonGuard.maxAmount < 1 ? 1 : buttonGuard.maxAmount}
               size="sm"
@@ -589,15 +546,22 @@ export function ButtonList({
               <NumberInputField />
               <div className="absolute right-5 top-[0.2rem]">
                 <NumberInputStepper>
-                  <Flex
-                    alignItems="center"
-                    justifyContent="center"
-                    gap="1"
-                  >
-                    <Button {...inc} size="xs" fontWeight="bold" backgroundColor={"gray.300"}>
+                  <Flex alignItems="center" justifyContent="center" gap="1">
+                    <Button
+                      {...inc}
+                      size="xs"
+                      fontWeight="bold"
+                      backgroundColor={"gray.300"}
+                      isDisabled={{ ...input }.value >= buttonGuard.maxAmount}
+                    >
                       +
                     </Button>
-                    <Button {...dec} size="xs" fontWeight="bold" backgroundColor={"gray.300"}>
+                    <Button
+                      {...dec}
+                      size="xs"
+                      fontWeight="bold"
+                      backgroundColor={"gray.300"}
+                    >
                       -
                     </Button>
                   </Flex>
