@@ -419,6 +419,23 @@ export function ButtonList({
     setNumberInputValues((prev) => ({ ...prev, [label]: value }));
   };
 
+  const handleNumberInputClick = (
+    label: string,
+    action: "increment" | "decrement"
+  ) => {
+    if (action === "increment") {
+      setNumberInputValues((prev) => ({
+        ...prev,
+        [label]: (prev[label] || 0) + 1,
+      }));
+    } else {
+      setNumberInputValues((prev) => ({
+        ...prev,
+        [label]: Math.max((prev[label] || 0) - 1, 1),
+      }));
+    }
+  };
+
   // remove duplicates from guardList
   //fucked up bugfix
   let filteredGuardlist = guardList.filter(
@@ -493,7 +510,7 @@ export function ButtonList({
             (!buttonGuard.startTime ||
               buttonGuard.startTime - solanaTime <= createBigInt(0)) && (
               <>
-                <Text fontSize="sm" marginRight={"2"}>
+                <Text fontSize="sm" marginRight={"2"} className="text-white">
                   Ending in:{" "}
                 </Text>
                 <Timer
@@ -548,19 +565,27 @@ export function ButtonList({
                 <NumberInputStepper>
                   <Flex alignItems="center" justifyContent="center" gap="1">
                     <Button
-                      {...inc}
                       size="xs"
                       fontWeight="bold"
                       backgroundColor={"gray.300"}
-                      isDisabled={{ ...input }.value >= buttonGuard.maxAmount}
+                      isDisabled={
+                        numberInputValues[buttonGuard.label] >=
+                        buttonGuard.maxAmount
+                      }
+                      onClick={() =>
+                        handleNumberInputClick(buttonGuard.label, "increment")
+                      }
                     >
                       +
                     </Button>
                     <Button
-                      {...dec}
                       size="xs"
                       fontWeight="bold"
                       backgroundColor={"gray.300"}
+                      isDisabled={numberInputValues[buttonGuard.label] == 1}
+                      onClick={() =>
+                        handleNumberInputClick(buttonGuard.label, "decrement")
+                      }
                     >
                       -
                     </Button>

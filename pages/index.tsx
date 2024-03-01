@@ -294,7 +294,7 @@ export default function Home() {
                   paddingY="0.2"
                   borderRadius="lg"
                 >
-                  0.1 $SOL
+                  200K CBTM
                 </Badge>
               </Box>
             </Center>

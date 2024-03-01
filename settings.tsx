@@ -5,13 +5,13 @@ export const mintText = [
     label: "WL",
     mintText: "1 mint per wallet",
     buttonLabel: "Mint",
-    header: "WL Mint (0.05 $SOL)",
+    header: "WL Mint",
   },
   {
     label: "Public",
     mintText: "5 mint per wallet",
     buttonLabel: "Mint",
-    header: "Public Mint (0.01 $SOL)",
+    header: "Public Mint",
   },
   {
     label: "default",
