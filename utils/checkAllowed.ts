@@ -36,6 +36,7 @@ import {
   GuardReturn,
   allocationChecker,
   calculateMintable,
+  getSolanaTime,
 } from "./checkerHelper";
 import { allowLists } from "./../allowlist";
 import {
@@ -48,8 +49,9 @@ export const guardChecker = async (
   umi: Umi,
   candyGuard: CandyGuard,
   candyMachine: CandyMachine,
-  solanaTime: bigint
 ) => {
+  const solanaTime = await getSolanaTime(umi);
+
   let guardReturn: GuardReturn[] = [];
   let ownedTokens: DigitalAssetWithToken[] = [];
   if (!candyGuard) {

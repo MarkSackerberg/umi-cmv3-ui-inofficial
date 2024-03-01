@@ -157,7 +157,6 @@ const useCandyMachine = (
 
 export default function Home() {
   const umi = useUmi();
-  const solanaTime = useSolanaTime();
   const toast = useToast();
   const {
     isOpen: isShowNftOpen,
@@ -231,8 +230,7 @@ export default function Home() {
       const { guardReturn, ownedTokens } = await guardChecker(
         umi,
         candyGuard,
-        candyMachine,
-        solanaTime
+        candyMachine
       );
 
       setOwnedTokens(ownedTokens);

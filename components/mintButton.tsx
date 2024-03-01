@@ -481,17 +481,6 @@ export function ButtonList({
     buttonGuardList.push(buttonElement);
   }
 
-  const { getInputProps, getIncrementButtonProps, getDecrementButtonProps } =
-    useNumberInput({
-      step: 1,
-      defaultValue: 1,
-      min: 1,
-    });
-
-  const inc = getIncrementButtonProps();
-  const dec = getDecrementButtonProps();
-  const input = getInputProps();
-
   const listItems = buttonGuardList.map((buttonGuard, index) => (
     <Box key={index} marginTop={"15px"} marginBottom={"15px"}>
       <Divider my="10px" />
@@ -546,7 +535,7 @@ export function ButtonList({
         <VStack>
           {process.env.NEXT_PUBLIC_MULTIMINT && buttonGuard.allowed ? (
             <NumberInput
-              value={numberInputValues[buttonGuard.label] || { ...input }.value}
+              value={numberInputValues[buttonGuard.label] || 1}
               min={1}
               max={buttonGuard.maxAmount < 1 ? 1 : buttonGuard.maxAmount}
               size="sm"
