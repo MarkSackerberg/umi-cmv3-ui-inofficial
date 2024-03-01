@@ -482,7 +482,7 @@ export function ButtonList({
   }
 
   const listItems = buttonGuardList.map((buttonGuard, index) => (
-    <Box key={index} marginTop={"15px"} marginBottom={"15px"}>
+    <Box key={index} marginTop={"10px"} marginBottom={"15px"}>
       <Divider my="10px" />
       <HStack marginTop="5" marginBottom="" paddingLeft="3" paddingRight="3">
         <Heading

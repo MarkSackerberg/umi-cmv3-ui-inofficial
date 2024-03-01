@@ -46,10 +46,9 @@ import { GuardReturn } from "../utils/checkerHelper";
 import { ShowNft } from "../components/showNft";
 import { InitializeModal } from "../components/initializeModal";
 import { image, headerText } from "../settings";
-import { useSolanaTime } from "@/utils/SolanaTimeContext";
 import Image from "next/image";
 import BG from "@/public/assets/background.png";
-import Nft from "@/public/assets/Nft.png";
+import CollectionLogo from "@/public/assets/collection_logo.png";
 import Round from "@/public/assets/Round.svg";
 import Twitter from "@/public/assets/Twitter.svg";
 import Telegram from "@/public/assets/Telegram.svg";
@@ -280,7 +279,8 @@ export default function Home() {
                   layout="fit"
                   objectFit={"cover"}
                   alt={"project Image"}
-                  src={Nft}
+                  src={CollectionLogo}
+                  style={{ borderRadius: "10px" }}
                 />
                 <Badge
                   pos={"absolute"}
@@ -305,6 +305,7 @@ export default function Home() {
                   justifyContent="center"
                   color="white"
                   className="font-roboto"
+                  mt={4}
                 >
                   <Text fontSize={"md"} className="tracking-wide">
                     Available NFTs :{" "}
