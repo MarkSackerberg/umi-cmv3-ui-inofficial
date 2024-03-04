@@ -49,6 +49,7 @@ import { image, headerText } from "../settings";
 import Image from "next/image";
 import BG from "@/public/assets/background.png";
 import CollectionLogo from "@/public/assets/collection_logo.png";
+import RainbowCard from "@/public/assets/Rainbow.gif";
 import Round from "@/public/assets/Round.svg";
 import Twitter from "@/public/assets/Twitter.svg";
 import Telegram from "@/public/assets/Telegram.svg";
@@ -279,7 +280,7 @@ export default function Home() {
                   layout="fit"
                   objectFit={"cover"}
                   alt={"project Image"}
-                  src={CollectionLogo}
+                  src={RainbowCard}
                   style={{ borderRadius: "10px" }}
                 />
                 <Badge
@@ -388,8 +389,8 @@ export default function Home() {
   };
 
   return (
-    <main>
-      <div className="w-full flex items-center justify-end pt-5 md:pt-8 bg-[#97aded]">
+    <div className="w-full h-full flex flex-col relative z-[50]">
+      <div className="w-full flex items-center justify-end pt-5 md:pt-8">
         <div className="bg-transparent hidden sm:flex items-center justify-center gap-5">
           <span className="mx-1">
             <Image src={Round} alt="" width={22} />
@@ -400,19 +401,26 @@ export default function Home() {
           <span className="mx-1">
             <Image src={Telegram} alt="" width={22} />
           </span>
-          <div className="px-0 sm:px-2 xl:px-4 mx-3">
-            <WalletMultiButtonDynamic />
-          </div>
+        </div>
+        <div className="px-0 sm:px-2 xl:px-4 mx-3">
+          <WalletMultiButtonDynamic />
         </div>
       </div>
-      <div className="w-full h-auto flex flex-col relative z-[50]">
-        <div className={styles.center}>
-          <PageContent key="content" />
-        </div>
-        <div className="absolute top-[20vh] left-0 w-full h-full z-[-1]">
-          <Image src={BG} alt={"Background"} fill objectFit={"cover"} />
-        </div>
+      <div className={styles.center}>
+        <PageContent key="content" />
       </div>
-    </main>
+      <div className="absolute left-0 w-full h-full z-[-1]">
+        <Image
+          src={BG}
+          alt={"Background"}
+          style={{
+            position: "absolute",
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+          }}
+        />
+      </div>
+    </div>
   );
 }
