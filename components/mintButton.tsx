@@ -174,7 +174,9 @@ const mintClick = async (
     const mintTxs: Transaction[] = [];
     let nftsigners = [] as KeypairSigner[];
 
-    const latestBlockhash = (await umi.rpc.getLatestBlockhash()).blockhash;
+    const latestBlockhash = await umi.rpc.getLatestBlockhash({
+      commitment: "processed",
+    });
 
     for (let i = 0; i < mintAmount; i++) {
       const nftMint = generateSigner(umi);
@@ -197,7 +199,7 @@ const mintClick = async (
 
       tx = tx.prepend(setComputeUnitLimit(umi, { units: 800_000 }));
       tx = tx.setAddressLookupTables(tables);
-      tx = tx.setBlockhash(latestBlockhash);
+      tx = tx.setBlockhash(latestBlockhash.blockhash);
       const transaction = tx.build(umi);
       mintTxs.push(transaction);
     }
@@ -218,7 +220,7 @@ const mintClick = async (
     let amountSent = 0;
     const sendPromises = signedTransactions.map((tx, index) => {
       return umi.rpc
-        .sendTransaction(tx)
+        .sendTransaction(tx, { skipPreflight: true })
         .then((signature) => {
           console.log(
             `Transaction ${index + 1} resolved with signature: ${
@@ -241,12 +243,7 @@ const mintClick = async (
       // throw error that no tx was created
       throw new Error("no tx was created");
     }
-    updateLoadingText(
-      `finalizing transaction(s)`,
-      guardList,
-      guardToUse.label,
-      setGuardList
-    );
+    updateLoadingText(`Finalizing`, guardList, guardToUse.label, setGuardList);
 
     createStandaloneToast().toast({
       title: `${signedTransactions.length} Transaction(s) sent!`,
@@ -254,7 +251,7 @@ const mintClick = async (
       duration: 3000,
     });
 
-    const successfulMints = await verifyTx(umi, signatures);
+    const successfulMints = await verifyTx(umi, signatures, latestBlockhash);
 
     updateLoadingText(
       "Fetching your NFT",
