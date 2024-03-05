@@ -12,10 +12,10 @@ import {
   Umi,
   createBigInt,
   generateSigner,
+  lamports,
   none,
   publicKey,
   signAllTransactions,
-  sol,
   some,
   transactionBuilder,
 } from "@metaplex-foundation/umi";
@@ -39,9 +39,6 @@ import {
   NumberInput,
   NumberInputField,
   NumberInputStepper,
-  NumberIncrementStepper,
-  NumberDecrementStepper,
-  useNumberInput,
   VStack,
   Divider,
   createStandaloneToast,
@@ -49,6 +46,7 @@ import {
 import {
   fetchAddressLookupTable,
   setComputeUnitLimit,
+  setComputeUnitPrice,
 } from "@metaplex-foundation/mpl-toolbox";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import {
@@ -174,9 +172,7 @@ const mintClick = async (
     const mintTxs: Transaction[] = [];
     let nftsigners = [] as KeypairSigner[];
 
-    const latestBlockhash = await umi.rpc.getLatestBlockhash({
-      commitment: "processed",
-    });
+    const latestBlockhash = await umi.rpc.getLatestBlockhash();
 
     for (let i = 0; i < mintAmount; i++) {
       const nftMint = generateSigner(umi);
@@ -198,8 +194,10 @@ const mintClick = async (
       );
 
       tx = tx.prepend(setComputeUnitLimit(umi, { units: 800_000 }));
+      tx = tx.prepend(setComputeUnitPrice(umi, { lamports: lamports(10_000) }));
       tx = tx.setAddressLookupTables(tables);
       tx = tx.setBlockhash(latestBlockhash.blockhash);
+
       const transaction = tx.build(umi);
       mintTxs.push(transaction);
     }
@@ -220,7 +218,7 @@ const mintClick = async (
     let amountSent = 0;
     const sendPromises = signedTransactions.map((tx, index) => {
       return umi.rpc
-        .sendTransaction(tx, { skipPreflight: true })
+        .sendTransaction(tx)
         .then((signature) => {
           console.log(
             `Transaction ${index + 1} resolved with signature: ${

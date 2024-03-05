@@ -26,16 +26,13 @@ export const verifyTx = async (
     signature: Uint8Array
   ): Promise<VerifySignatureResult> => {
     const confirmationRes = await umi.rpc.confirmTransaction(signature, {
-      commitment: "confirmed",
       strategy: { type: "blockhash", ...blockhash },
     });
 
     if (confirmationRes.value.err)
       return { success: false, reason: confirmationRes.value.err.toString() };
 
-    const transaction = await umi.rpc.getTransaction(signature, {
-      commitment: "processed",
-    });
+    const transaction = await umi.rpc.getTransaction(signature);
 
     if (!transaction) {
       return { success: false, reason: "No TX found" };
