@@ -32,7 +32,13 @@ export const verifyTx = async (
     if (confirmationRes.value.err)
       return { success: false, reason: confirmationRes.value.err.toString() };
 
-    const transaction = await umi.rpc.getTransaction(signature);
+    let transaction;
+    for (let i = 0; i < 5; i++) {
+      transaction = await umi.rpc.getTransaction(signature);
+      if (transaction) break;
+
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+    }
 
     if (!transaction) {
       return { success: false, reason: "No TX found" };
