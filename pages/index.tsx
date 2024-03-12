@@ -319,7 +319,7 @@ export default function Home() {
                 </Flex>
               )}
             </Center>
-            <Stack divider={<StackDivider />} spacing="8">
+            <Stack divider={<StackDivider />} spacing="6">
               {loading ? (
                 <div>
                   <Divider my="10px" />
@@ -341,6 +341,21 @@ export default function Home() {
                   setCheckEligibility={setCheckEligibility}
                 />
               )}
+              <div className="flex flex-col justify-center text-white px-3">
+                <span>
+                  <b>Bronze Keycards (80% chance) :</b> 1k $CBTM per 24h
+                </span>
+                <span>
+                  <b>Silver Keycards (10% chance) :</b> 1.5k $CBTM per 24h
+                </span>
+                <span>
+                  <b>Gold Keycards (5% chance) :</b> 2k $CBTM per 24h
+                </span>
+                <span>
+                  <b>Rainbow Keycards (5% chance) :</b> 2k $CBTM per 24h + 1
+                  $SOL prize giveaway
+                </span>
+              </div>
             </Stack>
           </CardBody>
         </Card>
@@ -392,6 +407,17 @@ export default function Home() {
     <div className="w-full h-full flex flex-col relative z-[50]">
       <div className="w-full flex items-center justify-end pt-5 md:pt-8">
         <div className="bg-transparent hidden sm:flex items-center justify-center gap-5">
+          <button
+            className="mx-1 text-white font-extrabold text-xl"
+            onClick={() => {
+              window.open(
+                "https://jup.ag/swap/SOL-CBTM_FpZWLF31ymwJQNKwdhxAog9HwFEJGWjk6JqQUWYnuHry",
+                "_blank"
+              );
+            }}
+          >
+            BUY $CBTM
+          </button>
           <span className="mx-1">
             <Image src={Round} alt="" width={22} />
           </span>
