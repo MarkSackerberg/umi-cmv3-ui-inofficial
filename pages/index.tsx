@@ -48,11 +48,16 @@ import { InitializeModal } from "../components/initializeModal";
 import { image, headerText } from "../settings";
 import Image from "next/image";
 import BG from "@/public/assets/background.png";
-import CollectionLogo from "@/public/assets/collection_logo.png";
+// import CollectionLogo from "@/public/assets/collection_logo.png";
 import RainbowCard from "@/public/assets/Rainbow.gif";
 import Round from "@/public/assets/Round.svg";
 import Twitter from "@/public/assets/Twitter.svg";
 import Telegram from "@/public/assets/Telegram.svg";
+import star1 from "@/public/assets/Star 1.svg";
+import star2 from "@/public/assets/Star 2.svg";
+import star3 from "@/public/assets/Star 3.svg";
+import star4 from "@/public/assets/Star 4.svg";
+
 
 const WalletMultiButtonDynamic = dynamic(
   async () =>
@@ -341,21 +346,6 @@ export default function Home() {
                   setCheckEligibility={setCheckEligibility}
                 />
               )}
-              <div className="flex flex-col justify-center text-white px-3">
-                <span>
-                  <b>Bronze Keycards (80% chance) :</b> 1k $CBTM per 24h
-                </span>
-                <span>
-                  <b>Silver Keycards (10% chance) :</b> 1.5k $CBTM per 24h
-                </span>
-                <span>
-                  <b>Gold Keycards (5% chance) :</b> 2k $CBTM per 24h
-                </span>
-                <span>
-                  <b>Rainbow Keycards (5% chance) :</b> 2k $CBTM per 24h + 1
-                  $SOL prize giveaway
-                </span>
-              </div>
             </Stack>
           </CardBody>
         </Card>
@@ -403,9 +393,113 @@ export default function Home() {
     );
   };
 
+  const NftTier = () => {
+    return (
+      <>
+        <Card backgroundColor="#5175e2" mt={5}>
+          <CardBody>
+            <Center>
+              <Flex
+                alignItems="center"
+                justifyContent="space-between"
+                className="font-inder"
+                mt={2}
+                px={4}
+                color="white"
+                width="100%"
+              >
+                <Text fontSize={"2xl"} fontWeight={""}>
+                  NFT Tiers
+                </Text>
+                <Text fontSize={"md"} fontWeight={""}>
+                  Mint Chances
+                </Text>
+              </Flex>
+            </Center>
+            <Stack divider={<StackDivider />} spacing="6" className="mt-3">
+              <div className="flex flex-col justify-center px-3 gap-3 font-inder">
+                <>
+                  <Flex alignItems="center" justifyContent="space-between" backgroundColor="#6183e5" width="100%" fontFamily={"font-inder"} borderRadius={"md"}>
+                    <Flex px={3} alignItems="center" justifyContent="center">
+                      <div className="p-1 sm:p-2 md:p-3 lg:p-5">
+                        <Image src={star1} alt="" className="" width={22}/>
+                      </div>
+                      <div className="flex flex-col p-3">
+                        <p className="text-lg text-white">Bronze Keycards</p>
+                        <p className="text-sm text-gray-300">1k $CBTM per 24h</p>
+                      </div>
+                    </Flex>
+                    <Flex px={8}>
+                      <p className="text-2xl text-[#F8F8B4]">80%</p>
+                    </Flex>
+                  </Flex>
+                </>
+                <>
+                  <Flex alignItems="center" justifyContent="space-between" backgroundColor="#6183e5" width="100%" fontFamily={"font-inder"} borderRadius={"md"}>
+                    <Flex px={3} alignItems="center" justifyContent="center">
+                      <div className="p-1 sm:p-2 md:p-3 lg:p-4">
+                        <Image src={star2} alt="" className="" width={22}/>
+                      </div>
+                      <div className="flex flex-col p-3">
+                        <p className="text-lg text-white">Silver Keycards</p>
+                        <p className="text-sm text-gray-300">1.5k $CBTM per 24h</p>
+                      </div>
+                    </Flex>
+                    <Flex px={8}>
+                      <p className="text-2xl text-[#F8F8B4]">10%</p>
+                    </Flex>
+                  </Flex>
+                </>
+                <>
+                  <Flex alignItems="center" justifyContent="space-between" backgroundColor="#6183e5" width="100%" fontFamily={"font-inder"} borderRadius={"md"}>
+                    <Flex px={3} alignItems="center" justifyContent="center">
+                      <div className="p-1 sm:p-2 md:p-3 lg:p-5">
+                        <Image src={star3} alt="" className="" width={22} />
+                      </div>
+                      <div className="flex flex-col p-3">
+                        <p className="text-lg text-white">Gold Keycards</p>
+                        <p className="text-sm text-gray-300">2k $CBTM per 24h</p>
+                      </div>
+                    </Flex>
+                    <Flex px={8}>
+                      <p className="text-2xl text-[#F8F8B4]">10%</p>
+                    </Flex>
+                  </Flex>
+                </>
+                <>
+                  <Flex alignItems="center" justifyContent="space-between" backgroundColor="#6183e5" width="100%" fontFamily={"font-inder"} borderRadius={"md"}>
+                    <Flex px={3} alignItems="center" justifyContent="center">
+                      <div className="p-1 sm:p-2 md:p-3 lg:p-5">
+                        <Image src={star4} alt="" className="" width={22} />
+                      </div>
+                      <div className="flex flex-col p-3">
+                        <p className="text-lg text-white">Rainbow Keycards</p>
+                        <p className="text-sm text-gray-300">2k $CBTM per 24h + 1 $SOL prize giveaway</p>
+                      </div>
+                    </Flex>
+                    <Flex px={8}>
+                      <p className="text-2xl text-[#F8F8B4]">10%</p>
+                    </Flex>
+                  </Flex>
+                </>
+              </div>
+            </Stack>
+          </CardBody>
+        </Card>
+      </>
+    )
+  }
+
   return (
-    <div className="w-full h-full flex flex-col relative z-[50]">
-      <div className="w-full flex items-center justify-end pt-5 md:pt-8">
+    <div className="w-full h-screen flex flex-col overflow-y-auto nobar">
+      <Image
+          src={BG}
+          alt={"Background"}
+          layout="fill"
+          objectFit={"cover"}
+          quality={100}
+        />
+      <div className="w-full flex items-center justify-end pt-5 md:pt-8 z-[100]">
         <div className="bg-transparent hidden sm:flex items-center justify-center gap-5">
           <button
             className="mx-1 text-white font-extrabold text-xl"
@@ -434,18 +528,7 @@ export default function Home() {
       </div>
       <div className={styles.center}>
         <PageContent key="content" />
-      </div>
-      <div className="absolute left-0 w-full h-full z-[-1]">
-        <Image
-          src={BG}
-          alt={"Background"}
-          style={{
-            position: "absolute",
-            width: "100%",
-            height: "100%",
-            objectFit: "cover",
-          }}
-        />
+        <NftTier />
       </div>
     </div>
   );

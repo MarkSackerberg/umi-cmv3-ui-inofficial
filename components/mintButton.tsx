@@ -522,7 +522,7 @@ export function ButtonList({
         </Flex>
       </HStack>
       {/* <HStack paddingLeft="3" paddingRight="3" marginBottom="" > */}
-      <SimpleGrid columns={2} spacing={10} paddingLeft="3" paddingRight="3">
+      <SimpleGrid columns={2} spacing={10} paddingLeft="3" paddingRight="">
         <Text pt="2" fontSize="sm" color="white" className="font-inter">
           {buttonGuard.mintText}
         </Text>
