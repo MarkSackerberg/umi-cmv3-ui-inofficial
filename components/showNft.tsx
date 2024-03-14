@@ -120,7 +120,7 @@ export const ShowNft = ({ nfts }: Props) => {
     </AccordionItem>
   ));
   return (
-    <Accordion defaultIndex={0} allowMultiple={true} >
+    <Accordion defaultIndex={[0]} allowMultiple={true} >
       {cards}
     </Accordion>
   );
