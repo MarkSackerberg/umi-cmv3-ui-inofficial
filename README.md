@@ -22,6 +22,7 @@ You can use this repo to deploy your own candy machine UI.
 - The users see NFTs left, start and end countdowns, reasons for not being able to mint and more
 - Combining most of these guards is possible since we are lookup tables. For example using `allowlist`,`nftBurn`, `nftPayment`, `solPayment`, `startDate` and `endDate`
 - For larger allowlists this UI will automatically split the mint into two transactions to avoid hitting the transaction size limit
+- Dynamic Compute Unit calculation to have higher chances to get the mint included into a block
 - It supports most of the existing guards:
   - `addressGate`
   - `allocation`
