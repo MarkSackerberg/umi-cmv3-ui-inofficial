@@ -56,6 +56,8 @@ import {
   routeBuilder,
   mintArgsBuilder,
   GuardButtonList,
+  buildTx,
+  getRequiredCU,
 } from "../utils/mintHelper";
 import { useSolanaTime } from "@/utils/SolanaTimeContext";
 import { verifyTx } from "@/utils/verifyTx";
@@ -183,40 +185,39 @@ const mintClick = async (
     let nftsigners = [] as KeypairSigner[];
 
     const latestBlockhash = (await umi.rpc.getLatestBlockhash()).blockhash;
+    
+    const mintArgs = mintArgsBuilder(candyMachine, guardToUse, ownedTokens);
+    const nftMint = generateSigner(umi);
+    const txForSimulation = buildTx(
+      umi,
+      candyMachine,
+      candyGuard,
+      nftMint,
+      guardToUse,
+      mintArgs,
+      tables,
+      latestBlockhash,
+      1_400_000,
+      buyBeer
+    );
+    const requiredCu = await getRequiredCU(umi, txForSimulation);
 
     for (let i = 0; i < mintAmount; i++) {
       const nftMint = generateSigner(umi);
       nftsigners.push(nftMint);
-
-      const mintArgs = mintArgsBuilder(candyMachine, guardToUse, ownedTokens);
-      let tx = transactionBuilder().add(
-        mintV2(umi, {
-          candyMachine: candyMachine.publicKey,
-          collectionMint: candyMachine.collectionMint,
-          collectionUpdateAuthority: candyMachine.authority,
-          nftMint,
-          group:
-            guardToUse.label === "default" ? none() : some(guardToUse.label),
-          candyGuard: candyGuard.publicKey,
-          mintArgs,
-          tokenStandard: candyMachine.tokenStandard,
-        })
+      const transaction = buildTx(
+        umi,
+        candyMachine,
+        candyGuard,
+        nftMint,
+        guardToUse,
+        mintArgs,
+        tables,
+        latestBlockhash,
+        requiredCu,
+        buyBeer
       );
-
-      if (buyBeer) {
-        tx = tx.prepend(
-          transferSol(umi, {
-            destination: publicKey(
-              "BeeryDvghgcKPTUw3N3bdFDFFWhTWdWHnsLuVebgsGSD"
-            ),
-            amount: sol(Number(0.005)),
-          })
-        );
-      }
-      tx = tx.prepend(setComputeUnitLimit(umi, { units: 800_000 }));
-      tx = tx.setAddressLookupTables(tables);
-      tx = tx.setBlockhash(latestBlockhash);
-      const transaction = tx.build(umi);
+      console.log(transaction)
       mintTxs.push(transaction);
     }
     if (!mintTxs.length) {
