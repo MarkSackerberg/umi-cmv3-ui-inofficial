@@ -47,8 +47,6 @@ import {
 } from "@chakra-ui/react";
 import {
   fetchAddressLookupTable,
-  setComputeUnitLimit,
-  transferSol,
 } from "@metaplex-foundation/mpl-toolbox";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import {
