@@ -23,6 +23,7 @@ You can use this repo to deploy your own candy machine UI.
 - Combining most of these guards is possible since we are lookup tables. For example using `allowlist`,`nftBurn`, `nftPayment`, `solPayment`, `startDate` and `endDate`
 - For larger allowlists this UI will automatically split the mint into two transactions to avoid hitting the transaction size limit
 - Dynamic Compute Unit calculation to have higher chances to get the mint included into a block
+- Priority fees are added. Those are hardcoded to a very small number. As of 15 March 24 all the dynamic solutions are only possibly with specific RPC providers. If you want to have it dynamic you need to implement it yourself.
 - It supports most of the existing guards:
   - `addressGate`
   - `allocation`
