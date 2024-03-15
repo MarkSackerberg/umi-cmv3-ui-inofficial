@@ -55,6 +55,9 @@ const createLut =
         candyGuard
       );
     try {
+      const latestBlockhash = (await umi.rpc.getLatestBlockhash()).blockhash;
+      builder = builder.setBlockhash(latestBlockhash);
+
       builder = builder.prepend(
         setComputeUnitPrice(umi, { microLamports: 500 })
       );
@@ -62,8 +65,6 @@ const createLut =
       builder = builder.prepend(
         setComputeUnitLimit(umi, { units: requiredCu })
       );
-      const latestBlockhash = (await umi.rpc.getLatestBlockhash()).blockhash;
-      builder = builder.setBlockhash(latestBlockhash);
       const { signature } = await builder.sendAndConfirm(umi, {
         confirm: { commitment: "processed" },
         send: {
@@ -126,6 +127,8 @@ const initializeGuards =
         builder = builder.prepend(
           setComputeUnitPrice(umi, { microLamports: 500 })
         );
+        const latestBlockhash = (await umi.rpc.getLatestBlockhash()).blockhash;
+        builder = builder.setBlockhash(latestBlockhash);
         const requiredCu = await getRequiredCU(umi, builder.build(umi));
         builder = builder.prepend(
           setComputeUnitLimit(umi, { units: requiredCu })
@@ -165,6 +168,8 @@ const buyABeer = (umi: Umi, amount: string) => async () => {
       })
     );
   builder = builder.prepend(setComputeUnitPrice(umi, { microLamports: 500 }));
+  const latestBlockhash = (await umi.rpc.getLatestBlockhash()).blockhash;
+  builder = builder.setBlockhash(latestBlockhash);
   const requiredCu = await getRequiredCU(umi, builder.build(umi));
   builder = builder.prepend(setComputeUnitLimit(umi, { units: requiredCu }));
   try {
