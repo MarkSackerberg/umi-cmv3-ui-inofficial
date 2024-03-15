@@ -27,7 +27,12 @@ import {
   some,
   transactionBuilder,
 } from "@metaplex-foundation/umi";
-import { transferSol, addMemo, setComputeUnitPrice, setComputeUnitLimit } from "@metaplex-foundation/mpl-toolbox";
+import {
+  transferSol,
+  addMemo,
+  setComputeUnitPrice,
+  setComputeUnitLimit,
+} from "@metaplex-foundation/mpl-toolbox";
 import React from "react";
 import { useEffect, useState } from "react";
 import { allowLists } from "@/allowlist";
@@ -50,9 +55,15 @@ const createLut =
         candyGuard
       );
     try {
-      builder = builder.prepend(setComputeUnitPrice(umi, { microLamports: 500 }));
+      builder = builder.prepend(
+        setComputeUnitPrice(umi, { microLamports: 500 })
+      );
       const requiredCu = await getRequiredCU(umi, builder.build(umi));
-      builder = builder.prepend(setComputeUnitLimit(umi, { units: requiredCu }));
+      builder = builder.prepend(
+        setComputeUnitLimit(umi, { units: requiredCu })
+      );
+      const latestBlockhash = (await umi.rpc.getLatestBlockhash()).blockhash;
+      builder = builder.setBlockhash(latestBlockhash);
       const { signature } = await builder.sendAndConfirm(umi, {
         confirm: { commitment: "processed" },
         send: {
@@ -112,9 +123,13 @@ const initializeGuards =
         );
       }
       if (builder.items.length > 0) {
-        builder = builder.prepend(setComputeUnitPrice(umi, { microLamports: 500 }));
+        builder = builder.prepend(
+          setComputeUnitPrice(umi, { microLamports: 500 })
+        );
         const requiredCu = await getRequiredCU(umi, builder.build(umi));
-        builder = builder.prepend(setComputeUnitLimit(umi, { units: requiredCu }));
+        builder = builder.prepend(
+          setComputeUnitLimit(umi, { units: requiredCu })
+        );
         builder.sendAndConfirm(umi, {
           confirm: { commitment: "processed" },
           send: {
