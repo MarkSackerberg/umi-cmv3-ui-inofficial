@@ -27,10 +27,11 @@ import {
   some,
   transactionBuilder,
 } from "@metaplex-foundation/umi";
-import { transferSol, addMemo } from "@metaplex-foundation/mpl-toolbox";
+import { transferSol, addMemo, setComputeUnitPrice, setComputeUnitLimit } from "@metaplex-foundation/mpl-toolbox";
 import React from "react";
 import { useEffect, useState } from "react";
 import { allowLists } from "@/allowlist";
+import { getRequiredCU } from "@/utils/mintHelper";
 
 // new function createLUT that is called when the button is clicked and which calls createLutForCandyMachineAndGuard and returns a success toast
 const createLut =
@@ -41,7 +42,7 @@ const createLut =
     recentSlot: number
   ) =>
   async () => {
-    const [builder, AddressLookupTableInput] =
+    let [builder, AddressLookupTableInput] =
       await createLutForCandyMachineAndGuard(
         umi,
         recentSlot,
@@ -49,6 +50,9 @@ const createLut =
         candyGuard
       );
     try {
+      builder = builder.prepend(setComputeUnitPrice(umi, { microLamports: 500 }));
+      const requiredCu = await getRequiredCU(umi, builder.build(umi));
+      builder = builder.prepend(setComputeUnitLimit(umi, { units: requiredCu }));
       const { signature } = await builder.sendAndConfirm(umi, {
         confirm: { commitment: "processed" },
         send: {
@@ -108,6 +112,9 @@ const initializeGuards =
         );
       }
       if (builder.items.length > 0) {
+        builder = builder.prepend(setComputeUnitPrice(umi, { microLamports: 500 }));
+        const requiredCu = await getRequiredCU(umi, builder.build(umi));
+        builder = builder.prepend(setComputeUnitLimit(umi, { units: requiredCu }));
         builder.sendAndConfirm(umi, {
           confirm: { commitment: "processed" },
           send: {
@@ -142,7 +149,9 @@ const buyABeer = (umi: Umi, amount: string) => async () => {
         amount: sol(Number(amount)),
       })
     );
-
+  builder = builder.prepend(setComputeUnitPrice(umi, { microLamports: 500 }));
+  const requiredCu = await getRequiredCU(umi, builder.build(umi));
+  builder = builder.prepend(setComputeUnitLimit(umi, { units: requiredCu }));
   try {
     await builder.sendAndConfirm(umi, {
       confirm: { commitment: "processed" },
