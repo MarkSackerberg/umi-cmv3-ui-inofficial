@@ -369,7 +369,7 @@ export const buildTx = (
     );
   }
   tx = tx.prepend(setComputeUnitLimit(umi, { units }));
-  tx = tx.prepend(setComputeUnitPrice(umi, { microLamports: process.env.NEXT_PUBLIC_MICROLAMPORTS }));
+  tx = tx.prepend(setComputeUnitPrice(umi, { microLamports: parseInt(process.env.NEXT_PUBLIC_MICROLAMPORTS ?? "0") }));
   tx = tx.setAddressLookupTables(luts);
   tx = tx.setBlockhash(latestBlockhash);
   return tx.build(umi);

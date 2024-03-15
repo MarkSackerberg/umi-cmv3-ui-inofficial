@@ -56,7 +56,7 @@ const createLut =
       );
     try {
       builder = builder.prepend(
-        setComputeUnitPrice(umi, { microLamports: process.env.NEXT_PUBLIC_MICROLAMPORTS })
+        setComputeUnitPrice(umi, { microLamports: parseInt(process.env.NEXT_PUBLIC_MICROLAMPORTS ?? "0") })
       );
       const requiredCu = await getRequiredCU(umi, builder.build(umi));
       builder = builder.prepend(
@@ -124,7 +124,7 @@ const initializeGuards =
       }
       if (builder.items.length > 0) {
         builder = builder.prepend(
-          setComputeUnitPrice(umi, { microLamports: process.env.NEXT_PUBLIC_MICROLAMPORTS })
+          setComputeUnitPrice(umi, { microLamports: parseInt(process.env.NEXT_PUBLIC_MICROLAMPORTS ?? "0") })
         );
         const requiredCu = await getRequiredCU(umi, builder.build(umi));
         builder = builder.prepend(
@@ -164,7 +164,7 @@ const buyABeer = (umi: Umi, amount: string) => async () => {
         amount: sol(Number(amount)),
       })
     );
-  builder = builder.prepend(setComputeUnitPrice(umi, { microLamports: process.env.NEXT_PUBLIC_MICROLAMPORTS }));
+  builder = builder.prepend(setComputeUnitPrice(umi, { microLamports: parseInt(process.env.NEXT_PUBLIC_MICROLAMPORTS ?? "0") }));
   const requiredCu = await getRequiredCU(umi, builder.build(umi));
   builder = builder.prepend(setComputeUnitLimit(umi, { units: requiredCu }));
   try {
