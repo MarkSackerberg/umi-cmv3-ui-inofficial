@@ -156,7 +156,7 @@ const mintClick = async (
         isClosable: true,
       });
       await routeBuild.sendAndConfirm(umi, {
-        confirm: { commitment: "processed" },
+        confirm: { commitment: "finalized" },
         send: {
           skipPreflight: true,
         },
