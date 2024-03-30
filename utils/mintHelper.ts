@@ -387,5 +387,5 @@ export const getRequiredCU = async (umi: Umi, transaction: Transaction) => {
   if (simulatedTx.value.err || !simulatedTx.value.unitsConsumed) {
     return defaultCU;
   }
-  return simulatedTx.value.unitsConsumed + 20_000 || defaultCU;
+  return simulatedTx.value.unitsConsumed * 1.2 || defaultCU;
 }
