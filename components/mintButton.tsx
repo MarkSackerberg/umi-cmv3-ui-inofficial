@@ -155,12 +155,27 @@ const mintClick = async (
         duration: 900,
         isClosable: true,
       });
-      await routeBuild.sendAndConfirm(umi, {
-        confirm: { commitment: "finalized" },
-        send: {
-          skipPreflight: true,
-        },
-      });
+      const latestBlockhash = (await umi.rpc.getLatestBlockhash({commitment: "finalized"}));
+      routeBuild.setBlockhash(latestBlockhash)
+      const sig = await umi.rpc
+        .sendTransaction(routeBuild.build(umi), { skipPreflight:true, maxRetries: 1, preflightCommitment: "finalized", commitment: "finalized" })
+        .then((signature) => {
+          signatures.push(signature);
+          return { status: "fulfilled", value: signature };
+        })
+        .catch((error) => {
+          createStandaloneToast().toast({
+            title: "Allow List TX failed!",
+            status: "error",
+            duration: 900,
+            isClosable: true,
+          });
+          return { status: "rejected", reason: error, value: new Uint8Array };
+
+        });
+        if (sig.status === "fulfilled")
+          await verifyTx(umi, [sig.value], latestBlockhash, "finalized");
+
     }
 
     // fetch LUT
@@ -182,7 +197,7 @@ const mintClick = async (
     const mintTxs: Transaction[] = [];
     let nftsigners = [] as KeypairSigner[];
 
-    const latestBlockhash = (await umi.rpc.getLatestBlockhash()).blockhash;
+    const latestBlockhash = (await umi.rpc.getLatestBlockhash({commitment: "finalized"}));
     
     const mintArgs = mintArgsBuilder(candyMachine, guardToUse, ownedTokens);
     const nftMint = generateSigner(umi);
@@ -233,9 +248,10 @@ const mintClick = async (
 
     let signatures: Uint8Array[] = [];
     let amountSent = 0;
+    
     const sendPromises = signedTransactions.map((tx, index) => {
       return umi.rpc
-        .sendTransaction(tx)
+        .sendTransaction(tx, { skipPreflight:true, maxRetries: 1, preflightCommitment: "finalized", commitment: "finalized" })
         .then((signature) => {
           console.log(
             `Transaction ${index + 1} resolved with signature: ${
@@ -271,7 +287,7 @@ const mintClick = async (
       duration: 3000,
     });
     
-    const successfulMints = await verifyTx(umi, signatures);
+    const successfulMints = await verifyTx(umi, signatures, latestBlockhash, "finalized");
 
     updateLoadingText(
       "Fetching your NFT",

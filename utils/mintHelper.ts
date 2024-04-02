@@ -26,6 +26,7 @@ import {
   Transaction,
   Signer,
   sol,
+  BlockhashWithExpiryBlockHeight,
 } from "@metaplex-foundation/umi";
 import { GuardReturn } from "./checkerHelper";
 import { Connection } from "@solana/web3.js";
@@ -342,7 +343,7 @@ export const buildTx = (
       },
   mintArgs: Partial<DefaultGuardSetMintArgs> | undefined,
   luts: AddressLookupTableInput[],
-  latestBlockhash: string,
+  latestBlockhash: BlockhashWithExpiryBlockHeight,
   units: number,
   buyBeer: boolean
 ) => {
