@@ -70,6 +70,7 @@ You can customize the UI by changing the code. If you just want to modify some v
   - `image` is the main image that is shown. You could change it to your project logo.
   - `headerText` is the website header. You could change it to your project name.
 - Decide if you want to allow multiple mints by a single user at the same time and in your `.env` file set `NEXT_PUBLIC_MULTIMINT` accordingly to `true` or `false`. By default a maximum of 15 NFTs can be minted at the same time this is because of wallet limitations. If you want to have less change `NEXT_PUBLIC_MAXMINTAMOUNT` in `.env`.
+- Change Priority fees if you want. By default it is set to the cheapest that is still considered to have priority fees. https://twitter.com/CloakdDev/status/1776661443330339285
 
 ### Fees
 This ui has a buy me a beer feature. Each mint will transfer a very small amount (0.005) of SOL to a tip wallet. If you do not want to support me feel free to change the NEXT_PUBLIC_BUYMARKBEER variable to false. I would appreachiate it though if you leave it on. 🍻

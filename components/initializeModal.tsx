@@ -59,7 +59,7 @@ const createLut =
       builder = builder.setBlockhash(latestBlockhash);
 
       builder = builder.prepend(
-        setComputeUnitPrice(umi, { microLamports: 500 })
+        setComputeUnitPrice(umi, { microLamports: parseInt(process.env.NEXT_PUBLIC_MICROLAMPORTS ?? "1001") })
       );
       const requiredCu = await getRequiredCU(umi, builder.build(umi));
       builder = builder.prepend(
@@ -125,7 +125,7 @@ const initializeGuards =
       }
       if (builder.items.length > 0) {
         builder = builder.prepend(
-          setComputeUnitPrice(umi, { microLamports: 500 })
+          setComputeUnitPrice(umi, { microLamports: parseInt(process.env.NEXT_PUBLIC_MICROLAMPORTS ?? "1001") })
         );
         const latestBlockhash = (await umi.rpc.getLatestBlockhash()).blockhash;
         builder = builder.setBlockhash(latestBlockhash);
@@ -167,7 +167,7 @@ const buyABeer = (umi: Umi, amount: string) => async () => {
         amount: sol(Number(amount)),
       })
     );
-  builder = builder.prepend(setComputeUnitPrice(umi, { microLamports: 500 }));
+  builder = builder.prepend(setComputeUnitPrice(umi, { microLamports: parseInt(process.env.NEXT_PUBLIC_MICROLAMPORTS ?? "1001") }));
   const latestBlockhash = (await umi.rpc.getLatestBlockhash()).blockhash;
   builder = builder.setBlockhash(latestBlockhash);
   const requiredCu = await getRequiredCU(umi, builder.build(umi));
