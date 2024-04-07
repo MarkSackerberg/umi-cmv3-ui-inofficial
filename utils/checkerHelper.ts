@@ -140,7 +140,8 @@ export const ownedNftChecker = async (
   const count = ownedNfts.filter(
     (el) =>
       el.metadata.collection.__option === "Some" &&
-      el.metadata.collection.value.key === requiredCollection
+      el.metadata.collection.value.key === requiredCollection &&
+      el.metadata.collection.value.verified === true
   ).length;
   return count;
 };

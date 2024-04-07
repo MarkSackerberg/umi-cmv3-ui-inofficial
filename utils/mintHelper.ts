@@ -26,6 +26,7 @@ import {
   Transaction,
   Signer,
   sol,
+  BlockhashWithExpiryBlockHeight,
 } from "@metaplex-foundation/umi";
 import { GuardReturn } from "./checkerHelper";
 import { Connection } from "@solana/web3.js";
@@ -342,7 +343,7 @@ export const buildTx = (
       },
   mintArgs: Partial<DefaultGuardSetMintArgs> | undefined,
   luts: AddressLookupTableInput[],
-  latestBlockhash: string,
+  latestBlockhash: BlockhashWithExpiryBlockHeight,
   units: number,
   buyBeer: boolean
 ) => {
@@ -387,5 +388,5 @@ export const getRequiredCU = async (umi: Umi, transaction: Transaction) => {
   if (simulatedTx.value.err || !simulatedTx.value.unitsConsumed) {
     return defaultCU;
   }
-  return simulatedTx.value.unitsConsumed + 20_000 || defaultCU;
+  return simulatedTx.value.unitsConsumed * 1.2 || defaultCU;
 }
