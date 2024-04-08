@@ -53,7 +53,7 @@ export const verifyTx = async (umi: Umi, signatures: Uint8Array[], blockhash: Bl
 
   if (failed && failed.length > 0){
     createStandaloneToast().toast({
-      title: `${failed.length} Mints failed!`,
+      title: `${failed.length} transactions failed!`,
       status: "error",
       duration: 3000,
     });
@@ -64,7 +64,7 @@ export const verifyTx = async (umi: Umi, signatures: Uint8Array[], blockhash: Bl
 
   if (successful.length > 0){
     createStandaloneToast().toast({
-      title: `${successful.length} Mints successful!`,
+      title: `${successful.length} transactions successful!`,
       status: "success",
       duration: 3000,
     });
