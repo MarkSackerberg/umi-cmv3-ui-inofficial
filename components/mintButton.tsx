@@ -15,6 +15,7 @@ import {
   none,
   publicKey,
   signAllTransactions,
+  signTransaction,
   sol,
   some,
   transactionBuilder,
@@ -155,12 +156,13 @@ const mintClick = async (
         duration: 900,
         isClosable: true,
       });
-      const latestBlockhash = (await umi.rpc.getLatestBlockhash({commitment: "finalized"}));
+      const latestBlockhash = await umi.rpc.getLatestBlockhash({commitment: "finalized"});
       routeBuild = routeBuild.setBlockhash(latestBlockhash)
+      const builtTx = await routeBuild.buildAndSign(umi);
       const sig = await umi.rpc
-        .sendTransaction(routeBuild.build(umi), { skipPreflight:true, maxRetries: 1, preflightCommitment: "finalized", commitment: "finalized" })
+        .sendTransaction(builtTx, { skipPreflight:true, maxRetries: 1, preflightCommitment: "finalized", commitment: "finalized" })
         .then((signature) => {
-          signatures.push(signature);
+          console.log("sent")
           return { status: "fulfilled", value: signature };
         })
         .catch((error) => {
