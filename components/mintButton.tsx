@@ -163,7 +163,6 @@ const mintClick = async (
       const sig = await umi.rpc
         .sendTransaction(builtTx, { skipPreflight:true, maxRetries: 1, preflightCommitment: "finalized", commitment: "finalized" })
         .then((signature) => {
-          console.log("sent")
           return { status: "fulfilled", value: signature };
         })
         .catch((error) => {
