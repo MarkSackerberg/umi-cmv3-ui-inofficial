@@ -47,7 +47,7 @@ import {
   createStandaloneToast,
 } from "@chakra-ui/react";
 import {
-  fetchAddressLookupTable,
+  fetchAddressLookupTable, setComputeUnitPrice,
 } from "@metaplex-foundation/mpl-toolbox";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import {
@@ -149,18 +149,19 @@ const mintClick = async (
     setGuardList(newGuardList);
 
     let routeBuild = await routeBuilder(umi, guardToUse, candyMachine);
-    if (routeBuild) {
+    if (routeBuild && routeBuild.items.length > 0) {
       createStandaloneToast().toast({
         title: "Allowlist detected. Please sign to be approved to mint.",
         status: "info",
         duration: 900,
         isClosable: true,
       });
+      routeBuild = routeBuild.prepend(setComputeUnitPrice(umi, { microLamports: parseInt(process.env.NEXT_PUBLIC_MICROLAMPORTS ?? "1001") }));
       const latestBlockhash = await umi.rpc.getLatestBlockhash({commitment: "finalized"});
       routeBuild = routeBuild.setBlockhash(latestBlockhash)
       const builtTx = await routeBuild.buildAndSign(umi);
       const sig = await umi.rpc
-        .sendTransaction(routeBuild.build(umi), { skipPreflight:true, maxRetries: 1, preflightCommitment: "finalized", commitment: "finalized" })
+        .sendTransaction(builtTx, { skipPreflight:true, maxRetries: 1, preflightCommitment: "finalized", commitment: "finalized" })
         .then((signature) => {
           return { status: "fulfilled", value: signature };
         })
