@@ -274,7 +274,7 @@ export const routeBuilder = async (
     const allowlist = allowLists.get(guardToUse.label);
     if (!allowlist) {
       console.error("allowlist not found!");
-      return transactionBuilder();
+      return tx2;
     }
     const allowListProof = await safeFetchAllowListProofFromSeeds(umi, {
       candyGuard: candyMachine.mintAuthority,
@@ -282,7 +282,9 @@ export const routeBuilder = async (
       merkleRoot: getMerkleRoot(allowlist),
       user: publicKey(umi.identity),
     });
+    console.log("allowListProof",allowListProof)
     if (allowListProof === null) {
+      console.log("null")
       tx2 = tx2.add(
         route(umi, {
           guard: "allowList",
