@@ -36,81 +36,84 @@ const useCandyMachine = (
   const [candyGuard, setCandyGuard] = useState<CandyGuard>();
   const toast = useToast();
 
-
-  useEffect(() => {
-    (async () => {
-      if (checkEligibility) {
-        if (!candyMachineId) {
-          console.error("No candy machine in .env!");
-          if (!toast.isActive("no-cm")) {
-            toast({
-              id: "no-cm",
-              title: "No candy machine in .env!",
-              description: "Add your candy machine address to the .env file!",
-              status: "error",
-              duration: 999999,
-              isClosable: true,
-            });
-          }
-          return;
-        }
-
-        let candyMachine;
-        try {
-          candyMachine = await fetchCandyMachine(umi, publicKey(candyMachineId));
-          //verify CM Version
-          if (candyMachine.version != AccountVersion.V2){
-            toast({
-              id: "wrong-account-version",
-              title: "Wrong candy machine account version!",
-              description: "Please use latest sugar to create your candy machine. Need Account Version 2!",
-              status: "error",
-              duration: 999999,
-              isClosable: true,
-            });
-            return;
-          }
-        } catch (e) {
-          console.error(e);
+  const fetchCmAndGuard = async () => {
+    if (checkEligibility) {
+      if (!candyMachineId) {
+        console.error("No candy machine in .env!");
+        if (!toast.isActive("no-cm")) {
           toast({
-            id: "no-cm-found",
-            title: "The CM from .env is invalid",
-            description: "Are you using the correct environment?",
+            id: "no-cm",
+            title: "No candy machine in .env!",
+            description: "Add your candy machine address to the .env file!",
             status: "error",
             duration: 999999,
             isClosable: true,
           });
         }
-        setCandyMachine(candyMachine);
-        if (!candyMachine) {
-          return;
-        }
-        let candyGuard;
-        try {
-          candyGuard = await safeFetchCandyGuard(umi, candyMachine.mintAuthority);
-        } catch (e) {
-          console.error(e);
-          toast({
-            id: "no-guard-found",
-            title: "No Candy Guard found!",
-            description: "Do you have one assigned?",
-            status: "error",
-            duration: 999999,
-            isClosable: true,
-          });
-        }
-        if (!candyGuard) {
-          return;
-        }
-        setCandyGuard(candyGuard);
-        if (firstRun){
-          setfirstRun(false)
-        }
+        return;
       }
-    })();
+
+      let candyMachine;
+      try {
+        candyMachine = await fetchCandyMachine(umi, publicKey(candyMachineId));
+        //verify CM Version
+        if (candyMachine.version != AccountVersion.V2) {
+          toast({
+            id: "wrong-account-version",
+            title: "Wrong candy machine account version!",
+            description:
+              "Please use latest sugar to create your candy machine. Need Account Version 2!",
+            status: "error",
+            duration: 999999,
+            isClosable: true,
+          });
+          return;
+        }
+      } catch (e) {
+        console.error(e);
+        toast({
+          id: "no-cm-found",
+          title: "The CM from .env is invalid",
+          description: "Are you using the correct environment?",
+          status: "error",
+          duration: 999999,
+          isClosable: true,
+        });
+      }
+      setCandyMachine(candyMachine);
+      if (!candyMachine) {
+        return;
+      }
+      let candyGuard;
+      try {
+        candyGuard = await safeFetchCandyGuard(umi, candyMachine.mintAuthority);
+      } catch (e) {
+        console.error(e);
+        toast({
+          id: "no-guard-found",
+          title: "No Candy Guard found!",
+          description: "Do you have one assigned?",
+          status: "error",
+          duration: 999999,
+          isClosable: true,
+        });
+      }
+      if (!candyGuard) {
+        return;
+      }
+      setCandyGuard(candyGuard);
+    }
+    if (firstRun) {
+      setfirstRun(false);
+    }
+  };
+
+ 
+  useEffect(() => {
+    fetchCmAndGuard();
   }, [umi, checkEligibility]);
 
-  return { candyMachine, candyGuard };
+  return { candyMachine, candyGuard, refetch: fetchCmAndGuard };
 
 
 };
@@ -163,7 +166,7 @@ export default function Home() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  const { candyMachine, candyGuard } = useCandyMachine(umi, candyMachineId, checkEligibility, setCheckEligibility, firstRun, setFirstRun);
+  const { candyMachine, candyGuard, refetch } = useCandyMachine(umi, candyMachineId, checkEligibility, setCheckEligibility, firstRun, setFirstRun);
 
   useEffect(() => {
     const checkEligibilityFunc = async () => {
@@ -260,6 +263,7 @@ export default function Home() {
                   mintsCreated={mintsCreated}
                   setMintsCreated={setMintsCreated}
                   onOpen={onShowNftOpen}
+                  refetch={refetch}
                   setCheckEligibility={setCheckEligibility}
                 />
               )}
