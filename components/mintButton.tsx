@@ -123,7 +123,8 @@ const mintClick = async (
   guardList: GuardReturn[],
   setGuardList: Dispatch<SetStateAction<GuardReturn[]>>,
   onOpen: () => void,
-  setCheckEligibility: Dispatch<SetStateAction<boolean>>
+  setCheckEligibility: Dispatch<SetStateAction<boolean>>,
+  refetch: () => void
 ) => {
   const guardToUse = chooseGuardToUse(guard, candyGuard);
   if (!guardToUse.guards) {
@@ -327,6 +328,7 @@ const mintClick = async (
     if (newMintsCreated.length > 0) {
         setMintsCreated(newMintsCreated);
         onOpen();
+        refetch();
     }
   } catch (e) {
     console.error(`minting failed because of ${e}`);
@@ -453,6 +455,7 @@ type Props = {
   candyMachine: CandyMachine | undefined;
   candyGuard: CandyGuard | undefined;
   ownedTokens: DigitalAssetWithToken[] | undefined;
+  refetch: () => void;
   setGuardList: Dispatch<SetStateAction<GuardReturn[]>>;
   mintsCreated:
     | {
@@ -474,6 +477,7 @@ export function ButtonList({
   umi,
   guardList,
   candyMachine,
+  refetch,
   candyGuard,
   ownedTokens = [], // provide default empty array
   setGuardList,
@@ -618,7 +622,8 @@ export function ButtonList({
                   guardList,
                   setGuardList,
                   onOpen,
-                  setCheckEligibility
+                  setCheckEligibility,
+                  refetch
                 )
               }
               key={buttonGuard.label}
