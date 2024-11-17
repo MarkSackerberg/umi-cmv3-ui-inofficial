@@ -183,12 +183,12 @@ const mintClick = async (
     }
 
     // fetch LUT
-    let tables: AddressLookupTableInput[] = [];
+    const tables: AddressLookupTableInput[] = [];
     const lut = process.env.NEXT_PUBLIC_LUT;
     if (lut) {
       const lutPubKey = publicKey(lut);
       const fetchedLut = await fetchAddressLookupTable(umi, lutPubKey);
-      tables = [fetchedLut];
+      tables.push(fetchedLut);
     } else {
       createStandaloneToast().toast({
         title: "The developer should really set a lookup table!",
