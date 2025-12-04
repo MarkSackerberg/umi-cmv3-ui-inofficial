@@ -21,8 +21,8 @@ dependencies:
     specifier: 6.0.1
     version: 6.0.1(@metaplex-foundation/umi@0.9.1)
   '@metaplex-foundation/mpl-token-metadata':
-    specifier: 3.2.0
-    version: 3.2.0(@metaplex-foundation/umi@0.9.1)
+    specifier: ^3.2.1
+    version: 3.2.1(@metaplex-foundation/umi@0.9.1)
   '@metaplex-foundation/mpl-toolbox':
     specifier: ^0.9.2
     version: 0.9.2(@metaplex-foundation/umi@0.9.1)
@@ -3247,17 +3247,25 @@ packages:
       '@metaplex-foundation/umi': 0.9.1
     dev: false
 
-  /@metaplex-foundation/mpl-token-metadata@3.2.0(@metaplex-foundation/umi@0.9.1):
-    resolution: {integrity: sha512-IP+orxAIkQwSa9M+xsYi7IopV+/0od5rgXTxp0988cHeB0hR1RpXQT8RrcTH/PeOs/tPCU5HvU01NaavV9EEcw==}
+  /@metaplex-foundation/mpl-token-metadata@3.2.1(@metaplex-foundation/umi@0.9.1):
+    resolution: {integrity: sha512-26W1NhQwDWmLOg/pBRYut7x/vEs/5kFS2sWVEY5/X0f2jJOLhnd4NaZQcq+5u+XZsXvm1jq2AtrRGPNK43oqWQ==}
     peerDependencies:
       '@metaplex-foundation/umi': '>= 0.8.2 < 1'
     dependencies:
-      '@metaplex-foundation/mpl-toolbox': 0.9.2(@metaplex-foundation/umi@0.9.1)
+      '@metaplex-foundation/mpl-toolbox': 0.9.4(@metaplex-foundation/umi@0.9.1)
       '@metaplex-foundation/umi': 0.9.1
     dev: false
 
   /@metaplex-foundation/mpl-toolbox@0.9.2(@metaplex-foundation/umi@0.9.1):
     resolution: {integrity: sha512-fNOpWUobslv/zyhj4KHVx+773B43/75q7vCiiFOuTAWs46OQXmJL8sl72qwh36pi1aNpoQMCL/wNI3wPNyJsNw==}
+    peerDependencies:
+      '@metaplex-foundation/umi': '>= 0.8.2 < 1'
+    dependencies:
+      '@metaplex-foundation/umi': 0.9.1
+    dev: false
+
+  /@metaplex-foundation/mpl-toolbox@0.9.4(@metaplex-foundation/umi@0.9.1):
+    resolution: {integrity: sha512-fd6JxfoLbj/MM8FG2x91KYVy1U6AjBQw4qjt7+Da3trzQaWnSaYHDcYRG/53xqfvZ9qofY1T2t53GXPlD87lnQ==}
     peerDependencies:
       '@metaplex-foundation/umi': '>= 0.8.2 < 1'
     dependencies:
@@ -11231,6 +11239,7 @@ packages:
 
   /rimraf@2.6.3:
     resolution: {integrity: sha512-mwqeW5XsA2qAejG46gYdENaxXjx9onRNCfn7L0duuP4hCuTIi/QO7PDK07KJfp1d+izWPrzEJDcSqBa0OZQriA==}
+    deprecated: Rimraf versions prior to v4 are no longer supported
     hasBin: true
     dependencies:
       glob: 7.2.3

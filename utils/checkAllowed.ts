@@ -162,8 +162,8 @@ export const guardChecker = async (
     }
 
     if (singleGuard.endDate.__option === "Some") {
-      const addressGate = singleGuard.endDate as Some<EndDate>;
-      if (solanaTime > addressGate.value.date) {
+      const endDate = singleGuard.endDate as Some<EndDate>;
+      if (solanaTime > endDate.value.date) {
         guardReturn.push({
           label: eachGuard.label,
           allowed: false,
@@ -218,7 +218,7 @@ export const guardChecker = async (
       );
       if (
         !digitalAssetWithToken ||
-        digitalAssetWithToken.token.amount >= freezeTokenPayment.value.amount
+        digitalAssetWithToken.token.amount < freezeTokenPayment.value.amount
       ) {
         guardReturn.push({
           label: eachGuard.label,
@@ -229,8 +229,8 @@ export const guardChecker = async (
         console.info(`${eachGuard.label}: Token Balance too low !`);
         continue;
       } else {
-        const payableAmount = freezeTokenPayment.value.amount / digitalAssetWithToken.token.amount;
-        mintableAmount = calculateMintable(mintableAmount, Number(payableAmount));
+        const payableAmount = Math.floor(Number(digitalAssetWithToken.token.amount) / Number(freezeTokenPayment.value.amount));
+        mintableAmount = calculateMintable(mintableAmount, payableAmount);
       }
     }
 
@@ -252,11 +252,11 @@ export const guardChecker = async (
 
     if (singleGuard.nftGate.__option === "Some") {
       const nftGate = singleGuard.nftGate as Some<NftGate>;
-      if (!ownedNftChecker(ownedTokens, nftGate.value.requiredCollection)) {
+      if (!(await ownedNftChecker(ownedTokens, nftGate.value.requiredCollection))) {
         guardReturn.push({
           label: eachGuard.label,
           allowed: false,
-          reason: "No NFT of the requred held!",
+          reason: "No NFT of the required held!",
           maxAmount: 0
         });
         console.info(`${eachGuard.label}: NftGate no NFT held!`);
@@ -282,10 +282,10 @@ export const guardChecker = async (
 
     if (singleGuard.redeemedAmount.__option === "Some") {
       const redeemedAmount = singleGuard.redeemedAmount as Some<RedeemedAmount>;
-      const payableAmount = redeemedAmount.value.maximum - candyMachine.itemsRedeemed;
+      const payableAmount = Math.max(0, Number(redeemedAmount.value.maximum) - Number(candyMachine.itemsRedeemed));
 
-      mintableAmount = calculateMintable(mintableAmount, Number(payableAmount));
-      if (redeemedAmount.value.maximum >= candyMachine.itemsRedeemed) {
+      mintableAmount = calculateMintable(mintableAmount, payableAmount);
+      if (redeemedAmount.value.maximum <= candyMachine.itemsRedeemed) {
         guardReturn.push({
           label: eachGuard.label,
           allowed: false,
@@ -302,10 +302,10 @@ export const guardChecker = async (
     if (singleGuard.solPayment.__option === "Some") {
       const solPayment = singleGuard.solPayment as Some<SolPayment>;
       let payableAmount = 0;
-      if (solPayment.value.lamports.basisPoints !== BigInt(0)) {
-        payableAmount = Number(solBalance.basisPoints) / Number(solPayment.value.lamports.basisPoints);
+      if (solPayment.value.lamports.basisPoints > BigInt(0)) {
+        payableAmount = Math.floor(Number(solBalance.basisPoints) / Number(solPayment.value.lamports.basisPoints));
       }
-      mintableAmount = calculateMintable(mintableAmount, Number(payableAmount));
+      mintableAmount = calculateMintable(mintableAmount, payableAmount);
 
       if (solPayment.value.lamports.basisPoints > solBalance.basisPoints) {
         guardReturn.push({
@@ -352,8 +352,8 @@ export const guardChecker = async (
         console.info(`${eachGuard.label} tokenBurn not enough tokens!`);
         continue;
       }
-      const payableAmount = tokenBurn.value.amount / digitalAssetWithToken.token.amount;
-      mintableAmount = calculateMintable(mintableAmount, Number(payableAmount));
+      const payableAmount = Math.floor(Number(digitalAssetWithToken.token.amount) / Number(tokenBurn.value.amount));
+      mintableAmount = calculateMintable(mintableAmount, payableAmount);
     }
 
     if (singleGuard.tokenGate.__option === "Some") {
@@ -394,8 +394,8 @@ export const guardChecker = async (
         console.info(`${eachGuard.label} tokenPayment not enough tokens!`);
         continue;
       }
-      const payableAmount = tokenPayment.value.amount / digitalAssetWithToken.token.amount;
-      mintableAmount = calculateMintable(mintableAmount, Number(payableAmount));
+      const payableAmount = Math.floor(Number(digitalAssetWithToken.token.amount) / Number(tokenPayment.value.amount));
+      mintableAmount = calculateMintable(mintableAmount, payableAmount);
 
     }
 
@@ -418,8 +418,8 @@ export const guardChecker = async (
         console.info(`${eachGuard.label} token2022Payment not enough tokens!`);
         continue;
       }
-      const payableAmount = token2022Payment.value.amount / digitalAssetWithToken.token.amount;
-      mintableAmount = calculateMintable(mintableAmount, Number(payableAmount));
+      const payableAmount = Math.floor(Number(digitalAssetWithToken.token.amount) / Number(token2022Payment.value.amount));
+      mintableAmount = calculateMintable(mintableAmount, payableAmount);
 
     }
     guardReturn.push({ label: eachGuard.label, allowed: true, maxAmount: mintableAmount });
